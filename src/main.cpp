@@ -1,26 +1,13 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+#include "vec3.hpp"
+#include "image.hpp"
+
 const float pi = acos(-1);
 const float eps = 1e-6;
 
 float randf() { return 1.0f * rand() / RAND_MAX; }
-
-struct vec3
-{
-	float x, y, z;
-	vec3 operator+(const vec3 &rhs) { return {x + rhs.x, y + rhs.y, z + rhs.z}; }
-	vec3 operator-(const vec3 &rhs) { return {x - rhs.x, y - rhs.y, z - rhs.z}; }
-	vec3 operator*(const vec3 &rhs) { return {x * rhs.x, y * rhs.y, z * rhs.z}; }
-	vec3 operator*(float rhs) { return {x * rhs, y * rhs, z * rhs}; }
-	vec3 operator/(float rhs) { return {x / rhs, y / rhs, z / rhs}; }
-	float dot(const vec3 &rhs) { return x * rhs.x + y * rhs.y + z * rhs.z; }
-	vec3 cross(const vec3 &rhs) { return {y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x}; }
-	float norm2() { return x * x + y * y + z * z; }
-	float norm() { return sqrt(norm2()); }
-	vec3 unit() { return (*this) / norm(); }
-};
-vec3 operator*(float lhs, const vec3 &rhs) { return {lhs * rhs.x, lhs * rhs.y, lhs * rhs.z}; }
 
 struct Material
 {
@@ -39,10 +26,20 @@ struct Triangle
 			return {-1, vec3()};
 		if (tdir.dot(dir) < 0)
 			tdir = -1 * tdir;
-		float x = (tpos - pos).dot(tdir) / (dir.dot(tdir));
+		float x = (tpos - pos).dot(tdir) / (tdir.dot(dir));
 		if (x < 0)
 			return {-1, vec3()};
-		return {x, tpos + x * tdir};
+		vec3 ph = pos + x * dir;
+		float dis = (ph - p0).dot(normal());
+		vec3 q0 = (p1 - p0).cross(ph - p0);
+		vec3 q1 = (p2 - p1).cross(ph - p1);
+		vec3 q2 = (p0 - p2).cross(ph - p2);
+		if (q0.dot(q1) > 0 && q1.dot(q2) > 0 && q2.dot(q0) > 0)
+		{
+			return {x, ph};
+		}
+		else
+			return {-1, vec3()};
 	}
 };
 
@@ -54,7 +51,7 @@ std::tuple<float, vec3, Triangle *> intersect(std::vector<Triangle> &triangles, 
 	for (auto &triangle : triangles)
 	{
 		auto [thdis, thpos] = triangle.intersect(pos, dir);
-		if (thdis < hitdis)
+		if (thdis > 0 && thdis < hitdis)
 		{
 			hitdis = thdis;
 			hitpos = thpos;
@@ -69,7 +66,7 @@ std::tuple<float, vec3, Triangle *> intersect(std::vector<Triangle> &triangles, 
 vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &triangles)
 {
 	if (depth > 5)
-		return {0, 0, 0};
+		return {0.0, 0, 0};
 	auto [hitdis, hitpos, hitobj] = intersect(triangles, raypos, raydir);
 	if (hitdis < 0)
 		return {0, 0, 0};
@@ -90,5 +87,48 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 
 int main(int argc, char *argv[])
 {
-	
+	std::vector<Triangle> scene;
+	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{1, 1, 1}, {0, 0, 0}}});
+	scene.push_back({{-1e1, 1e1, 0}, {1e1, 1e1, 0}, {0, -1e1, 0}, {{0.3, 0.3, 0.3}, {0, 0, 0}}});
+	scene.push_back({{-1, -1, 5}, {1, -1, 5}, {0, 1, 5}, {{0, 0, 0}, {1, 1, 1}}});
+	int img_siz_x = 512;
+	int img_siz_y = 512;
+	int spp = 4;
+	vec3 cam_dir = {0, 1, 0};
+	vec3 cam_pos = {0, -3, 1};
+	vec3 cam_top = {0, 0, 1};
+	float focal = 35;
+	float fov = 2 * atan(36 / 2 / focal);
+	float fp_siz_x = 2 * tan(fov / 2);
+	float fp_siz_y = fp_siz_x * img_siz_y / img_siz_x;
+	float near_clip = 0.1;
+	vec3 fp_e_y = cam_top;
+	vec3 fp_e_x = cam_dir.cross(fp_e_y);
+
+	Image image(img_siz_x, img_siz_y);
+
+	for (int img_x = 0; img_x < img_siz_x; img_x++)
+	{
+		if (img_x % 100 == 0)
+			cout << "Rendering... " << fixed << setprecision(2) << (1.0 * img_x / img_siz_x * 100) << "%" << endl;
+		for (int img_y = 0; img_y < img_siz_y; img_y++)
+		{
+			for (int t = 0; t < spp; t++)
+			{
+				float x = img_x + 0.5 * (-1 + 2 * randf());
+				float y = img_y + 0.5 * (-1 + 2 * randf());
+				vec3 focus_pos = cam_pos + (cam_dir + (x / img_siz_x - 0.5) * fp_siz_x * fp_e_x + (y / img_siz_y - 0.5) * fp_siz_y * fp_e_y) * near_clip;
+				vec3 raypos = focus_pos;
+				vec3 raydir = (focus_pos - cam_pos).unit();
+				vec3 radiance = PathTrace(raypos, raydir, 0, scene);
+
+				// cout << "raydir: " << raydir.x << "," << raydir.y << "," << raydir.z << "\t\t";
+				// cout << "result: " << radiance.x << "," << radiance.y << "," << radiance.z << endl;
+
+				image.Add(img_x, img_y, radiance / (1.0 * spp));
+			}
+		}
+	}
+
+	image.WriteToTGA("output.tga");
 }
