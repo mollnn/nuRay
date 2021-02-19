@@ -5,10 +5,10 @@ using namespace std;
 #include "image.hpp"
 #include "timer.hpp"
 
-const float pi = acos(-1);
-const float eps = 1e-6;
+const double pi = acos(-1);
+const double eps = 1e-6;
 
-float randf() { return 1.0f * rand() / RAND_MAX; }
+double randf() { return 1.0f * rand() / RAND_MAX; }
 
 struct Material
 {
@@ -20,18 +20,18 @@ struct Triangle
 	vec3 p0, p1, p2;
 	Material mat;
 	vec3 normal() { return ((p1 - p0).cross(p2 - p0)).unit(); }
-	std::pair<float, vec3> intersect(vec3 pos, vec3 dir)
+	std::pair<double, vec3> intersect(vec3 pos, vec3 dir)
 	{
 		vec3 tpos = p0, tdir = normal();
 		if (fabs(tdir.dot(dir)) < eps)
 			return {-1, vec3()};
 		if (tdir.dot(dir) < 0)
 			tdir = -1 * tdir;
-		float x = (tpos - pos).dot(tdir) / (tdir.dot(dir));
+		double x = (tpos - pos).dot(tdir) / (tdir.dot(dir));
 		if (x < 0)
 			return {-1, vec3()};
 		vec3 ph = pos + x * dir;
-		float dis = (ph - p0).dot(normal());
+		double dis = (ph - p0).dot(normal());
 		vec3 q0 = (p1 - p0).cross(ph - p0);
 		vec3 q1 = (p2 - p1).cross(ph - p1);
 		vec3 q2 = (p0 - p2).cross(ph - p2);
@@ -44,9 +44,9 @@ struct Triangle
 	}
 };
 
-std::tuple<float, vec3, Triangle *> intersect(std::vector<Triangle> &triangles, vec3 pos, vec3 dir)
+std::tuple<double, vec3, Triangle *> intersect(std::vector<Triangle> &triangles, vec3 pos, vec3 dir)
 {
-	float hitdis = 2e18;
+	double hitdis = 2e18;
 	vec3 hitpos;
 	Triangle *hitobj = NULL;
 	for (auto &triangle : triangles)
@@ -67,12 +67,12 @@ std::tuple<float, vec3, Triangle *> intersect(std::vector<Triangle> &triangles, 
 namespace fastmath
 {
 	const int siz_cos_l = 1e4;
-	const float lim_cos_l = 2 * pi;
-	const float step_cos_l = lim_cos_l / siz_cos_l;
+	const double lim_cos_l = 2 * pi;
+	const double step_cos_l = lim_cos_l / siz_cos_l;
 
-	vector<float> mem_cos_l(siz_cos_l + 2);
+	vector<double> mem_cos_l(siz_cos_l + 2);
 
-	float get_cos_l(float x)
+	double get_cos_l(double x)
 	{
 		if (x < 0 || x > 2 * pi)
 			x = fmod(x, 2 * pi);
@@ -80,7 +80,7 @@ namespace fastmath
 		return mem_cos_l[idx];
 	}
 
-	float get_cos_l_(float x)
+	double get_cos_l_(double x)
 	{
 		if (x < 0 || x > 2 * pi)
 			x = fmod(x, 2 * pi);
@@ -108,15 +108,15 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 	auto [hitdis, hitpos, hitobj] = intersect(triangles, raypos, raydir);
 	if (hitdis < 0)
 		return {0, 0, 0};
-	float r2 = randf();
-	float phi = randf() * 2 * pi;
-	float sqr2 = sqrt(r2);
-	// float cosphi = cos(phi);
-	float cosphi = fastmath::get_cos_l(phi);
-	float sinphi = sqrt(1 - cosphi * cosphi) * (phi < pi ? 1 : -1);
-	float du = sqr2 * cosphi;
-	float dv = sqr2 * sinphi;
-	float dw = sqrt(1 - r2);
+	double r2 = randf();
+	double phi = randf() * 2 * pi;
+	double sqr2 = sqrt(r2);
+	// double cosphi = cos(phi);
+	double cosphi = fastmath::get_cos_l(phi);
+	double sinphi = sqrt(1 - cosphi * cosphi) * (phi < pi ? 1 : -1);
+	double du = sqr2 * cosphi;
+	double dv = sqr2 * sinphi;
+	double dw = sqrt(1 - r2);
 	vec3 normal = hitobj->normal();
 	if (raydir.dot(normal) > 0)
 		normal = -1 * normal;
@@ -127,14 +127,14 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 	return hitobj->mat.emission + hitobj->mat.diffuse * PathTrace(hitpos + eps * difdir, difdir, depth + 1, triangles);
 }
 
-void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, float focal, float near_clip,
+void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, double focal, double near_clip,
 			Image &image, vector<Triangle> &scene)
 {
 	Timer timer, t_timer;
 
-	float fov = 2 * atan(36 / 2 / focal);
-	float fp_siz_x = 2 * tan(fov / 2);
-	float fp_siz_y = fp_siz_x * img_siz_y / img_siz_x;
+	double fov = 2 * atan(36 / 2 / focal);
+	double fp_siz_x = 2 * tan(fov / 2);
+	double fp_siz_y = fp_siz_x * img_siz_y / img_siz_x;
 	vec3 fp_e_y = cam_top;
 	vec3 fp_e_x = cam_dir.cross(fp_e_y);
 
@@ -149,8 +149,8 @@ void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, v
 		{
 			for (int t = 0; t < spp; t++)
 			{
-				float x = img_x + 0.5 * (-1 + 2 * randf());
-				float y = img_y + 0.5 * (-1 + 2 * randf());
+				double x = img_x + 0.5 * (-1 + 2 * randf());
+				double y = img_y + 0.5 * (-1 + 2 * randf());
 				vec3 focus_pos = cam_pos + (cam_dir + (x / img_siz_x - 0.5) * fp_siz_x * fp_e_x + (y / img_siz_y - 0.5) * fp_siz_y * fp_e_y) * near_clip;
 				vec3 raypos = focus_pos;
 				vec3 raydir = (focus_pos - cam_pos).unit();
@@ -160,7 +160,7 @@ void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, v
 			}
 		}
 	}
-	float rendertime = timer.Current();
+	double rendertime = timer.Current();
 	cout << "Finish!  Time cost: " << fixed << setprecision(2) << rendertime << "s" << endl;
 }
 
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 	fastmath::presolve();
 
 	std::vector<Triangle> scene;
-	
+
 	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{0.8, 0.8, 0.8}, {0, 0, 0}}});
 	scene.push_back({{-2, -7, 0}, {2, -7, 0}, {0, -7, 2}, {{0, 0, 0}, {4, 4, 4}}});
 	scene.push_back({{-1e2, 1e2, 0}, {1e2, 1e2, 0}, {0, -1e2, 0}, {{0.3, 0.3, 0.3}, {0, 0, 0}}});
@@ -177,14 +177,14 @@ int main(int argc, char *argv[])
 	scene.push_back({{-1e2, 2, 0}, {1e2, 2, 0}, {0, 2, 1e3}, {{0.5, 0.5, 0.5}, {0, 0, 0}}});
 
 	int img_siz_x = 1024;
-	float img_aspect = 2.39;
+	double img_aspect = 2.39;
 	int img_siz_y = img_siz_x / img_aspect;
-	int spp = 8;
+	int spp = 1024;
 	vec3 cam_dir = (vec3){0.8, 1, 0.14}.unit();
 	vec3 cam_pos = {-3, -5, 0.5};
 	vec3 cam_top = {0, 0, 1};
-	float focal = 24;
-	float near_clip = 0.1;
+	double focal = 24;
+	double near_clip = 0.1;
 
 	Image image(img_siz_x, img_siz_y);
 
