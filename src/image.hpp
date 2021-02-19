@@ -17,9 +17,9 @@ struct Image
     void reallocate()
     {
         buffer.clear();
-        buffer.resize(size_y);
-        for (int i = 0; i < size_y; i++)
-            buffer[i].resize(size_x);
+        buffer.resize(size_x);
+        for (int i = 0; i < size_x; i++)
+            buffer[i].resize(size_y);
     }
 
     Image(int sx = 0, int sy = 0) : size_x(sx), size_y(sy)
