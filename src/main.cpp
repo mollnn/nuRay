@@ -68,6 +68,7 @@ namespace fastmath
 {
 	const int siz_cos_l = 1e4;
 	const float lim_cos_l = 2 * pi;
+	const float step_cos_l = lim_cos_l / siz_cos_l;
 
 	vector<float> mem_cos_l(siz_cos_l + 2);
 
@@ -75,8 +76,18 @@ namespace fastmath
 	{
 		if (x < 0 || x > 2 * pi)
 			x = fmod(x, 2 * pi);
-		int idx = (x + 1e-8) / (lim_cos_l / siz_cos_l);
+		int idx = (x + 1e-7) / step_cos_l;
 		return mem_cos_l[idx];
+	}
+
+	float get_cos_l_(float x)
+	{
+		if (x < 0 || x > 2 * pi)
+			x = fmod(x, 2 * pi);
+		int idx1k = 1e3 * (x + 1e-7) / step_cos_l;
+		int idx = idx1k / 1000;
+		int offset = idx1k - idx * 1000;
+		return (mem_cos_l[idx] * offset + mem_cos_l[idx + 1] * (1000 - offset)) / 1000;
 	}
 
 	void presolve()
@@ -116,34 +127,16 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 	return hitobj->mat.emission + hitobj->mat.diffuse * PathTrace(hitpos + eps * difdir, difdir, depth + 1, triangles);
 }
 
-int main(int argc, char *argv[])
+void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, float focal, float near_clip,
+			Image &image, vector<Triangle> &scene)
 {
-	fastmath::presolve();
+	Timer timer, t_timer;
 
-	std::vector<Triangle> scene;
-	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{0.8, 0.8, 0.8}, {0, 0, 0}}});
-	scene.push_back({{-2, -7, 0}, {2, -7, 0}, {0, -7, 2}, {{0, 0, 0}, {4, 4, 4}}});
-	scene.push_back({{-1e2, 1e2, 0}, {1e2, 1e2, 0}, {0, -1e2, 0}, {{0.3, 0.3, 0.3}, {0, 0, 0}}});
-	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {4, 2.5, 0}}});
-	scene.push_back({{-1e2, 2, 0}, {1e2, 2, 0}, {0, 2, 1e3}, {{0.5, 0.5, 0.5}, {0, 0, 0}}});
-	int img_siz_x = 1024;
-	float img_aspect = 2.39;
-	int img_siz_y = img_siz_x / img_aspect;
-	int spp = 8;
-	vec3 cam_dir = (vec3){0.8, 1, 0.14}.unit();
-	vec3 cam_pos = {-3, -5, 0.5};
-	vec3 cam_top = {0, 0, 1};
-	float focal = 24;
 	float fov = 2 * atan(36 / 2 / focal);
 	float fp_siz_x = 2 * tan(fov / 2);
 	float fp_siz_y = fp_siz_x * img_siz_y / img_siz_x;
-	float near_clip = 0.1;
 	vec3 fp_e_y = cam_top;
 	vec3 fp_e_x = cam_dir.cross(fp_e_y);
-
-	Image image(img_siz_x, img_siz_y);
-
-	Timer timer, t_timer;
 
 	for (int img_x = 0; img_x < img_siz_x; img_x++)
 	{
@@ -167,9 +160,35 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-
 	float rendertime = timer.Current();
 	cout << "Finish!  Time cost: " << fixed << setprecision(2) << rendertime << "s" << endl;
+}
+
+int main(int argc, char *argv[])
+{
+	fastmath::presolve();
+
+	std::vector<Triangle> scene;
+	
+	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{0.8, 0.8, 0.8}, {0, 0, 0}}});
+	scene.push_back({{-2, -7, 0}, {2, -7, 0}, {0, -7, 2}, {{0, 0, 0}, {4, 4, 4}}});
+	scene.push_back({{-1e2, 1e2, 0}, {1e2, 1e2, 0}, {0, -1e2, 0}, {{0.3, 0.3, 0.3}, {0, 0, 0}}});
+	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {4, 2.5, 0}}});
+	scene.push_back({{-1e2, 2, 0}, {1e2, 2, 0}, {0, 2, 1e3}, {{0.5, 0.5, 0.5}, {0, 0, 0}}});
+
+	int img_siz_x = 1024;
+	float img_aspect = 2.39;
+	int img_siz_y = img_siz_x / img_aspect;
+	int spp = 8;
+	vec3 cam_dir = (vec3){0.8, 1, 0.14}.unit();
+	vec3 cam_pos = {-3, -5, 0.5};
+	vec3 cam_top = {0, 0, 1};
+	float focal = 24;
+	float near_clip = 0.1;
+
+	Image image(img_siz_x, img_siz_y);
+
+	render(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip, image, scene);
 
 	image.WriteToTGA("output.tga");
 }
