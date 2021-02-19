@@ -64,6 +64,32 @@ std::tuple<float, vec3, Triangle *> intersect(std::vector<Triangle> &triangles, 
 	return {hitdis, hitpos, hitobj};
 }
 
+namespace fastmath
+{
+	const int siz_cos_l = 1e4;
+	const float lim_cos_l = 2 * pi;
+
+	vector<float> mem_cos_l(siz_cos_l + 2);
+
+	float get_cos_l(float x)
+	{
+		if (x < 0 || x > 2 * pi)
+			x = fmod(x, 2 * pi);
+		int idx = (x + 1e-8) / (lim_cos_l / siz_cos_l);
+		return mem_cos_l[idx];
+	}
+
+	void presolve()
+	{
+		cout << "Math Presolving..." << endl;
+		for (int i = 0; i <= siz_cos_l; i++)
+		{
+			mem_cos_l[i] = cos(lim_cos_l / siz_cos_l * i);
+		}
+		cout << "Math Finish!" << endl;
+	}
+};
+
 vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &triangles)
 {
 	if (depth > 6)
@@ -74,7 +100,8 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 	float r2 = randf();
 	float phi = randf() * 2 * pi;
 	float sqr2 = sqrt(r2);
-	float cosphi = cos(phi);
+	// float cosphi = cos(phi);
+	float cosphi = fastmath::get_cos_l(phi);
 	float sinphi = sqrt(1 - cosphi * cosphi) * (phi < pi ? 1 : -1);
 	float du = sqr2 * cosphi;
 	float dv = sqr2 * sinphi;
@@ -91,6 +118,8 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 
 int main(int argc, char *argv[])
 {
+	fastmath::presolve();
+
 	std::vector<Triangle> scene;
 	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{0.8, 0.8, 0.8}, {0, 0, 0}}});
 	scene.push_back({{-2, -7, 0}, {2, -7, 0}, {0, -7, 2}, {{0, 0, 0}, {4, 4, 4}}});
