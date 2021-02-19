@@ -65,7 +65,7 @@ std::tuple<float, vec3, Triangle *> intersect(std::vector<Triangle> &triangles, 
 
 vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &triangles)
 {
-	if (depth > 4)
+	if (depth > 6)
 		return {0, 0, 0};
 	auto [hitdis, hitpos, hitobj] = intersect(triangles, raypos, raydir);
 	if (hitdis < 0)
@@ -88,14 +88,15 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 int main(int argc, char *argv[])
 {
 	std::vector<Triangle> scene;
-	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{0.8, 0.9, 1}, {0, 0, 0}}});
+	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{0.8, 0.8, 0.8}, {0, 0, 0}}});
+	scene.push_back({{-2, -7, 0}, {2, -7, 0}, {0, -7, 2}, {{0, 0, 0}, {4, 4, 4}}});
 	scene.push_back({{-1e2, 1e2, 0}, {1e2, 1e2, 0}, {0, -1e2, 0}, {{0.3, 0.3, 0.3}, {0, 0, 0}}});
-	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {3, 2, 1}}});
+	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {4, 2.5, 0}}});
 	scene.push_back({{-1e2, 2, 0}, {1e2, 2, 0}, {0, 2, 1e3}, {{0.5, 0.5, 0.5}, {0, 0, 0}}});
-	int img_siz_x = 512;
+	int img_siz_x = 1024;
 	float img_aspect = 2.39;
 	int img_siz_y = img_siz_x / img_aspect;
-	int spp = 4;
+	int spp = 8;
 	vec3 cam_dir = (vec3){0.5, 1, 0}.unit();
 	vec3 cam_pos = {-2, -5, 1};
 	vec3 cam_top = {0, 0, 1};
@@ -111,7 +112,7 @@ int main(int argc, char *argv[])
 
 	for (int img_x = 0; img_x < img_siz_x; img_x++)
 	{
-		if (img_x % 100 == 0)
+		if (img_x % 16 == 0)
 			cout << "Rendering... " << fixed << setprecision(2) << (1.0 * img_x / img_siz_x * 100) << "%" << endl;
 		for (int img_y = 0; img_y < img_siz_y; img_y++)
 		{
