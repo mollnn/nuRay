@@ -3,6 +3,7 @@ using namespace std;
 
 #include "vec3.hpp"
 #include "image.hpp"
+#include "timer.hpp"
 
 const float pi = acos(-1);
 const float eps = 1e-6;
@@ -72,8 +73,11 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 		return {0, 0, 0};
 	float r2 = randf();
 	float phi = randf() * 2 * pi;
-	float du = sqrt(r2) * cos(phi);
-	float dv = sqrt(r2) * sin(phi);
+	float sqr2 = sqrt(r2);
+	float cosphi = cos(phi);
+	float sinphi = sqrt(1 - cosphi * cosphi) * (phi < pi ? 1 : -1);
+	float du = sqr2 * cosphi;
+	float dv = sqr2 * sinphi;
 	float dw = sqrt(1 - r2);
 	vec3 normal = hitobj->normal();
 	if (raydir.dot(normal) > 0)
@@ -97,8 +101,8 @@ int main(int argc, char *argv[])
 	float img_aspect = 2.39;
 	int img_siz_y = img_siz_x / img_aspect;
 	int spp = 8;
-	vec3 cam_dir = (vec3){0.5, 1, 0}.unit();
-	vec3 cam_pos = {-2, -5, 1};
+	vec3 cam_dir = (vec3){0.8, 1, 0.14}.unit();
+	vec3 cam_pos = {-3, -5, 0.5};
 	vec3 cam_top = {0, 0, 1};
 	float focal = 24;
 	float fov = 2 * atan(36 / 2 / focal);
@@ -110,10 +114,15 @@ int main(int argc, char *argv[])
 
 	Image image(img_siz_x, img_siz_y);
 
+	Timer timer, t_timer;
+
 	for (int img_x = 0; img_x < img_siz_x; img_x++)
 	{
-		if (img_x % 16 == 0)
+		if (t_timer.Current() > 1)
+		{
 			cout << "Rendering... " << fixed << setprecision(2) << (1.0 * img_x / img_siz_x * 100) << "%" << endl;
+			t_timer.Start();
+		}
 		for (int img_y = 0; img_y < img_siz_y; img_y++)
 		{
 			for (int t = 0; t < spp; t++)
@@ -129,6 +138,9 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+
+	float rendertime = timer.Current();
+	cout << "Finish!  Time cost: " << fixed << setprecision(2) << rendertime << "s" << endl;
 
 	image.WriteToTGA("output.tga");
 }
