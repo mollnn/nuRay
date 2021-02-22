@@ -131,7 +131,7 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 }
 
 void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, double focal, double near_clip,
-			Image &image, vector<Triangle> &scene, bool impsflag = false)
+			Image &image, vector<Triangle> &scene)
 {
 	double fov = 2 * atan(36 / 2 / focal);
 	double fp_siz_x = 2 * tan(fov / 2);
@@ -143,27 +143,12 @@ void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, v
 	{
 		for (int img_y = 0; img_y < img_siz_y; img_y++)
 		{
-			if (img_x > 0 && img_x < img_siz_x - 1 && img_y > 0 && img_y < img_siz_y - 1 && impsflag)
-			{
-				vec3 d[5] = {image.Get(img_x, img_y),
-							 image.Get(img_x - 1, img_y),
-							 image.Get(img_x + 1, img_y),
-							 image.Get(img_x, img_y - 1),
-							 image.Get(img_x, img_y + 1)};
-				float norm0 = d[0].norm2() + 0.01;
-				float f[4] = {
-					(d[1] - d[0]).norm2(),
-					(d[2] - d[0]).norm2(),
-					(d[3] - d[0]).norm2(),
-					(d[4] - d[0]).norm2()};
-				float mf = max(max(f[0], f[1]), max(f[2], f[3]));
-				if (mf < 0.1 * norm0)
-					continue;
-			}
 			for (int t = 0; t < spp; t++)
 			{
-				double x = img_x + 0.2 * (-1 + 2 * randf());
-				double y = img_y + 0.2 * (-1 + 2 * randf());
+				double rx = (-1 + 2 * randf());
+				double ry = (-1 + 2 * randf());
+				double x = img_x + 0.5 * rx;
+				double y = img_y + 0.5 * ry;
 				vec3 focus_pos = cam_pos + (cam_dir + (x / img_siz_x - 0.5) * fp_siz_x * fp_e_x + (y / img_siz_y - 0.5) * fp_siz_y * fp_e_y) * near_clip;
 				vec3 raypos = focus_pos;
 				vec3 raydir = (focus_pos - cam_pos).unit();
@@ -187,7 +172,7 @@ int main(int argc, char *argv[])
 	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {4, 2.5, 0}}});
 	scene.push_back({{-1e2, 2, 0}, {1e2, 2, 0}, {0, 2, 1e3}, {{0.5, 0.5, 0.5}, {0, 0, 0}}});
 
-	int img_siz_x = 1024;
+	int img_siz_x = 512;
 	double img_aspect = 2.39;
 	int img_siz_y = img_siz_x / img_aspect;
 	int spp = 1;
@@ -245,7 +230,7 @@ int main(int argc, char *argv[])
 		}
 
 		count++;
-		render(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip, image, scene, count > 4 && count % 2);
+		render(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip, image, scene);
 
 		for (int i = 0; i < img_siz_x; i++)
 		{
