@@ -133,8 +133,6 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, double focal, double near_clip,
 			Image &image, vector<Triangle> &scene)
 {
-	Timer timer, t_timer;
-
 	double fov = 2 * atan(36 / 2 / focal);
 	double fp_siz_x = 2 * tan(fov / 2);
 	double fp_siz_y = fp_siz_x * img_siz_y / img_siz_x;
@@ -143,11 +141,6 @@ void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, v
 
 	for (int img_x = 0; img_x < img_siz_x; img_x++)
 	{
-		if (t_timer.Current() > 1)
-		{
-			cout << "Rendering... " << fixed << setprecision(2) << (1.0 * img_x / img_siz_x * 100) << "%" << endl;
-			t_timer.Start();
-		}
 		for (int img_y = 0; img_y < img_siz_y; img_y++)
 		{
 			for (int t = 0; t < spp; t++)
@@ -163,9 +156,6 @@ void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, v
 			}
 		}
 	}
-
-	double rendertime = timer.Current();
-	cout << "Finish!  Time cost: " << fixed << setprecision(2) << rendertime << "s" << endl;
 }
 
 int main(int argc, char *argv[])
@@ -183,7 +173,7 @@ int main(int argc, char *argv[])
 	int img_siz_x = 1024;
 	double img_aspect = 2.39;
 	int img_siz_y = img_siz_x / img_aspect;
-	int spp = 4;
+	int spp = 1;
 	vec3 cam_dir = (vec3){0.8, 1, 0.14}.unit();
 	vec3 cam_pos = {-3, -5, 0.5};
 	vec3 cam_top = {0, 0, 1};
@@ -192,13 +182,122 @@ int main(int argc, char *argv[])
 
 	Image image(img_siz_x, img_siz_y);
 
-	render(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip, image, scene);
+	int count = 0;
 
-	image.Clamp();
+	int img_width = image.size_x;
+	int img_height = image.size_y;
 
-	image.FilpV();
-	showImageWindow(image);
-	image.FilpV();
+	//init SDL
+	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+	{
+		return 1;
+	}
+	SDL_Window *window = SDL_CreateWindow("Image Viewer", 100, 100, img_width, img_height, SDL_WINDOW_SHOWN);
+	if (!window)
+	{
+		SDL_Quit();
+		return 1;
+	}
+	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if (!renderer)
+	{
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+		return 1;
+	}
+
+	//Main loop
+	bool running = true;
+	while (running)
+	{
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_QUIT)
+			{
+				running = false;
+			}
+		}
+
+		for (int i = 0; i < img_siz_x; i++)
+		{
+			for (int j = 0; j < img_siz_y; j++)
+			{
+				image.buffer[i][j] = image.buffer[i][j] * count;
+			}
+		}
+
+		count++;
+		render(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip, image, scene);
+
+		for (int i = 0; i < img_siz_x; i++)
+		{
+			for (int j = 0; j < img_siz_y; j++)
+			{
+				image.buffer[i][j] = image.buffer[i][j] * 1.0 / count;
+			}
+		}
+
+		image.Clamp();
+		image.FilpV();
+
+		//Create SW surface
+		SDL_Surface *surface = SDL_CreateRGBSurface(0, img_width, img_height, 24,
+													0x0000FF00, 0x00FF0000, 0xFF000000, 0x00000000);
+		if (!surface)
+		{
+			SDL_DestroyRenderer(renderer);
+			SDL_DestroyWindow(window);
+			SDL_Quit();
+			return 1;
+		}
+
+		SDL_LockSurface(surface);
+		for (int y = 0; y < img_height; y++)
+		{
+			for (int x = 0; x < img_width; x++)
+			{
+				vec3 c = image.Get(x, y);
+				auto [r, g, b] = colorFloatToUint8(c);
+				uint32 color = SDL_MapRGB(surface->format, r, g, b);
+				PutPixel24(surface, x, y, color);
+			}
+		}
+		SDL_UnlockSurface(surface);
+
+		//Create HW surface
+		SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+		if (!surface)
+		{
+			SDL_FreeSurface(surface);
+			SDL_DestroyRenderer(renderer);
+			SDL_DestroyWindow(window);
+			SDL_Quit();
+			return 1;
+		}
+		SDL_FreeSurface(surface);
+
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderClear(renderer);
+
+		SDL_Rect dst;
+		dst.x = 0;
+		dst.y = 0;
+		dst.w = img_width;
+		dst.h = img_height;
+		SDL_RenderCopy(renderer, texture, NULL, &dst);
+
+		SDL_RenderPresent(renderer);
+		SDL_Delay(100);
+
+		SDL_DestroyTexture(texture);
+
+		image.FilpV();
+	}
+
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
 
 	image.WriteToTGA("output.tga");
 }
