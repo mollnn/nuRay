@@ -1,9 +1,12 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+#include "uint.h"
 #include "vec3.hpp"
 #include "image.hpp"
 #include "timer.hpp"
+#include "color.hpp"
+#include "imagewnd.hpp"
 
 const double pi = acos(-1);
 const double eps = 1e-6;
@@ -160,6 +163,7 @@ void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, v
 			}
 		}
 	}
+
 	double rendertime = timer.Current();
 	cout << "Finish!  Time cost: " << fixed << setprecision(2) << rendertime << "s" << endl;
 }
@@ -179,7 +183,7 @@ int main(int argc, char *argv[])
 	int img_siz_x = 1024;
 	double img_aspect = 2.39;
 	int img_siz_y = img_siz_x / img_aspect;
-	int spp = 1024;
+	int spp = 4;
 	vec3 cam_dir = (vec3){0.8, 1, 0.14}.unit();
 	vec3 cam_pos = {-3, -5, 0.5};
 	vec3 cam_top = {0, 0, 1};
@@ -189,6 +193,12 @@ int main(int argc, char *argv[])
 	Image image(img_siz_x, img_siz_y);
 
 	render(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip, image, scene);
+
+	image.Clamp();
+
+	image.FilpV();
+	showImageWindow(image);
+	image.FilpV();
 
 	image.WriteToTGA("output.tga");
 }

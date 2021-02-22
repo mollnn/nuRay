@@ -2,7 +2,7 @@
 #define __IMAGE_HPP__
 
 #include <vector>
-
+#include "color.hpp"
 #include "tgaimage.hpp"
 
 #include "vec3.hpp"
@@ -91,6 +91,28 @@ struct Image
         TGAImage tga_image;
         tga_image.read_tga_file(filename);
         FromTGAImage(tga_image);
+    }
+
+    void Clamp()
+    {
+        for (int i = 0; i < size_x; i++)
+        {
+            for (int j = 0; j < size_y; j++)
+            {
+                buffer[i][j] = colorClamp(buffer[i][j]);
+            }
+        }
+    }
+
+    void FilpV()
+    {
+        for (int i = 0; i < size_x; i++)
+        {
+            for (int j = 0; j + j < size_y; j++)
+            {
+                swap(buffer[i][j], buffer[i][size_y - j]);
+            }
+        }
     }
 };
 

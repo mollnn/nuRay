@@ -12,7 +12,7 @@ CXXFLAGS	:= -std=c++17  -O4
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS =
+LFLAGS = -lmingw32 -lSDL2main -lSDL2 
 
 # define output directory
 OUTPUT	:= output
