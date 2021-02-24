@@ -217,3 +217,5 @@ include/SDL*
 lib/*
 *.dll
 ._SDL
+
+output.tga

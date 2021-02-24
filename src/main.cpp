@@ -11,7 +11,10 @@ using namespace std;
 const double pi = acos(-1);
 const double eps = 1e-6;
 
-double randf() { return 1.0f * rand() / RAND_MAX; }
+random_device global_random_device;
+uniform_int_distribution<int> global_uniform_int_distribution(0, RAND_MAX);
+
+double randf() { return 1.0f * global_uniform_int_distribution(global_random_device) / RAND_MAX; }
 
 struct Material
 {
@@ -130,18 +133,13 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 	return hitobj->mat.emission + hitobj->mat.diffuse * PathTrace(hitpos + eps * difdir, difdir, depth + 1, triangles);
 }
 
-void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, double focal, double near_clip,
-			Image &image, vector<Triangle> &scene)
+void render_thread(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, double focal, double near_clip,
+				   Image &image, vector<Triangle> &scene, double fp_siz_x, double fp_siz_y, vec3 fp_e_x, vec3 fp_e_y,
+				   int img_y_min, int img_y_max)
 {
-	double fov = 2 * atan(36 / 2 / focal);
-	double fp_siz_x = 2 * tan(fov / 2);
-	double fp_siz_y = fp_siz_x * img_siz_y / img_siz_x;
-	vec3 fp_e_y = cam_top;
-	vec3 fp_e_x = cam_dir.cross(fp_e_y);
-
-	for (int img_x = 0; img_x < img_siz_x; img_x++)
+	for (int img_y = img_y_min; img_y <= img_y_max; img_y++)
 	{
-		for (int img_y = 0; img_y < img_siz_y; img_y++)
+		for (int img_x = 0; img_x < img_siz_x; img_x++)
 		{
 			for (int t = 0; t < spp; t++)
 			{
@@ -158,6 +156,39 @@ void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, v
 			}
 		}
 	}
+}
+
+void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, double focal, double near_clip,
+			Image &image, vector<Triangle> &scene)
+{
+	double fov = 2 * atan(36 / 2 / focal);
+	double fp_siz_x = 2 * tan(fov / 2);
+	double fp_siz_y = fp_siz_x * img_siz_y / img_siz_x;
+	vec3 fp_e_y = cam_top;
+	vec3 fp_e_x = cam_dir.cross(fp_e_y);
+	int img_y_step = 32;
+
+	vector<thread *> thread_list;
+	for (int img_y = 0; img_y < img_siz_y; img_y += img_y_step)
+	{
+		int img_y_min = img_y, img_y_max = min(img_y + img_y_step, img_siz_y) - 1;
+		thread *th = new thread(render_thread, img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip,
+								ref(image), ref(scene), fp_siz_x, fp_siz_y, fp_e_x, fp_e_y, img_y_min, img_y_max);
+		thread_list.push_back(th);
+	}
+	for (auto th : thread_list)
+	{
+		th->join();
+	}
+	for (auto th : thread_list)
+	{
+		delete th;
+	}
+
+	// 单线程，用于测速参考
+	// int img_y_min = 0, img_y_max = img_siz_y - 1;
+	// render_thread(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip,
+	// 			  ref(image), ref(scene), fp_siz_x, fp_siz_y, fp_e_x, fp_e_y, img_y_min, img_y_max);
 }
 
 int main(int argc, char *argv[])
@@ -207,6 +238,9 @@ int main(int argc, char *argv[])
 		SDL_Quit();
 		return 1;
 	}
+
+	Timer timer;
+	int frame_count = 0;
 
 	//Main loop
 	bool running = true;
@@ -295,6 +329,9 @@ int main(int argc, char *argv[])
 		SDL_DestroyTexture(texture);
 
 		image.FilpV();
+
+		frame_count++;
+		cout << "Frame " << frame_count << "  AvgFPS " << fixed << setprecision(2) << 1.0 * frame_count / timer.Current() << endl;
 	}
 
 	SDL_DestroyRenderer(renderer);
