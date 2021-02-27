@@ -163,10 +163,10 @@ int main(int argc, char *argv[])
 
 	std::vector<Triangle> scene;
 
-	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{0.8, 0.8, 0.8}, {0, 0, 0}}});			  // 演员
-	scene.push_back({{-2, -7, 0}, {2, -7, 0}, {0, -7, 2}, {{0, 0, 0}, {4, 4, 4}}});				  // 射灯
+	scene.push_back({{-0.7, 0, 0}, {0.7, 0, 0}, {0, 0, 1.8}, {{0.8, 0.8, 0.8}, {0, 0, 0}}});	  // 演员
+	scene.push_back({{-5, -7, 0}, {5, -7, 0}, {0, -7, 5}, {{0, 0, 0}, {4.5, 2, 0}}});			  // 射灯
 	scene.push_back({{-1e2, 1e2, 0}, {1e2, 1e2, 0}, {0, -1e2, 0}, {{0.3, 0.3, 0.3}, {0, 0, 0}}}); // 地板
-	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {3, 1.5, 0}}});		  // 背景灯
+	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {1, 1.5, 2.2}}});		  // 背景灯
 	scene.push_back({{-1e2, 2, 0}, {1e2, 2, 0}, {0, 2, 1e3}, {{0.5, 0.5, 0.5}, {0, 0, 0}}});	  // 幕布
 
 	for (auto &i : scene)
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 	int img_siz_y = img_siz_x / img_aspect;
 	int spp = 1;
 	vec3 cam_dir = (vec3){0.8, 1, 0.14}.unit();
-	vec3 cam_pos = {-3, -5, 0.5};
+	vec3 cam_pos = {-3, -6, 0.5};
 	vec3 cam_top = {0, 0, 1};
 	double focal = 24;
 	double near_clip = 0.1;
@@ -189,41 +189,41 @@ int main(int argc, char *argv[])
 	int img_width = image.size_x;
 	int img_height = image.size_y;
 
-	//init SDL
-	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+	SDL_Window *screen;
+	SDL_Renderer *sdl_renderer;
+	SDL_Texture *sdl_texture;
+	SDL_Rect sdl_rect;
+
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER))
 	{
-		return 1;
+		printf("Could not initialize SDL - %s\n", SDL_GetError());
+		return -1;
 	}
-	SDL_Window *window = SDL_CreateWindow("Image Viewer", 100, 100, img_width, img_height, SDL_WINDOW_SHOWN);
-	if (!window)
-	{
-		SDL_Quit();
-		return 1;
-	}
-	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (!renderer)
-	{
-		SDL_DestroyWindow(window);
-		SDL_Quit();
-		return 1;
-	}
+
+	int screen_w = img_siz_x;
+	int screen_h = img_siz_y;
+	int image_w = img_siz_x;
+	int image_h = img_siz_y;
+
+	screen = SDL_CreateWindow("Player", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+							  screen_w, screen_h,
+							  SDL_WINDOW_OPENGL);
+
+	sdl_renderer = SDL_CreateRenderer(screen, -1, 0);
+	sdl_texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, img_siz_x, img_siz_y);
+	sdl_rect.x = 0;
+	sdl_rect.y = 0;
+	sdl_rect.w = screen_w;
+	sdl_rect.h = screen_h;
 
 	Timer timer;
 	int frame_count = 0;
 
 	//Main loop
-	bool running = true;
+	bool flag_running = true;
 
-	while (running)
+	while (flag_running)
 	{
-		SDL_Event event;
-		while (SDL_PollEvent(&event))
-		{
-			if (event.type == SDL_QUIT)
-			{
-				running = false;
-			}
-		}
 
 		for (int i = 0; i < img_siz_x; i++)
 		{
@@ -247,63 +247,54 @@ int main(int argc, char *argv[])
 		image.Clamp();
 		image.FilpV();
 
-		//Create SW surface
-		SDL_Surface *surface = SDL_CreateRGBSurface(0, img_width, img_height, 24,
-													0x0000FF00, 0x00FF0000, 0xFF000000, 0x00000000);
-		if (!surface)
+		uint8_t *pixels = new uint8_t[image_h * image_w * 4];
+		for (int y = 0; y < image_h; y++)
 		{
-			SDL_DestroyRenderer(renderer);
-			SDL_DestroyWindow(window);
-			SDL_Quit();
-			return 1;
-		}
-
-		SDL_LockSurface(surface);
-		for (int y = 0; y < img_height; y++)
-		{
-			for (int x = 0; x < img_width; x++)
+			for (int x = 0; x < image_w; x++)
 			{
-				vec3 c = image.Get(x, y);
-				auto [r, g, b] = colorFloatToUint8(c);
-				uint32 color = SDL_MapRGB(surface->format, r, g, b);
-				PutPixel24(surface, x, y, color);
+				vec3 vec = image.Get(x, y);
+
+				uint8_t r = vec.x * 255;
+				uint8_t g = vec.y * 255;
+				uint8_t b = vec.z * 255;
+
+				pixels[y * image_w * 4 + x * 4 + 0] = 0;
+				pixels[y * image_w * 4 + x * 4 + 1] = b;
+				pixels[y * image_w * 4 + x * 4 + 2] = g;
+				pixels[y * image_w * 4 + x * 4 + 3] = r;
 			}
 		}
-		SDL_UnlockSurface(surface);
 
-		//Create HW surface
-		SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-		if (!surface)
-		{
-			SDL_FreeSurface(surface);
-			SDL_DestroyRenderer(renderer);
-			SDL_DestroyWindow(window);
-			SDL_Quit();
-			return 1;
-		}
-		SDL_FreeSurface(surface);
+		SDL_UpdateTexture(sdl_texture, &sdl_rect, pixels, image_w * 4);
 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_RenderClear(renderer);
+		delete[] pixels;
 
-		SDL_Rect dst;
-		dst.x = 0;
-		dst.y = 0;
-		dst.w = img_width;
-		dst.h = img_height;
-		SDL_RenderCopy(renderer, texture, NULL, &dst);
-
-		SDL_RenderPresent(renderer);
-		SDL_DestroyTexture(texture);
+		SDL_RenderClear(sdl_renderer);
+		SDL_RenderCopy(sdl_renderer, sdl_texture, NULL, &sdl_rect);
+		SDL_RenderPresent(sdl_renderer);
 
 		image.FilpV();
 
 		frame_count++;
 		cout << "Frame " << frame_count << "  AvgFPS " << fixed << setprecision(2) << 1.0 * frame_count / timer.Current() << endl;
+
+		SDL_Event sdl_event;
+		while (SDL_PollEvent(&sdl_event))
+		{
+			if (sdl_event.type == SDL_QUIT)
+			{
+				flag_running = false;
+			}
+			if (sdl_event.type == SDL_KEYUP)
+			{
+				if (sdl_event.key.keysym.sym == SDLK_ESCAPE)
+				{
+					flag_running = false;
+				}
+			}
+		}
 	}
 
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
 	SDL_Quit();
 
 	image.WriteToTGA("output.tga");
