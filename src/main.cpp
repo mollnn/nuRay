@@ -7,14 +7,14 @@ using namespace std;
 #include "timer.hpp"
 #include "color.hpp"
 #include "imagewnd.hpp"
+#include "fastmath.hpp"
+#include "random.hpp"
 
 const double pi = acos(-1);
 const double eps = 1e-6;
 
 random_device global_random_device;
 uniform_int_distribution<int> global_uniform_int_distribution(0, RAND_MAX);
-
-double randf() { return 1.0f * global_uniform_int_distribution(global_random_device) / RAND_MAX; }
 
 struct Material
 {
@@ -69,43 +69,6 @@ std::tuple<double, vec3, Triangle *> intersect(std::vector<Triangle> &triangles,
 		return {-1, hitpos, hitobj};
 	return {hitdis, hitpos, hitobj};
 }
-
-namespace fastmath
-{
-	const int siz_cos_l = 1e4;
-	const double lim_cos_l = 2 * pi;
-	const double step_cos_l = lim_cos_l / siz_cos_l;
-
-	vector<double> mem_cos_l(siz_cos_l + 2);
-
-	double get_cos_l(double x)
-	{
-		if (x < 0 || x > 2 * pi)
-			x = fmod(x, 2 * pi);
-		int idx = (x + 1e-7) / step_cos_l;
-		return mem_cos_l[idx];
-	}
-
-	double get_cos_l_(double x)
-	{
-		if (x < 0 || x > 2 * pi)
-			x = fmod(x, 2 * pi);
-		int idx1k = 1e3 * (x + 1e-7) / step_cos_l;
-		int idx = idx1k / 1000;
-		int offset = idx1k - idx * 1000;
-		return (mem_cos_l[idx] * offset + mem_cos_l[idx + 1] * (1000 - offset)) / 1000;
-	}
-
-	void presolve()
-	{
-		cout << "Math Presolving..." << endl;
-		for (int i = 0; i <= siz_cos_l; i++)
-		{
-			mem_cos_l[i] = cos(lim_cos_l / siz_cos_l * i);
-		}
-		cout << "Math Finish!" << endl;
-	}
-};
 
 vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &triangles)
 {
@@ -197,13 +160,13 @@ int main(int argc, char *argv[])
 
 	std::vector<Triangle> scene;
 
-	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{0.8, 0.8, 0.8}, {0, 0, 0}}});
-	scene.push_back({{-2, -7, 0}, {2, -7, 0}, {0, -7, 2}, {{0, 0, 0}, {4, 4, 4}}});
-	scene.push_back({{-1e2, 1e2, 0}, {1e2, 1e2, 0}, {0, -1e2, 0}, {{0.3, 0.3, 0.3}, {0, 0, 0}}});
-	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {4, 2.5, 0}}});
-	scene.push_back({{-1e2, 2, 0}, {1e2, 2, 0}, {0, 2, 1e3}, {{0.5, 0.5, 0.5}, {0, 0, 0}}});
+	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{0.8, 0.8, 0.8}, {0, 0, 0}}});			  // 演员
+	scene.push_back({{-2, -7, 0}, {2, -7, 0}, {0, -7, 2}, {{0, 0, 0}, {4, 4, 4}}});				  // 射灯
+	scene.push_back({{-1e2, 1e2, 0}, {1e2, 1e2, 0}, {0, -1e2, 0}, {{0.3, 0.3, 0.3}, {0, 0, 0}}}); // 地板
+	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {3, 1.5, 0}}});			  // 背景灯
+	scene.push_back({{-1e2, 2, 0}, {1e2, 2, 0}, {0, 2, 1e3}, {{0.5, 0.5, 0.5}, {0, 0, 0}}});	  // 幕布
 
-	int img_siz_x = 512;
+	int img_siz_x = 1024;
 	double img_aspect = 2.39;
 	int img_siz_y = img_siz_x / img_aspect;
 	int spp = 1;
@@ -244,6 +207,7 @@ int main(int argc, char *argv[])
 
 	//Main loop
 	bool running = true;
+
 	while (running)
 	{
 		SDL_Event event;
