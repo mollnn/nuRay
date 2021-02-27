@@ -25,7 +25,10 @@ struct Triangle
 {
 	vec3 p0, p1, p2;
 	Material mat;
-	vec3 normal() { return ((p1 - p0).cross(p2 - p0)).unit(); }
+	vec3 n;
+	vec3 math_normal() { return ((p1 - p0).cross(p2 - p0)).unit(); }
+	vec3 normal() { return n; }
+	void auto_normal() { n = math_normal(); }
 	std::pair<double, vec3> intersect(vec3 pos, vec3 dir)
 	{
 		vec3 tpos = p0, tdir = normal();
@@ -72,7 +75,7 @@ std::tuple<double, vec3, Triangle *> intersect(std::vector<Triangle> &triangles,
 
 vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &triangles)
 {
-	if (depth > 6)
+	if (depth > 10)
 		return {0, 0, 0};
 	auto [hitdis, hitpos, hitobj] = intersect(triangles, raypos, raydir);
 	if (hitdis < 0)
@@ -163,8 +166,11 @@ int main(int argc, char *argv[])
 	scene.push_back({{-1, 0, 0}, {1, 0, 0}, {0, 0, 2}, {{0.8, 0.8, 0.8}, {0, 0, 0}}});			  // 演员
 	scene.push_back({{-2, -7, 0}, {2, -7, 0}, {0, -7, 2}, {{0, 0, 0}, {4, 4, 4}}});				  // 射灯
 	scene.push_back({{-1e2, 1e2, 0}, {1e2, 1e2, 0}, {0, -1e2, 0}, {{0.3, 0.3, 0.3}, {0, 0, 0}}}); // 地板
-	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {3, 1.5, 0}}});			  // 背景灯
+	scene.push_back({{-10, -10, 3}, {10, -10, 3}, {0, -5, 5}, {{0, 0, 0}, {3, 1.5, 0}}});		  // 背景灯
 	scene.push_back({{-1e2, 2, 0}, {1e2, 2, 0}, {0, 2, 1e3}, {{0.5, 0.5, 0.5}, {0, 0, 0}}});	  // 幕布
+
+	for (auto &i : scene)
+		i.auto_normal();
 
 	int img_siz_x = 1024;
 	double img_aspect = 2.39;
@@ -288,8 +294,6 @@ int main(int argc, char *argv[])
 		SDL_RenderCopy(renderer, texture, NULL, &dst);
 
 		SDL_RenderPresent(renderer);
-		SDL_Delay(100);
-
 		SDL_DestroyTexture(texture);
 
 		image.FilpV();
