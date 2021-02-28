@@ -28,22 +28,20 @@ int main(int argc, char *argv[])
 	for (auto &i : scene.triangles)
 		i.auto_normal();
 
-	int img_siz_x = 1024;
+	int img_siz_x = 512;
 	double img_aspect = 2.39;
-	int img_siz_y = img_siz_x / img_aspect;
-	int spp = 1;
+	int img_siz_y = (int)(img_siz_x / img_aspect) / 2 * 2;
+	int spp = 4;
 	vec3 cam_dir = (vec3){0.8, 1, 0}.unit();
 	vec3 cam_pos = {-3, -6.5, 1};
 	vec3 cam_top = {0, 0, 1};
 	double focal = 24;
 	double near_clip = 0.1;
 
-	Image image(img_siz_x, img_siz_y);
-
 	int count = 0;
 
-	int img_width = image.size_x;
-	int img_height = image.size_y;
+	int img_width = img_siz_x;
+	int img_height = img_siz_y;
 
 	SDL_Window *screen;
 	SDL_Renderer *sdl_renderer;
@@ -80,26 +78,14 @@ int main(int argc, char *argv[])
 
 	while (flag_running)
 	{
-
-		for (int i = 0; i < img_siz_x; i++)
-		{
-			for (int j = 0; j < img_siz_y; j++)
-			{
-				image.buffer[i][j] = image.buffer[i][j] * count;
-			}
-		}
+		Image image(img_siz_x, img_siz_y);
 
 		count++;
 
-		RenderMain(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip, image, scene);
+		double tx = fmod(timer.Current(), 8);
+		cam_pos.y = -7 + (tx < 4 ? tx : 0) + (tx >= 4 ? (8 - tx) : 0);
 
-		for (int i = 0; i < img_siz_x; i++)
-		{
-			for (int j = 0; j < img_siz_y; j++)
-			{
-				image.buffer[i][j] = image.buffer[i][j] * 1.0 / count;
-			}
-		}
+		RenderMain(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip, image, scene);
 
 		image.Clamp();
 		image.FilpV();
@@ -153,6 +139,4 @@ int main(int argc, char *argv[])
 	}
 
 	SDL_Quit();
-
-	image.WriteToTGA("output.tga");
 }
