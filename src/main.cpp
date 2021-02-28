@@ -13,9 +13,6 @@ using namespace std;
 const double pi = acos(-1);
 const double eps = 1e-6;
 
-random_device global_random_device;
-uniform_int_distribution<int> global_uniform_int_distribution(0, RAND_MAX);
-
 struct Material
 {
 	vec3 diffuse, reflect, refrect, emission;
@@ -27,12 +24,13 @@ struct Triangle
 	vec3 p0, p1, p2;
 	Material mat;
 	vec3 n;
-	vec3 math_normal() { return ((p1 - p0).cross(p2 - p0)).unit(); }
-	vec3 normal() { return n; }
+	vec3 math_normal() const { return ((p1 - p0).cross(p2 - p0)).unit(); }
+	vec3 normal() const { return n; }
 	void auto_normal() { n = math_normal(); }
-	std::pair<double, vec3> intersect(vec3 pos, vec3 dir)
+	std::pair<double, vec3> intersect(vec3 pos, vec3 dir) const
 	{
-		vec3 tpos = p0, tdir = normal();
+		vec3 tpos = p0;
+		vec3 tdir = n;
 		if (fabs(tdir.dot(dir)) < eps)
 			return {-1, vec3()};
 		if (tdir.dot(dir) < 0)
@@ -53,11 +51,11 @@ struct Triangle
 	}
 };
 
-std::tuple<double, vec3, Triangle *> intersect(std::vector<Triangle> &triangles, vec3 pos, vec3 dir)
+std::tuple<double, vec3, const Triangle *> Intersect(const std::vector<Triangle> &triangles, vec3 pos, vec3 dir)
 {
 	double hitdis = 2e18;
 	vec3 hitpos;
-	Triangle *hitobj = NULL;
+	const Triangle *hitobj = NULL;
 	for (auto &triangle : triangles)
 	{
 		auto [thdis, thpos] = triangle.intersect(pos, dir);
@@ -73,11 +71,11 @@ std::tuple<double, vec3, Triangle *> intersect(std::vector<Triangle> &triangles,
 	return {hitdis, hitpos, hitobj};
 }
 
-vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &triangles)
+vec3 PathTrace(vec3 raypos, vec3 raydir, int depth,const std::vector<Triangle> &triangles)
 {
-	if (depth > 20)
+	if (depth > 10)
 		return {0, 0, 0};
-	auto [hitdis, hitpos, hitobj] = intersect(triangles, raypos, raydir);
+	auto [hitdis, hitpos, hitobj] = Intersect(triangles, raypos, raydir);
 	if (hitdis < 0)
 		return {0, 0, 0};
 
@@ -108,7 +106,7 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 	if (isnanf(fresnel_x))
 		fresnel_x = 1;
 
-	Material &material = hitobj->mat; // 命中物体的材质
+	const Material &material = hitobj->mat; // 命中物体的材质
 
 	double fresnel_reflect_intensity = fresnel_i0 + (1 - fresnel_i0) * pow(fresnel_x, 5); // 菲涅尔反射强度
 	double fresnel_refrect_intensity = 1 - fresnel_reflect_intensity;					  // 菲涅尔折射强度
@@ -160,8 +158,8 @@ vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, std::vector<Triangle> &trian
 	return ans;
 }
 
-void render_thread(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, double focal, double near_clip,
-				   Image &image, vector<Triangle> &scene, double fp_siz_x, double fp_siz_y, vec3 fp_e_x, vec3 fp_e_y,
+void RenderThread(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, double focal, double near_clip,
+				   Image &image, const vector<Triangle> &scene, double fp_siz_x, double fp_siz_y, vec3 fp_e_x, vec3 fp_e_y,
 				   int img_y_min, int img_y_max)
 {
 	for (int img_y = img_y_min; img_y <= img_y_max; img_y++)
@@ -185,8 +183,8 @@ void render_thread(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam
 	}
 }
 
-void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, double focal, double near_clip,
-			Image &image, vector<Triangle> &scene)
+void RenderMain(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, vec3 cam_top, double focal, double near_clip,
+			Image &image, const vector<Triangle> &scene)
 {
 	double fov = 2 * atan(36 / 2 / focal);
 	double fp_siz_x = 2 * tan(fov / 2);
@@ -199,7 +197,7 @@ void render(int img_siz_x, int img_siz_y, int spp, vec3 cam_pos, vec3 cam_dir, v
 	for (int img_y = 0; img_y < img_siz_y; img_y += img_y_step)
 	{
 		int img_y_min = img_y, img_y_max = min(img_y + img_y_step, img_siz_y) - 1;
-		thread *th = new thread(render_thread, img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip,
+		thread *th = new thread(RenderThread, img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip,
 								ref(image), ref(scene), fp_siz_x, fp_siz_y, fp_e_x, fp_e_y, img_y_min, img_y_max);
 		thread_list.push_back(th);
 	}
@@ -302,7 +300,7 @@ int main(int argc, char *argv[])
 		}
 
 		count++;
-		render(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip, image, scene);
+		RenderMain(img_siz_x, img_siz_y, spp, cam_pos, cam_dir, cam_top, focal, near_clip, image, scene);
 
 		for (int i = 0; i < img_siz_x; i++)
 		{
