@@ -4,6 +4,10 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+const double eps = 1e-6;
+const double pi = acos(-1);
+
+
 namespace fastmath
 {
     const double pi = acos(-1);
