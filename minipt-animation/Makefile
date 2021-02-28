@@ -7,12 +7,12 @@
 CXX = g++
 
 # define any compile-time flags
-CXXFLAGS	:= -std=c++17  -O4
+CXXFLAGS	:= -std=c++17  -g  -Wl,--stack=999999999
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS = -lmingw32 -lSDL2main -lSDL2 
+LFLAGS = -lavcodec -lavdevice -lavfilter -lavformat -lavresample -lavutil -lpostproc -lswresample -lswscale -lmingw32 -lSDL2main -lSDL2
 
 # define output directory
 OUTPUT	:= output

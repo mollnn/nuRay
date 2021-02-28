@@ -219,3 +219,8 @@ lib/*
 ._SDL
 
 output.tga
+
+*/include
+*/lib
+*/bin
+*/output
