@@ -16,6 +16,7 @@ using namespace std;
 #include "pathtracer.hpp"
 #include "renderer.hpp"
 #include "testscene.hpp"
+#include "objloader.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +24,28 @@ int main(int argc, char *argv[])
 
 	Scene scene;
 	TestScene test_scene;
-	test_scene.Load(scene);
+
+	objl::Loader Loader;
+	std::string obj_path = "rock.obj";
+
+	scene.triangles.push_back({{0, -100, 100}, {0, 100, 100}, {100, 100, 100}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {1, 1, 1}, 1}});
+	scene.triangles.push_back({{0, -100, 100}, {100, -100, 100}, {100, 100, 100}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {1, 1, 1}, 1}});
+
+	scene.triangles.push_back({{-100, -100, -3}, {-100, 100, -3}, {100, 100, -3}, {{0.5, 0.5, 0.5}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 1}});
+	scene.triangles.push_back({{-100, -100, -3}, {100, -100, -3}, {100, 100, -3}, {{0.5, 0.5, 0.5}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 1}});
+	// Load .obj File
+	bool loadout = Loader.LoadFile(obj_path);
+	for (auto mesh : Loader.LoadedMeshes)
+	{
+		cout << "New face loaded" << endl;
+		for (int i = 0; i < mesh.Vertices.size(); i += 3)
+		{
+			scene.triangles.push_back({{mesh.Vertices[i + 0].Position.X, mesh.Vertices[i + 0].Position.Y, mesh.Vertices[i + 0].Position.Z},
+									   {mesh.Vertices[i + 1].Position.X, mesh.Vertices[i + 1].Position.Y, mesh.Vertices[i + 1].Position.Z},
+									   {mesh.Vertices[i + 2].Position.X, mesh.Vertices[i + 2].Position.Y, mesh.Vertices[i + 2].Position.Z},
+									   {{1, 1, 1}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 1}});
+		}
+	}
 
 	for (auto &i : scene.triangles)
 		i.auto_normal();
@@ -32,9 +54,9 @@ int main(int argc, char *argv[])
 	double img_aspect = 2.39;
 	int img_siz_y = img_siz_x / img_aspect;
 	int spp = 1;
-	vec3 cam_dir = (vec3){0.8, 1, 0}.unit();
-	vec3 cam_pos = {-3, -6.5, 1};
-	vec3 cam_top = {0, 0, 1};
+	vec3 cam_dir = (vec3){0, 1, -1}.unit();
+	vec3 cam_pos = {0, -5, 5};
+	vec3 cam_top = {0, 1, 1};
 	double focal = 24;
 	double near_clip = 0.1;
 
