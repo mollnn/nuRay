@@ -15,7 +15,7 @@ using namespace std;
 
 class PathTracer
 {
-    public:
+public:
     vec3 PathTrace(vec3 raypos, vec3 raydir, int depth, const std::vector<Triangle> &triangles, const std::vector<Spherical> &sphericals)
     {
         if (depth > 10)
@@ -73,16 +73,6 @@ class PathTracer
         double fresnel_reflect_intensity = fresnel_i0 + (1 - fresnel_i0) * pow(fresnel_x, 5); // 菲涅尔反射强度
         double fresnel_refrect_intensity = 1 - fresnel_reflect_intensity;                     // 菲涅尔折射强度
 
-        // 搜索各种光线的概率
-        double reflect_probability = material.reflect.avg() + material.refrect.avg() * fresnel_reflect_intensity; // 总镜面反射概率
-        double refrect_probability = material.refrect.avg() * fresnel_refrect_intensity;                          // 总折射概率
-        double diffuse_probability = material.diffuse.avg();                                                      // 总漫反射概率
-
-        double sum_probability = diffuse_probability + reflect_probability + refrect_probability + eps;
-        diffuse_probability /= sum_probability;
-        reflect_probability /= sum_probability;
-        refrect_probability /= sum_probability;
-
         // 光线强度
         vec3 reflect_intensity = material.reflect + material.refrect * fresnel_reflect_intensity; // 总镜面反射强度
         vec3 refrect_intensity = material.refrect * fresnel_refrect_intensity;                    // 总折射强度
@@ -91,7 +81,8 @@ class PathTracer
         vec3 ans = hitobj->mat.emission;
 
         double rand_value = randf();
-        if (rand_value < diffuse_probability)
+
+        if (diffuse_intensity.norm2() > 1e-6)
         {
             double r2 = randf();
             double phi = randf() * 2 * pi;
@@ -107,16 +98,19 @@ class PathTracer
             vec3 eu = ((vec3){randf(), randf(), randf()}).unit().cross(normal);
             vec3 ev = eu.cross(ew);
             vec3 difdir = du * eu + dv * ev + dw * ew;
-            ans = ans + hitobj->mat.diffuse * PathTrace(hitpos + eps * difdir, difdir, depth + 1, triangles, sphericals);
+            ans = ans + diffuse_intensity * PathTrace(hitpos + eps * difdir, difdir, depth + 1, triangles, sphericals);
         }
-        else if (rand_value - diffuse_probability < reflect_probability)
+
+        if (reflect_intensity.norm2() > 1e-6)
         {
-            ans = ans + PathTrace(hitpos + eps * reflect_dir, reflect_dir, depth + 1, triangles, sphericals) * reflect_intensity / reflect_probability;
+            ans = ans + reflect_intensity * PathTrace(hitpos + eps * reflect_dir, reflect_dir, depth + 1, triangles, sphericals);
         }
-        else if (rand_value - diffuse_probability - reflect_probability < refrect_probability)
+
+        if (refrect_intensity.norm2() > 1e-6)
         {
-            ans = ans + PathTrace(hitpos + eps * refrect_dir, refrect_dir, depth + 1, triangles, sphericals) * refrect_intensity / refrect_probability;
+            ans = ans + refrect_intensity * PathTrace(hitpos + eps * refrect_dir, refrect_dir, depth + 1, triangles, sphericals);
         }
+
         return ans;
     }
 };
