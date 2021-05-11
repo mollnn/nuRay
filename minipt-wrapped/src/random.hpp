@@ -3,39 +3,14 @@
 
 #include <bits/stdc++.h>
 
-int STDRANDOM()
-{
-    return rand()*rand();
-}
+int STDRANDOM();
 
-uint32_t xorshf96()
-{
-    static uint32_t x = STDRANDOM(), y = STDRANDOM(), z = STDRANDOM();
-    uint32_t t;
-    x ^= x << 16;
-    x ^= x >> 5;
-    x ^= x << 1;
-    t = x;
-    x = y;
-    y = z;
-    z = t ^ x ^ y;
-    return z;
-}
+uint32_t xorshf96();
 
 // 随机数生成器
-double RAND(unsigned short seed[3])
-{
-    return (double)xorshf96() / (double)0xffffffffU;
-}
+double RAND(unsigned short seed[3]);
 
-double RAND()
-{
-    return (double)xorshf96() / (double)0xffffffffU;
-}
+double RAND();
 
-double randf()
-{
-    return (double)xorshf96() / (double)0xffffffffU;
-}
-
+double randf();
 #endif

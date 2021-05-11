@@ -5,12 +5,10 @@
 using namespace std;
 
 #include "triangle.hpp"
-#include "spherical.hpp"
 
 struct Scene
 {
 	std::vector<Triangle> triangles;
-	std::vector<Spherical> sphericals;
 };
 
 #endif
