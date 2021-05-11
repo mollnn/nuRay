@@ -1,7 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#include "uint.h"
 #include "vec3.hpp"
 #include "image.hpp"
 #include "timer.hpp"
@@ -13,15 +12,12 @@ using namespace std;
 #include "pathtracer.hpp"
 #include "renderer.hpp"
 #include "testscene.hpp"
-#include "objloader.hpp"
 
 class Minipt
 {
 public:
     Scene scene;
     TestScene test_scene;
-
-    objl::Loader Loader;
 
     int img_siz_x = 1024;
     double img_aspect = 2.39;
@@ -36,8 +32,6 @@ public:
     Minipt();
 
     void LoadDefaultLightset();
-
-    void ImportObject(std::string obj_path);
 
     void AutoNormal();
 

@@ -15,23 +15,6 @@ void Minipt::LoadDefaultLightset()
     scene.triangles.push_back({{-100, -100, -3}, {100, -100, -3}, {100, 100, -3}, {{0.5, 0.5, 0.5}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 1}});
 }
 
-void Minipt::ImportObject(std::string obj_path)
-{
-    // Load .obj File
-    bool loadout = Loader.LoadFile(obj_path);
-    for (auto mesh : Loader.LoadedMeshes)
-    {
-        cout << "New face loaded" << endl;
-        for (int i = 0; i < mesh.Vertices.size(); i += 3)
-        {
-            scene.triangles.push_back({{mesh.Vertices[i + 0].Position.X, mesh.Vertices[i + 0].Position.Y, mesh.Vertices[i + 0].Position.Z},
-                                       {mesh.Vertices[i + 1].Position.X, mesh.Vertices[i + 1].Position.Y, mesh.Vertices[i + 1].Position.Z},
-                                       {mesh.Vertices[i + 2].Position.X, mesh.Vertices[i + 2].Position.Y, mesh.Vertices[i + 2].Position.Z},
-                                       {{1, 1, 1}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 1}});
-        }
-    }
-}
-
 void Minipt::AutoNormal()
 {
     // Auto normal

@@ -6,8 +6,8 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 	Minipt minipt;
-	minipt.LoadDefaultLightset();
-	minipt.ImportObject("cube.obj");
+	TestScene ts;
+	ts.Load(minipt.scene);
 	minipt.AutoNormal();
 	Image image = minipt.Render();
 	image.WriteToTGA("output.tga");
