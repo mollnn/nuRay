@@ -16,10 +16,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    camera.cpp \
+    loader.cpp \
     main.cpp \
+    triangle.cpp \
+    vec3.cpp \
     widget.cpp
 
 HEADERS += \
+    camera.h \
+    loader.h \
+    triangle.h \
+    vec3.h \
     widget.h
 
 FORMS += \
