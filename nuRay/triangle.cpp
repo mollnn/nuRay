@@ -10,11 +10,11 @@ Triangle::Triangle(const vec3 &p0, const vec3 &p1, const vec3 &p2) : p{p0, p1, p
 void Triangle::evalNormal()
 {
     n[0] = (p[1] - p[0]).cross(p[2] - p[0]).normalized();
-    n[1] = (p[2] - p[1]).cross(p[0] - p[1]).normalized();
-    n[2] = (p[0] - p[2]).cross(p[1] - p[2]).normalized();
+    n[1] = n[0];
+    n[2] = n[0];
 }
 
-std::tuple<float, float, float> Triangle::intersection(const vec3 &o, const vec3 &d)
+std::tuple<float, float, float> Triangle::intersection(const vec3 &o, const vec3 &d) const
 {
     vec3 e1 = p[1] - p[0], e2 = p[2] - p[0];
     vec3 s = o - p[0], s1 = d.cross(e2), s2 = s.cross(e1);
@@ -22,12 +22,12 @@ std::tuple<float, float, float> Triangle::intersection(const vec3 &o, const vec3
     return {t / q, b1 / q, b2 / q};
 }
 
-vec3 Triangle::getNormal(float b1, float b2)
+vec3 Triangle::getNormal(float b1, float b2)const
 {
     return ((1.0f - b1 - b2) * n[0] + b1 * n[1] + b2 * n[2]).normalized();
 }
 
-vec3 Triangle::getTexCoords(float b1, float b2)
+vec3 Triangle::getTexCoords(float b1, float b2)const
 {
     return (1.0f - b1 - b2) * t[0] + b1 * t[1] + b2 * t[2];
 }

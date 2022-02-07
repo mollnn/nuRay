@@ -19,6 +19,7 @@ SOURCES += \
     camera.cpp \
     loader.cpp \
     main.cpp \
+    renderer.cpp \
     triangle.cpp \
     vec3.cpp \
     widget.cpp
@@ -26,6 +27,7 @@ SOURCES += \
 HEADERS += \
     camera.h \
     loader.h \
+    renderer.h \
     triangle.h \
     vec3.h \
     widget.h

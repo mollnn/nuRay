@@ -29,16 +29,43 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
         {
             normals.push_back(vec3(atof(buf[1].c_str()), atof(buf[2].c_str()), atof(buf[3].c_str())));
         }
-        else if(buf[0] == "f")
+        else if (buf[0] == "f")
         {
             // TODO: read normals and texcoords from obj
-            triangles.push_back(Triangle(vertices[atoi(buf[1].c_str())],vertices[atoi(buf[2].c_str())],vertices[atoi(buf[3].c_str())]));
+            std::vector<std::vector<int>> a(3);
+            for (int i = 0; i < 3; i++)
+            {
+                std::vector<std::size_t> pos_slash;
+                for (int j = 0; j < buf[i + 1].length(); j++)
+                {
+                    if (buf[i + 1][j] == '/')
+                        pos_slash.push_back(j);
+                }
+                while (pos_slash.size() < 3)
+                {
+                    pos_slash.push_back(buf[i + 1].length());
+                }
+                std::size_t ptr = 0;
+                for (int j = 0; j < 3; j++)
+                {
+                    std::size_t cur = pos_slash[j];
+                    // ptr..cur-1
+                    // nextptr = cur+1
+                    if (ptr < cur)
+                        a[i].push_back(atoi(buf[i + 1].substr(ptr, cur - ptr).c_str()));
+                    else
+                        a[i].push_back(0);
+                    ptr = std::min(buf[i + 1].length(), cur + 1);
+                }
+            }
+            std::cout<<a[0][0]<<" "<<a[0][1]<<" "<<a[0][2]<<"   "<<a[1][0]<<" "<<a[1][1]<<" "<<a[1][2]<<"   "<<a[2][0]<<" "<<a[2][1]<<" "<<a[2][2]<<std::endl;
+
+            triangles.push_back(Triangle(vertices[a[0][0]],vertices[a[1][0]],vertices[a[2][0]]));
         }
     }
 }
 
-
-std::vector<Triangle>& Loader::getTriangles()
+std::vector<Triangle> &Loader::getTriangles()
 {
     return triangles;
 }

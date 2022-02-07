@@ -14,9 +14,9 @@ struct Triangle
     Triangle(const vec3& p0, const vec3& p1, const vec3& p2);
 
     void evalNormal();
-    std::tuple<float, float, float> intersection(const vec3 &o, const vec3 &d);
-    vec3 getNormal(float b1, float b2);
-    vec3 getTexCoords(float b1, float b2);
+    std::tuple<float, float, float> intersection(const vec3 &o, const vec3 &d) const;
+    vec3 getNormal(float b1, float b2)const;
+    vec3 getTexCoords(float b1, float b2)const;
 };
 
 std::ostream &operator<<(std::ostream& lhs, const Triangle &rhs);

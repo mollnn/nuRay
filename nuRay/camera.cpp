@@ -1,6 +1,6 @@
 #include "camera.h"
 
-vec3 Camera::generateRay(float img_x, float img_y)
+vec3 Camera::generateRay(float img_x, float img_y) const
 {
     float canonical_x = img_x / img_width * 2 - 1;
     float canonical_y = img_y / img_height * 2 - 1;
