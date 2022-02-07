@@ -2,7 +2,7 @@
 
 Triangle::Triangle() {}
 
-Triangle::Triangle(const vec3 &p0, const vec3 &p1, const vec3 &p2) : p{p0, p1, p2} 
+Triangle::Triangle(const vec3 &p0, const vec3 &p1, const vec3 &p2, const vec3& t0, const vec3& t1, const vec3& t2) : p{p0, p1, p2}, t{t0, t1, t2}
 {
     this->evalNormal();
 }

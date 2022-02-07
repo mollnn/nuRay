@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "texture.h"
 
 std::tuple<float, float, float, const Triangle *> Renderer::intersect(const vec3 &origin, const vec3 &dir, const std::vector<Triangle> &triangles)
 {
@@ -20,11 +21,15 @@ std::tuple<float, float, float, const Triangle *> Renderer::intersect(const vec3
 
 vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles)
 {
+    static Texture test_tex("uvtest.jpg");
+
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles);
     if (hit_obj == nullptr)
         return vec3(0.0f, 0.0f, 0.0f);
 
     vec3 normal = hit_obj->getNormal(b1, b2);
+    vec3 texcoords = hit_obj->getTexCoords(b1, b2);
+    float u = texcoords[0], v = texcoords[1];
 
     if (normal.dot(dir) > 0)
         return vec3(0.0f, 0.0f, 0.0f); // Back culling, not for refraction
@@ -34,8 +39,11 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
 
     // TODO: sample the light
     float brdf_ = 0.3; // todo
+    qDebug()<<b1<<" "<<b2<<" "<<u<<" "<<v;
+    brdf_ *= test_tex.pixelUV(u,v);
+
     vec3 light_pos = vec3(0.0f, 2.0f, 4.0f);
-    vec3 light_int = vec3(1.0f, 0.7f, 0.5f) * 30.0f;
+    vec3 light_int = vec3(1.0f, 1.0f, 1.0f) * 30.0f;
     vec3 Ll = light_int / ((hit_pos - light_pos).dot(hit_pos - light_pos));
     result += Ll * brdf_ * std::max(0.0f, normal.dot((light_pos - hit_pos).normalized()));
 
@@ -55,8 +63,8 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     vec3 ax2 = normal.cross(ax1).normalized();
     vec3 wi = h * normal + r * cos(phi) * ax1 + r * sin(phi) * ax2;
     float pdf = 1.0 / 3.14159;
-
     float brdf = 0.3; // todo
+    brdf_ *= test_tex.pixelUV(u,v);
     vec3 Li = trace(hit_pos + wi * 1e-5, wi, triangles);
     result += Li * brdf / pdf / prr;
 
@@ -75,7 +83,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
         {
             vec3 ray_dir = camera.generateRay(x, y);
             vec3 result;
-            for(int i=0;i<SPP;i++)
+            for (int i = 0; i < SPP; i++)
             {
                 result += trace(camera.pos, ray_dir, triangles) * 255.0f;
             }

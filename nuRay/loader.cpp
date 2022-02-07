@@ -60,7 +60,11 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
             }
             std::cout<<a[0][0]<<" "<<a[0][1]<<" "<<a[0][2]<<"   "<<a[1][0]<<" "<<a[1][1]<<" "<<a[1][2]<<"   "<<a[2][0]<<" "<<a[2][1]<<" "<<a[2][2]<<std::endl;
 
-            triangles.push_back(Triangle(vertices[a[0][0]],vertices[a[1][0]],vertices[a[2][0]]));
+            triangles.push_back(Triangle(vertices[a[0][0]],vertices[a[1][0]],vertices[a[2][0]],
+                texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
+                texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f),
+                texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f)
+            ));
         }
     }
 }
