@@ -1,8 +1,8 @@
 #include "vec3.h"
 #include <cmath>
 
-
 vec3::vec3() : v{0.0f, 0.0f, 0.0f} {}
+vec3::vec3(float x) : v{x, x, x} {}
 vec3::vec3(float x, float y, float z) : v{x, y, z} {}
 
 vec3 &vec3::operator+=(const vec3 &rhs)
@@ -90,7 +90,7 @@ float vec3::operator[](int i) const
     return v[i];
 }
 
-std::ostream &operator<<(std::ostream& lhs, const vec3 &rhs)
+std::ostream &operator<<(std::ostream &lhs, const vec3 &rhs)
 {
     lhs << "(" << rhs[0] << "," << rhs[1] << "," << rhs[2] << ")";
     return lhs;

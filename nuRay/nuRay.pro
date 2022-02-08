@@ -26,9 +26,6 @@ SOURCES += \
     widget.cpp
 
 HEADERS += \
-    Img.h \
-    ImgConvert.h \
-    ImgData.h \
     camera.h \
     loader.h \
     renderer.h \

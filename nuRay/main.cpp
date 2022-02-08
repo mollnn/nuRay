@@ -21,9 +21,9 @@ int main(int argc, char *argv[])
     // Render
 
     Loader loader;
-    // loader.loadObj("rock.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
+    loader.loadObj("rock.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
     loader.loadObj("cube.obj", {0.0f, -5.0f, 0.0f}, 5.0f);
-    loader.loadObj("cube.obj", {0.0f, 0.5f, 0.0f}, 1.0f);
+    // loader.loadObj("cube.obj", {0.0f, 0.5f, 0.0f}, 1.0f);
 
     auto triangles = loader.getTriangles();
 

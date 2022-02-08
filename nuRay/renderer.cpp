@@ -38,8 +38,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     vec3 result;
 
     // TODO: sample the light
-    float brdf_ = 0.3; // todo
-    qDebug()<<b1<<" "<<b2<<" "<<u<<" "<<v;
+    vec3 brdf_ = 0.3; // todo
     brdf_ *= test_tex.pixelUV(u,v);
 
     vec3 light_pos = vec3(0.0f, 2.0f, 4.0f);
@@ -63,7 +62,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     vec3 ax2 = normal.cross(ax1).normalized();
     vec3 wi = h * normal + r * cos(phi) * ax1 + r * sin(phi) * ax2;
     float pdf = 1.0 / 3.14159;
-    float brdf = 0.3; // todo
+    vec3 brdf = 0.3; // todo
     brdf_ *= test_tex.pixelUV(u,v);
     vec3 Li = trace(hit_pos + wi * 1e-5, wi, triangles);
     result += Li * brdf / pdf / prr;

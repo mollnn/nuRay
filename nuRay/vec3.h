@@ -8,6 +8,7 @@ struct vec3
     float v[3];
 
     vec3();
+    vec3(float i);
     vec3(float x, float y, float z);
 
     vec3 &operator+=(const vec3 &rhs);
