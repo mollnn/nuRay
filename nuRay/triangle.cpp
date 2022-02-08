@@ -2,7 +2,7 @@
 
 Triangle::Triangle() {}
 
-Triangle::Triangle(const vec3 &p0, const vec3 &p1, const vec3 &p2, const vec3& t0, const vec3& t1, const vec3& t2) : p{p0, p1, p2}, t{t0, t1, t2}
+Triangle::Triangle(const vec3 &p0, const vec3 &p1, const vec3 &p2, const vec3 &t0, const vec3 &t1, const vec3 &t2, const Material *mat) : p{p0, p1, p2}, t{t0, t1, t2}, mat(mat)
 {
     this->evalNormal();
 }
@@ -22,14 +22,31 @@ std::tuple<float, float, float> Triangle::intersection(const vec3 &o, const vec3
     return {t / q, b1 / q, b2 / q};
 }
 
-vec3 Triangle::getNormal(float b1, float b2)const
+vec3 Triangle::getNormal(float b1, float b2) const
 {
     return ((1.0f - b1 - b2) * n[0] + b1 * n[1] + b2 * n[2]).normalized();
 }
 
-vec3 Triangle::getTexCoords(float b1, float b2)const
+vec3 Triangle::getTexCoords(float b1, float b2) const
 {
     return (1.0f - b1 - b2) * t[0] + b1 * t[1] + b2 * t[2];
+}
+
+std::tuple<vec3, float, float> Triangle::sample() const
+{
+    float r1 = rand() * 1.0f / RAND_MAX;
+    float r2 = rand() * 1.0f / RAND_MAX;
+    if (r1 + r2 > 1)
+    {
+        r1 = 1 - r1;
+        r2 = 1 - r2;
+    }
+    return {(1 - r1 - r2) * p[0] + r1 * p[1] + r2 * p[2], r1, r2};
+}
+
+float Triangle::area() const
+{
+    return (p[1] - p[0]).cross(p[2] - p[0]).norm();
 }
 
 std::ostream &operator<<(std::ostream &lhs, const Triangle &rhs)

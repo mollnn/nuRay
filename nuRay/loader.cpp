@@ -1,6 +1,6 @@
 #include "loader.h"
 
-void Loader::loadObj(const std::string &filename, const vec3 &position, float scale)
+void Loader::loadObj(const std::string &filename, const vec3 &position, float scale, const Material* mat)
 {
     std::vector<vec3> vertices(1), normals(1), texcoords(1);
     std::ifstream ifs(filename);
@@ -31,7 +31,7 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
         }
         else if (buf[0] == "f")
         {
-            // TODO: read normals and texcoords from obj
+            // TODO: read normals from obj
             std::vector<std::vector<int>> a(3);
             for (int i = 0; i < 3; i++)
             {
@@ -63,7 +63,8 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
             triangles.push_back(Triangle(vertices[a[0][0]],vertices[a[1][0]],vertices[a[2][0]],
                 texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
                 texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f),
-                texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f)
+                texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
+                mat
             ));
         }
     }

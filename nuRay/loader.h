@@ -9,7 +9,7 @@ class Loader
     std::vector<Triangle> triangles;
 
 public:
-    void loadObj(const std::string &filename, const vec3 &position, float scale);
+    void loadObj(const std::string &filename, const vec3 &position, float scale, const Material* mat = nullptr);
     std::vector<Triangle>& getTriangles();
 };
 

@@ -4,6 +4,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
 
+QMAKE_CXXFLAGS_RELEASE -= -O
+QMAKE_CXXFLAGS_RELEASE -= -O1
+QMAKE_CXXFLAGS_RELEASE -= -O2
+QMAKE_CXXFLAGS_RELEASE -= -O3
+QMAKE_CXXFLAGS_RELEASE += -O3 
+
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -17,8 +23,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     camera.cpp \
+    lightsampler.cpp \
     loader.cpp \
     main.cpp \
+    matlambert.cpp \
+    matlight.cpp \
     renderer.cpp \
     texture.cpp \
     triangle.cpp \
@@ -27,7 +36,11 @@ SOURCES += \
 
 HEADERS += \
     camera.h \
+    lightsampler.h \
     loader.h \
+    material.h \
+    matlambert.h \
+    matlight.h \
     renderer.h \
     texture.h \
     triangle.h \
