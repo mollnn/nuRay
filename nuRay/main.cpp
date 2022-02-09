@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
     auto triangles = loader.getTriangles();
 
     Camera camera;
-    camera.pos = {0.5f, 1.0f, -2.0f};
-    camera.gaze = vec3(-0.3f, 0.0f, 1.0f).normalized();
+    camera.pos = {0.0f, 1.0f, -2.0f};
+    camera.gaze = vec3(0.0f, 0.0f, 1.0f).normalized();
     camera.up = {0.0f, 1.0f, 0.0f};
     camera.img_width = RSIZE;
     camera.img_height = RSIZE;

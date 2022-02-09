@@ -54,7 +54,7 @@ std::tuple<float, float, float, const Triangle *> BVHNode::getIntersection(const
     for (auto triangle : primitives)
     {
         auto [t, b1, b2] = triangle->intersection(origin, dir);
-        if (t < m_t && t > 0 && b1 > 0 && b2 > 0 && b1 + b2 < 1)
+        if (t < m_t && t > 0 && b1 >= 0 && b2 >= 0 && b1 + b2 <= 1)
         {
             m_t = t;
             m_b1 = b1;
