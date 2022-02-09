@@ -59,5 +59,5 @@ vec3 Texture::pixelBi(float x, float y) const
 
 vec3 Texture::pixelUV(float x, float y) const
 {
-    return pixelBi(x * width_, y * height_);
+    return pixelBi(x * width_, (1.0f - y) * height_);
 }
