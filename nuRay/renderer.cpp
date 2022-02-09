@@ -1,6 +1,7 @@
 #include "renderer.h"
 #include "texture.h"
 #include "lightsampler.h"
+#include <QTime>
 
 std::tuple<float, float, float, const Triangle *> Renderer::intersect(const vec3 &origin, const vec3 &dir, const std::vector<Triangle> &triangles)
 {
@@ -68,7 +69,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     }
 
     // Round Robin
-    float prr = 0.8;
+    float prr = 0.9;
     if (rand() * 1.0 / RAND_MAX > prr)
         return result;
 
@@ -84,15 +85,20 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
 
 void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img)
 {
-    int SPP = 1024;
+    int SPP = 16;
     LightSampler light_sampler;
     light_sampler.initialize(triangles);
 
+    QTime time;
+    time.start();
+
     for (int y = 0; y < camera.img_height; y++)
     {
-        if (y % 10 == 0)
-            std::cout << "y=" << y << std::endl;
+        float progress = y * 1.0f / camera.img_height;
+        std::cout << std::fixed << std::setprecision(2) << "Rendering... " << progress * 100 << "%"
+                  << "   " << time.elapsed() * 0.001 << " secs used" << std::endl;
 
+#pragma omp parallel for
         for (int x = 0; x < camera.img_width; x++)
         {
             vec3 ray_dir = camera.generateRay(x, y);
@@ -105,4 +111,6 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             img.setPixel(x, y, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
         }
     }
+    std::cout << std::fixed << std::setprecision(2) << "Rendering... " << 100.0 << "%"
+              << "   " << time.elapsed() * 0.001 << " secs used" << std::endl;
 }
