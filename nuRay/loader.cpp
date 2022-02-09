@@ -14,6 +14,7 @@ void Loader::loadMtl(const std::string &filename)
 {
     float Ns, Ni;
     vec3 Ka, Kd, Ks, Ke, Tf;
+    std::string map_Kd;
     std::string name;
 
     auto commit = [&]()
@@ -25,7 +26,13 @@ void Loader::loadMtl(const std::string &filename)
         }
         else
         {
-            mat = new MatLambert(Kd);
+            MatLambert *lambert = new MatLambert(Kd);
+            if (map_Kd != "")
+            {
+                lambert->usetex_Kd_ = true;
+                lambert->map_Kd_.load(map_Kd);
+            }
+            mat = lambert;
         }
         material_dict[filename + ":" + name] = mat;
 
@@ -36,6 +43,7 @@ void Loader::loadMtl(const std::string &filename)
         Ks = 0.0f;
         Ke = 0.0f;
         Tf = 0.0f;
+        map_Kd = "";
 
         return;
     };
@@ -79,6 +87,10 @@ void Loader::loadMtl(const std::string &filename)
         else if (buf[0] == "Kd")
         {
             Kd = vec3(atof(buf[1].c_str()), atof(buf[2].c_str()), atof(buf[3].c_str()));
+        }
+        else if (buf[0] == "map_Kd")
+        {
+            map_Kd = buf[1];
         }
         else if (buf[0] == "Ks")
         {

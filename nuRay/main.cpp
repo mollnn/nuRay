@@ -19,7 +19,9 @@ int main(int argc, char *argv[])
     Widget w;
     QGridLayout gl;
     QLabel l(&w);
-    QImage img(QSize(64, 64), QImage::Format_RGB888);
+
+    const int RSIZE = 256;
+    QImage img(QSize(RSIZE, RSIZE), QImage::Format_RGB888);
 
     // Render
 
@@ -47,12 +49,12 @@ int main(int argc, char *argv[])
     camera.pos = {0.0f, 0.5f, 3.0f};
     camera.gaze = {0.0f, 0.0f, -1.0f};
     camera.up = {0.0f, 1.0f, 0.0f};
-    camera.img_width = 64;
-    camera.img_height = 64;
-    camera.fov_h = 90.0f * 3.14159f / 180.0f;
+    camera.img_width = RSIZE;
+    camera.img_height = RSIZE;
+    camera.fov_h = 72.0f * 3.14159f / 180.0f;
     camera.aspect = 1.0;
 
-    l.setFixedSize(QSize(512, 512));
+    l.setFixedSize(QSize(768, 768));
     gl.addWidget(&l, 0, 0, 1, 1);
     w.setLayout(&gl);
     w.show();
@@ -63,7 +65,7 @@ int main(int argc, char *argv[])
     qDebug() << "Rendering...";
 
     renderer.render(camera, triangles, img);
-    l.setPixmap(QPixmap::fromImage(img.scaled(QSize(512, 512))));
+    l.setPixmap(QPixmap::fromImage(img.scaled(QSize(768, 768))));
 
     // Clear
 

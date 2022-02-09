@@ -1,6 +1,6 @@
 #include "matlambert.h"
 
-MatLambert::MatLambert(const vec3& Kd) : Kd_(Kd) {}
+MatLambert::MatLambert(const vec3 &Kd) : Kd_(Kd), usetex_Kd_(false) {}
 
 vec3 MatLambert::sampleBxdf(const vec3 &wo, const vec3 &normal) const
 {
@@ -17,9 +17,16 @@ vec3 MatLambert::sampleBxdf(const vec3 &wo, const vec3 &normal) const
     return wi;
 }
 
-vec3 MatLambert::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
+vec3 MatLambert::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
 {
-    return Kd_;
+    if (usetex_Kd_)
+    {
+        return map_Kd_.pixelUV(uv[0], uv[1]);
+    }
+    else
+    {
+        return Kd_;
+    }
 }
 
 float MatLambert::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
@@ -37,7 +44,7 @@ bool MatLambert::requireLightSampling(const vec3 &wo, const vec3 &normal) const
     return true;
 }
 
-vec3 MatLambert::emission(const vec3 &wo, const vec3& normal) const
+vec3 MatLambert::emission(const vec3 &wo, const vec3 &normal) const
 {
     return vec3(0.0f, 0.0f, 0.0f);
 }

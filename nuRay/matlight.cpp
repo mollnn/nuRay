@@ -7,7 +7,7 @@ vec3 MatLight::sampleBxdf(const vec3 &wo, const vec3 &normal) const
     return vec3(0.0f, 0.0f, 0.0f);
 }
 
-vec3 MatLight::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
+vec3 MatLight::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
 {
     return vec3(0.0f, 0.0f, 0.0f);
 }
