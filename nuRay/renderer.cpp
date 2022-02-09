@@ -64,8 +64,8 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
         vec3 light_int = light_obj->mat->emission(wl, light_normal);
         float light_pdf = light_sampler.p();
         vec3 brdf_ = hit_obj->mat->bxdf(wo, normal, wl, light_uv);
-        auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 1e-5, wl, triangles, bvh);
-        if (light_ray_t + 2e-5 > light_vec.norm())
+        auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 4e-4, wl, triangles, bvh);
+        if (light_ray_t + 8e-4 > light_vec.norm())
         {
             vec3 Ll = light_int / light_vec.norm2() * std::max(0.0f, light_normal.dot(-wl)) / light_pdf;
             result += Ll * brdf_ * std::max(0.0f, normal.dot((light_pos - hit_pos).normalized()));
@@ -81,7 +81,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     vec3 wi = hit_obj->mat->sampleBxdf(wo, normal);
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-    vec3 Li = trace(hit_pos + wi * 1e-5, wi, triangles, light_sampler, bvh, !is_light_sampled);
+    vec3 Li = trace(hit_pos + wi * 4e-4, wi, triangles, light_sampler, bvh, !is_light_sampled);
     result += Li * brdf / pdf / prr;
 
     return result;
@@ -89,7 +89,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
 
 void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img)
 {
-    int SPP = 512;
+    int SPP = 32;
     LightSampler light_sampler;
     light_sampler.initialize(triangles);
 
