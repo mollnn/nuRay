@@ -89,7 +89,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
 
 void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img)
 {
-    int SPP = 32;
+    int SPP = 512;
     LightSampler light_sampler;
     light_sampler.initialize(triangles);
 
@@ -117,9 +117,12 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             vec3 result;
             for (int i = 0; i < SPP; i++)
             {
-                result += trace(camera.pos, ray_dir, triangles, light_sampler, bvh) * 255.0f;
+                result += trace(camera.pos, ray_dir, triangles, light_sampler, bvh);
             }
             result /= SPP;
+            // Gamma correction
+            result = result.pow(1.0 / 2.2);
+            result *= 255.0f;
             img.setPixel(x, y, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
         }
     }

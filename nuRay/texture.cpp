@@ -14,9 +14,10 @@ void Texture::load(const std::string &filename)
         for (int j = 0; j < width_; j++)
         {
             QColor color = image_src.pixelColor(j, i);
-            img_[(i * width_ + j)][0] = color.redF();
-            img_[(i * width_ + j)][1] = color.greenF();
-            img_[(i * width_ + j)][2] = color.blueF();
+            // * Gamma correction
+            img_[(i * width_ + j)][0] = std::pow(color.redF(), 2.2f);
+            img_[(i * width_ + j)][1] = std::pow(color.greenF(), 2.2f);
+            img_[(i * width_ + j)][2] = std::pow(color.blueF(), 2.2f);
         }
     }
 }

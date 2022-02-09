@@ -30,6 +30,7 @@ struct vec3
     float norm() const;
     vec3 normalized() const;
     float avg() const;
+    vec3 pow(float q) const;
 
     float &operator[](int i);
     float operator[](int i) const;

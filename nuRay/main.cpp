@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     // Render
 
     std::vector<Material *> user_materials;
-    user_materials.push_back(new MatLight(vec3(1.0, 1.0, 1.0) * 200));
+    user_materials.push_back(new MatLight(vec3(1.0, 1.0, 1.0) * 1000));
     user_materials.push_back(new MatLambert(vec3(0.2, 0.1, 0.1)));
     user_materials.push_back(new MatLambert(vec3(0.7, 0.7, 0.7)));
 
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     // loader.loadObj("test/test.obj", {0.0f, 4.9f, 0.0f}, 2.0f);
     // loader.loadObj("cube.obj", {0.0f, 0.5f, 0.0f}, 1.0f);
 
-    loader.loadObj("test/test.obj", {0.0f, 2000.0f, 200.0f}, 100.0f, user_materials[0]);
+    loader.loadObj("test/test.obj", {0.0f, 1000.0f, 0.0f}, 20.0f, user_materials[0]);
     loader.loadObj("sponza/sponza.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
 
     auto triangles = loader.getTriangles();

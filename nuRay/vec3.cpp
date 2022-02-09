@@ -105,3 +105,8 @@ vec3 max(const vec3 &a, const vec3 &b)
 {
     return vec3(std::max(a[0], b[0]), std::max(a[1], b[1]), std::max(a[2], b[2]));
 }
+
+vec3 vec3::pow(float q) const
+{
+    return vec3(std::pow(v[0], q), std::pow(v[1], q), std::pow(v[2], q));
+}
