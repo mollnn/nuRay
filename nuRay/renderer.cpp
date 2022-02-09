@@ -1,29 +1,32 @@
 #include "renderer.h"
 #include "texture.h"
 #include "lightsampler.h"
+#include "bvh.h"
 #include <QTime>
 
-std::tuple<float, float, float, const Triangle *> Renderer::intersect(const vec3 &origin, const vec3 &dir, const std::vector<Triangle> &triangles)
+std::tuple<float, float, float, const Triangle *> Renderer::intersect(const vec3 &origin, const vec3 &dir, const std::vector<Triangle> &triangles, BVH &bvh)
 {
-    float m_t = 1e18, m_b1 = 0, m_b2 = 0;
-    const Triangle *hit_obj = nullptr;
-    for (auto &triangle : triangles)
-    {
-        auto [t, b1, b2] = triangle.intersection(origin, dir);
-        if (t < m_t && t > 0 && b1 > 0 && b2 > 0 && b1 + b2 < 1)
-        {
-            m_t = t;
-            m_b1 = b1;
-            m_b2 = b2;
-            hit_obj = &triangle;
-        }
-    }
-    return {m_t, m_b1, m_b2, hit_obj};
+    // float m_t = 1e18, m_b1 = 0, m_b2 = 0;
+    // const Triangle *hit_obj = nullptr;
+    // for (auto &triangle : triangles)
+    // {
+    //     auto [t, b1, b2] = triangle.intersection(origin, dir);
+    //     if (t < m_t && t > 0 && b1 > 0 && b2 > 0 && b1 + b2 < 1)
+    //     {
+    //         m_t = t;
+    //         m_b1 = b1;
+    //         m_b2 = b2;
+    //         hit_obj = &triangle;
+    //     }
+    // }
+    // return {m_t, m_b1, m_b2, hit_obj};
+
+    return bvh.intersection(origin, dir);
 }
 
-vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, bool light_source_visible)
+vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible)
 {
-    auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles);
+    auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
         return vec3(0.0f, 0.0f, 0.0f);
 
@@ -62,7 +65,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     vec3 light_int = light_obj->mat->emission(wl, light_normal);
     float light_pdf = light_sampler.p();
     vec3 brdf_ = hit_obj->mat->bxdf(wo, normal, wl, light_uv);
-    auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 1e-5, wl, triangles);
+    auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 1e-5, wl, triangles, bvh);
     if (light_ray_t + 2e-5 > light_vec.norm())
     {
         vec3 Ll = light_int / light_vec.norm2() * std::max(0.0f, light_normal.dot(-wl)) / light_pdf;
@@ -70,7 +73,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     }
 
     // Round Robin
-    float prr = 0.9;
+    float prr = 0.8;
     if (rand() * 1.0 / RAND_MAX > prr)
         return result;
 
@@ -78,7 +81,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     vec3 wi = hit_obj->mat->sampleBxdf(wo, normal);
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-    vec3 Li = trace(hit_pos + wi * 1e-5, wi, triangles, light_sampler, !is_light_sampled);
+    vec3 Li = trace(hit_pos + wi * 1e-5, wi, triangles, light_sampler, bvh, !is_light_sampled);
     result += Li * brdf / pdf / prr;
 
     return result;
@@ -89,6 +92,9 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
     int SPP = 8;
     LightSampler light_sampler;
     light_sampler.initialize(triangles);
+
+    BVH bvh;
+    bvh.build(triangles);
 
     QTime time;
     time.start();
@@ -111,7 +117,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             vec3 result;
             for (int i = 0; i < SPP; i++)
             {
-                result += trace(camera.pos, ray_dir, triangles, light_sampler) * 255.0f;
+                result += trace(camera.pos, ray_dir, triangles, light_sampler, bvh) * 255.0f;
             }
             result /= SPP;
             img.setPixel(x, y, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));

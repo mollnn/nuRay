@@ -21,11 +21,11 @@ vec3 MatLambert::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const 
 {
     if (usetex_Kd_)
     {
-        return map_Kd_.pixelUV(uv[0], uv[1]);
+        return map_Kd_.pixelUV(uv[0], uv[1]) / 3.14159;
     }
     else
     {
-        return Kd_;
+        return Kd_ / 3.14159;
     }
 }
 

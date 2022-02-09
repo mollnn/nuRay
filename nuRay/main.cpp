@@ -28,12 +28,12 @@ int main(int argc, char *argv[])
     std::vector<Material *> user_materials;
     user_materials.push_back(new MatLight(vec3(1.0, 1.0, 1.0) * 10));
     user_materials.push_back(new MatLambert(vec3(0.2, 0.1, 0.1)));
-    user_materials.push_back(new MatLambert(vec3(0.2, 0.2, 0.2)));
+    user_materials.push_back(new MatLambert(vec3(0.7, 0.7, 0.7)));
 
     qDebug() << "Loading...";
 
     Loader loader;
-    loader.loadObj("rock.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
+    loader.loadObj("spot.obj", {0.0f, 1.0f, 0.0f}, 1.0f);
     loader.loadObj("cube.obj", {0.0f, -5.0f, 0.0f}, 5.0f, user_materials[2]);
     loader.loadObj("cube.obj", {0.0f, 10.0f, 0.0f}, 5.0f, user_materials[2]);
     loader.loadObj("cube.obj", {-10.0f, 0.0f, 0.0f}, 5.0f, user_materials[2]);
@@ -46,15 +46,15 @@ int main(int argc, char *argv[])
     auto triangles = loader.getTriangles();
 
     Camera camera;
-    camera.pos = {0.0f, 0.5f, 3.0f};
+    camera.pos = {0.0f, 0.5f, 2.0f};
     camera.gaze = {0.0f, 0.0f, -1.0f};
     camera.up = {0.0f, 1.0f, 0.0f};
     camera.img_width = RSIZE;
     camera.img_height = RSIZE;
-    camera.fov_h = 72.0f * 3.14159f / 180.0f;
+    camera.fov_h = 60.0f * 3.14159f / 180.0f;
     camera.aspect = 1.0;
 
-    l.setFixedSize(QSize(768, 768));
+    l.setFixedSize(QSize(1024, 1024));
     gl.addWidget(&l, 0, 0, 1, 1);
     w.setLayout(&gl);
     w.show();
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     qDebug() << "Rendering...";
 
     renderer.render(camera, triangles, img);
-    l.setPixmap(QPixmap::fromImage(img.scaled(QSize(768, 768))));
+    l.setPixmap(QPixmap::fromImage(img.scaled(QSize(1024, 1024))));
 
     // Clear
 

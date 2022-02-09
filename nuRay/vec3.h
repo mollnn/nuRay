@@ -36,5 +36,7 @@ struct vec3
 };
 vec3 operator*(float lhs, const vec3 &rhs);
 std::ostream &operator<<(std::ostream& lhs, const vec3 &rhs);
+vec3 min(const vec3& a, const vec3& b);
+vec3 max(const vec3& a, const vec3& b);
 
 #endif

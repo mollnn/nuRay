@@ -95,3 +95,13 @@ std::ostream &operator<<(std::ostream &lhs, const vec3 &rhs)
     lhs << "(" << rhs[0] << "," << rhs[1] << "," << rhs[2] << ")";
     return lhs;
 }
+
+vec3 min(const vec3 &a, const vec3 &b)
+{
+    return vec3(std::min(a[0], b[0]), std::min(a[1], b[1]), std::min(a[2], b[2]));
+}
+
+vec3 max(const vec3 &a, const vec3 &b)
+{
+    return vec3(std::max(a[0], b[0]), std::max(a[1], b[1]), std::max(a[2], b[2]));
+}
