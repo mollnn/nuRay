@@ -10,6 +10,14 @@ Loader::~Loader()
     }
 }
 
+std::string path2dir(const std::string &path)
+{
+    std::size_t pos = path.find_last_of("/\\");
+    if (pos == path.npos)
+        return ".";
+    return path.substr(0, pos);
+}
+
 void Loader::loadMtl(const std::string &filename)
 {
     float Ns, Ni;
@@ -90,7 +98,7 @@ void Loader::loadMtl(const std::string &filename)
         }
         else if (buf[0] == "map_Kd")
         {
-            map_Kd = buf[1];
+            map_Kd = path2dir(filename) + "/" + buf[1];
         }
         else if (buf[0] == "Ks")
         {
@@ -129,7 +137,7 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
             continue;
         if (buf[0] == "mtllib")
         {
-            mtllib_filename = buf[1];
+            mtllib_filename = path2dir(filename) + "/" + buf[1];
             if (forcing_mat == nullptr)
             {
                 loadMtl(mtllib_filename);

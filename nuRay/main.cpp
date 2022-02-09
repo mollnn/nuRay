@@ -33,15 +33,17 @@ int main(int argc, char *argv[])
     qDebug() << "Loading...";
 
     Loader loader;
-    loader.loadObj("spot.obj", {0.0f, 1.0f, 0.0f}, 1.0f);
-    loader.loadObj("cube.obj", {0.0f, -5.0f, 0.0f}, 5.0f, user_materials[2]);
-    loader.loadObj("cube.obj", {0.0f, 10.0f, 0.0f}, 5.0f, user_materials[2]);
-    loader.loadObj("cube.obj", {-10.0f, 0.0f, 0.0f}, 5.0f, user_materials[2]);
-    loader.loadObj("cube.obj", {10.0f, 0.0f, 0.0f}, 5.0f, user_materials[2]);
-    loader.loadObj("cube.obj", {0.0f, 0.0f, -10.0f}, 5.0f, user_materials[2]);
-    loader.loadObj("cube.obj", {0.0f, 0.0f, 10.0f}, 5.0f, user_materials[2]);
-    loader.loadObj("test.obj", {0.0f, 4.9f, 0.0f}, 2.0f);
+    // loader.loadObj("spot/spot.obj", {0.0f, 1.0f, 0.0f}, 1.0f);
+    // loader.loadObj("cube/cube.obj", {0.0f, -5.0f, 0.0f}, 5.0f, user_materials[2]);
+    // loader.loadObj("cube/cube.obj", {0.0f, 10.0f, 0.0f}, 5.0f, user_materials[2]);
+    // loader.loadObj("cube/cube.obj", {-10.0f, 0.0f, 0.0f}, 5.0f, user_materials[2]);
+    // loader.loadObj("cube/cube.obj", {10.0f, 0.0f, 0.0f}, 5.0f, user_materials[2]);
+    // loader.loadObj("cube/cube.obj", {0.0f, 0.0f, -10.0f}, 5.0f, user_materials[2]);
+    // loader.loadObj("cube/cube.obj", {0.0f, 0.0f, 10.0f}, 5.0f, user_materials[2]);
+    // loader.loadObj("test/test.obj", {0.0f, 4.9f, 0.0f}, 2.0f);
     // loader.loadObj("cube.obj", {0.0f, 0.5f, 0.0f}, 1.0f);
+
+    loader.loadObj("sponza/sponza.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
 
     auto triangles = loader.getTriangles();
 
