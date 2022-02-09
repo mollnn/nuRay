@@ -1,6 +1,6 @@
 #include "lightsampler.h"
 
-void LightSampler::initialize(const std::vector<Triangle>& scene)
+void LightSampler::initialize(const std::vector<Triangle> &scene)
 {
     lighting_triangles.clear();
     cdf.clear();
@@ -31,11 +31,18 @@ void LightSampler::initialize(const std::vector<Triangle>& scene)
         cdf.push_back(sum_prob);
     }
 
-
+    if (lighting_triangles.size() == 0)
+    {
+        std::cerr << "LightSampler::initialize(...) called but no light" << std::endl;
+    }
 }
 
-const Triangle* LightSampler::sampleLight()
+const Triangle *LightSampler::sampleLight()
 {
+    if (lighting_triangles.size() == 0)
+    {
+        throw("LightSampler::sampleLight() called but no light");
+    }
     float r = rand() * 1.0f / RAND_MAX;
     int id = lower_bound(cdf.begin(), cdf.end(), r) - cdf.begin();
     return lighting_triangles[id];

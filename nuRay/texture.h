@@ -19,6 +19,7 @@ public:
     vec3 pixel(int x,int y) const;
     vec3 pixelBi(float x,float y) const;
     vec3 pixelUV(float x,float y) const;
+    int width() const;
 
 };
 

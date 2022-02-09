@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     QGridLayout gl;
     QLabel l(&w);
 
-    const int RSIZE = 256;
+    const int RSIZE = 64;
     QImage img(QSize(RSIZE, RSIZE), QImage::Format_RGB888);
 
     // Render
@@ -43,17 +43,18 @@ int main(int argc, char *argv[])
     // loader.loadObj("test/test.obj", {0.0f, 4.9f, 0.0f}, 2.0f);
     // loader.loadObj("cube.obj", {0.0f, 0.5f, 0.0f}, 1.0f);
 
+    loader.loadObj("test/test.obj", {0.0f, 10.0f, 0.0f}, 5.0f);
     loader.loadObj("sponza/sponza.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
 
     auto triangles = loader.getTriangles();
 
     Camera camera;
-    camera.pos = {0.0f, 1.0f, -2.0f};
+    camera.pos = {0.0f, 1.0f, 0.0f};
     camera.gaze = vec3(0.0f, 0.0f, 1.0f).normalized();
     camera.up = {0.0f, 1.0f, 0.0f};
     camera.img_width = RSIZE;
     camera.img_height = RSIZE;
-    camera.fov_h = 60.0f * 3.14159f / 180.0f;
+    camera.fov_h = 90.0f * 3.14159f / 180.0f;
     camera.aspect = 1.0;
 
     l.setFixedSize(QSize(1024, 1024));
