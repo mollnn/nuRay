@@ -44,7 +44,7 @@ std::tuple<vec3, float, float> Triangle::sample() const
     return {(1 - r1 - r2) * p[0] + r1 * p[1] + r2 * p[2], r1, r2};
 }
 
-float Triangle::area() const
+float Triangle::area() const    
 {
     return (p[1] - p[0]).cross(p[2] - p[0]).norm();
 }
@@ -53,4 +53,14 @@ std::ostream &operator<<(std::ostream &lhs, const Triangle &rhs)
 {
     lhs << std::fixed << std::setprecision(2) << "{" << rhs.p[0] << ", " << rhs.p[1] << ", " << rhs.p[2] << " | " << rhs.n[0] << ", " << rhs.n[1] << ", " << rhs.n[2] << "}";
     return lhs;
+}
+
+vec3 Triangle::pMin() const
+{
+    return min(p[0], min(p[1], p[2]));
+}
+
+vec3 Triangle::pMax() const
+{
+    return max(p[0], max(p[1], p[2]));
 }

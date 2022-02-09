@@ -1,11 +1,59 @@
 #include "bvh.h"
 #include <QDebug>
+#include <bits/stdc++.h>
 
 std::pair<std::vector<const Triangle *>, std::vector<const Triangle *>> BVH::_divide(const std::vector<const Triangle *> &primitives)
 {
-    int mid = primitives.size() / 2;
-    std::vector<const Triangle *> part_l(primitives.begin(), primitives.begin() + mid);
-    std::vector<const Triangle *> part_r(primitives.begin() + mid, primitives.end());
+    // int mid = primitives.size() / 2;
+    // std::vector<const Triangle *> part_l(primitives.begin(), primitives.begin() + mid);
+    // std::vector<const Triangle *> part_r(primitives.begin() + mid, primitives.end());
+    // return {part_l, part_r};
+
+    int ans_axis = 0;
+    int ans_mid = 0;
+    float ans_cost = 1e38;
+
+    auto prims = primitives;
+
+    auto getSurfaceArea = [](const vec3 &a, const vec3 &b)
+    {
+        vec3 d = b - a;
+        return (d[0] * d[1] + d[1] * d[2] + d[2] * d[0]) * 2;
+    };
+
+    for (int axis = 0; axis < 3; axis++)
+    {
+        std::sort(prims.begin(), prims.end(), [&](const Triangle *a, const Triangle *b)
+                  { return a->pMax()[axis] < b->pMax()[axis]; });
+
+        std::vector<float> suffix_surface_area(prims.size());
+        vec3 tmp_p_min = 1e18, tmp_p_max = -1e18;
+        for (int i = prims.size() - 1; i >= 0; i--)
+        {
+            tmp_p_min = min(tmp_p_min, prims[i]->pMin());
+            tmp_p_max = max(tmp_p_max, prims[i]->pMax());
+            suffix_surface_area[i] = getSurfaceArea(tmp_p_min, tmp_p_max);
+        }
+
+        tmp_p_min = 1e18, tmp_p_max = -1e18;
+        for (int i = 0; i < prims.size() - 1; i++)
+        {
+            tmp_p_min = min(tmp_p_min, prims[i]->pMin());
+            tmp_p_max = max(tmp_p_max, prims[i]->pMax());
+            float prefix_surface_area = getSurfaceArea(tmp_p_min, tmp_p_max);
+            float cost = prefix_surface_area * (i + 1) + suffix_surface_area[i + 1] * (prims.size() - i);
+            if (cost < ans_cost)
+            {
+                ans_cost = cost;
+                ans_mid = i + 1;
+                ans_axis = axis;
+            }
+        }
+    }
+    std::sort(prims.begin(), prims.end(), [&](const Triangle *a, const Triangle *b)
+              { return a->pMax()[ans_axis] < b->pMax()[ans_axis]; });
+    std::vector<const Triangle *> part_l(prims.begin(), prims.begin() + ans_mid);
+    std::vector<const Triangle *> part_r(prims.begin() + ans_mid, prims.end());
     return {part_l, part_r};
 }
 

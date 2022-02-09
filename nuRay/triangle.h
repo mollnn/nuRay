@@ -22,6 +22,9 @@ struct Triangle
 
     std::tuple<vec3, float, float> sample() const;
     float area() const;
+
+    vec3 pMin() const;
+    vec3 pMax() const;
 };
 
 std::ostream &operator<<(std::ostream& lhs, const Triangle &rhs);
