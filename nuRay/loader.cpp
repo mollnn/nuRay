@@ -172,7 +172,6 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
         }
         else if (buf[0] == "f")
         {
-            // TODO: read normals from obj
             std::vector<std::vector<int>> a(buf.size() - 1);
             for (int i = 0; i < buf.size() - 1; i++)
             {
@@ -202,12 +201,25 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
 
             // std::cout << (texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f)) << (texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f)) << (texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f)) << std::endl;
 
+        for (int i = 0; i < 3; i++)
+            {
+                if (a[i][0] < 0)
+                    a[i][0] += vertices.size();
+                if (a[i][1] < 0)
+                    a[i][1] += texcoords.size();
+                if (a[i][2] < 0)
+                    a[i][2] += normals.size();
+            }
+
             if (buf.size() - 1 == 3)
             {
                 triangles.push_back(Triangle(vertices[a[0][0]], vertices[a[1][0]], vertices[a[2][0]],
                                              texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                             normals.size() > a[0][2] ? normals[a[0][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                             normals.size() > a[1][2] ? normals[a[1][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                             normals.size() > a[2][2] ? normals[a[2][2]] : vec3(0.0f, 0.0f, 0.0f),
                                              mtl));
             }
             else if (buf.size() - 1 == 4)
@@ -216,11 +228,17 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
                                              texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                             normals.size() > a[0][2] ? normals[a[0][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                             normals.size() > a[1][2] ? normals[a[1][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                             normals.size() > a[2][2] ? normals[a[2][2]] : vec3(0.0f, 0.0f, 0.0f),
                                              mtl));
                 triangles.push_back(Triangle(vertices[a[2][0]], vertices[a[3][0]], vertices[a[0][0]],
                                              texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[3][1] ? texcoords[a[3][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                             normals.size() > a[2][2] ? normals[a[2][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                             normals.size() > a[3][2] ? normals[a[3][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                             normals.size() > a[0][2] ? normals[a[0][2]] : vec3(0.0f, 0.0f, 0.0f),
                                              mtl));
             }
             else

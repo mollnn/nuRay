@@ -2,9 +2,19 @@
 
 Triangle::Triangle() {}
 
-Triangle::Triangle(const vec3 &p0, const vec3 &p1, const vec3 &p2, const vec3 &t0, const vec3 &t1, const vec3 &t2, const Material *mat) : p{p0, p1, p2}, t{t0, t1, t2}, mat(mat)
+Triangle::Triangle(const vec3 &p0, const vec3 &p1, const vec3 &p2,
+                   const vec3 &t0,
+                   const vec3 &t1,
+                   const vec3 &t2,
+                   const vec3 &n0,
+                   const vec3 &n1,
+                   const vec3 &n2,
+                   const Material *mat) : p{p0, p1, p2}, t{t0, t1, t2}, n{n0, n1, n2}, mat(mat)
 {
-    this->evalNormal();
+    if (n[0].norm2() < 1e-4)
+    {
+        this->evalNormal();
+    }
 }
 
 void Triangle::evalNormal()
@@ -44,7 +54,7 @@ std::tuple<vec3, float, float> Triangle::sample() const
     return {(1 - r1 - r2) * p[0] + r1 * p[1] + r2 * p[2], r1, r2};
 }
 
-float Triangle::area() const    
+float Triangle::area() const
 {
     return (p[1] - p[0]).cross(p[2] - p[0]).norm();
 }

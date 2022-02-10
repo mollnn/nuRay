@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     QGridLayout gl;
     QLabel l(&w);
 
-    const int RSIZE = 128;
+    const int RSIZE = 512;
     QImage img(QSize(RSIZE, RSIZE), QImage::Format_RGB888);
 
     // Render
@@ -46,20 +46,21 @@ int main(int argc, char *argv[])
     // loader.loadObj("test/test.obj", {0.0f, 4.9f, 0.0f}, 2.0f);
     // loader.loadObj("cube.obj", {0.0f, 0.5f, 0.0f}, 1.0f);
 
-    loader.loadObj("test/test2.obj", {0.0f, 1500.0f, 0.0f}, 100.0f, user_materials[0]);
-    loader.loadObj("sponza/sponza.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
+    loader.loadObj("test/test2.obj", {0.0f, 1000.0f, 0.0f}, 50.0f, user_materials[0]);
+    loader.loadObj("mitsuba/mitsuba.obj", {0.0f, 0.0f, 0.0f}, 100.0f);
 
     auto triangles = loader.getTriangles();
 
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
 
     Camera camera;
-    camera.pos = {-900.0f, 400.0f, 0.0f};
-    camera.gaze = vec3(1.0f, 0.0f, 0.0f).normalized();
-    camera.up = {0.0f, 1.0f, 0.0f};
+    camera.pos = {100.0f, 300.0f, 500.0f};
+    camera.gaze = vec3(-0.2f, -0.5f, -1.0f).normalized();
+    vec3 camera_hand = vec3(1.0f, 0.0f, 0.1f).normalized();
+    camera.up = camera_hand.cross(camera.gaze).normalized();
     camera.img_width = RSIZE;
     camera.img_height = RSIZE;
-    camera.fov_h = 72.0f * 3.14159f / 180.0f;
+    camera.fov_h = 20.0f * 3.14159f / 180.0f;
     camera.aspect = 1.0;
 
     l.setFixedSize(QSize(1280, 1280));
