@@ -64,8 +64,8 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
         vec3 wl = light_vec.normalized();
         vec3 light_int = light_obj->mat->emission(wl, light_normal);
         float light_pdf = light_sampler.p();
-        auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 4e-4, wl, triangles, bvh);
-        if (light_ray_t + 8e-4 > light_vec.norm())
+        auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 1e-3, wl, triangles, bvh);
+        if (light_ray_t + 2e-3 > light_vec.norm())
         {
             vec3 brdf_ = hit_obj->mat->bxdf(wo, normal, wl, texcoords);
             vec3 Ll = light_int / light_vec.norm2() * std::max(0.0f, light_normal.dot(-wl)) / light_pdf;
@@ -82,7 +82,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     vec3 wi = hit_obj->mat->sampleBxdf(wo, normal);
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-    vec3 Li = trace(hit_pos + wi * 4e-4, wi, triangles, light_sampler, bvh, !is_light_sampled);
+    vec3 Li = trace(hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled);
     result += Li * brdf / pdf / prr;
 
     return result;
@@ -90,10 +90,12 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
 
 void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img)
 {
-    int SPP = 8;
+    int SPP = 16;
+    qDebug() << "Builing Light Sampler...";
     LightSampler light_sampler;
     light_sampler.initialize(triangles);
 
+    qDebug() << "Builing BVH...";
     BVH bvh;
     bvh.build(triangles);
 
@@ -101,6 +103,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
     time.start();
     auto time_last = time.elapsed();
 
+    std::cout << "Rendering... " << std::endl;
     for (int y = 0; y < camera.img_height; y++)
     {
         float progress = y * 1.0f / camera.img_height;

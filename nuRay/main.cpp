@@ -12,6 +12,7 @@
 #include "material.h"
 #include "matlambert.h"
 #include "matlight.h"
+#include <QTime>
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +31,9 @@ int main(int argc, char *argv[])
     user_materials.push_back(new MatLambert(vec3(0.2, 0.1, 0.1)));
     user_materials.push_back(new MatLambert(vec3(0.7, 0.7, 0.7)));
 
-    qDebug() << "Loading...";
+    QTime timer;
+    timer.start();
+    std::cout << "Loading scene..." << std::endl;
 
     Loader loader;
     // loader.loadObj("spot/spot.obj", {0.0f, 1.0f, 0.0f}, 1.0f);
@@ -43,18 +46,20 @@ int main(int argc, char *argv[])
     // loader.loadObj("test/test.obj", {0.0f, 4.9f, 0.0f}, 2.0f);
     // loader.loadObj("cube.obj", {0.0f, 0.5f, 0.0f}, 1.0f);
 
-    loader.loadObj("test/test2.obj", {0.0f, 1000.0f, 0.0f}, 100.0f, user_materials[0]);
+    loader.loadObj("test/test2.obj", {0.0f, 1500.0f, 0.0f}, 100.0f, user_materials[0]);
     loader.loadObj("sponza/sponza.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
 
     auto triangles = loader.getTriangles();
 
+    std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
+
     Camera camera;
-    camera.pos = {-900.0f, 300.0f, 0.0f};
+    camera.pos = {-900.0f, 400.0f, 0.0f};
     camera.gaze = vec3(1.0f, 0.0f, 0.0f).normalized();
     camera.up = {0.0f, 1.0f, 0.0f};
     camera.img_width = RSIZE;
     camera.img_height = RSIZE;
-    camera.fov_h = 90.0f * 3.14159f / 180.0f;
+    camera.fov_h = 72.0f * 3.14159f / 180.0f;
     camera.aspect = 1.0;
 
     l.setFixedSize(QSize(1280, 1280));
@@ -63,9 +68,6 @@ int main(int argc, char *argv[])
     w.show();
 
     Renderer renderer;
-
-
-    qDebug() << "Rendering...";
 
     renderer.render(camera, triangles, img);
     l.setPixmap(QPixmap::fromImage(img.scaled(QSize(1280, 1280))));

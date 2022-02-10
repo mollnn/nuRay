@@ -4,11 +4,11 @@
 
 void Texture::load(const std::string &filename)
 {
-    auto image_src = QImage(QString::fromStdString(filename).replace("\\", "/"));
-    qDebug() << (QString::fromStdString(filename).replace("\\", "/"));
+    QImage image_src = QImage(QString::fromStdString(filename).replace("\\", "/")).convertToFormat(QImage::Format_RGBA8888);
     width_ = image_src.width();
     height_ = image_src.height();
     img_ = new vec3[width_ * height_];
+#pragma omp parallel for
     for (int i = 0; i < height_; i++)
     {
         for (int j = 0; j < width_; j++)
@@ -19,6 +19,14 @@ void Texture::load(const std::string &filename)
             img_[(i * width_ + j)][1] = std::pow(color.greenF(), 2.2f);
             img_[(i * width_ + j)][2] = std::pow(color.blueF(), 2.2f);
         }
+        // // ! Fast but maybe unsafe
+        // uchar *ptr = image_src.scanLine(i);
+        // for (int j = 0; j < width_; j++)
+        // {
+        //     img_[(i * width_ + j)][0] = std::pow(ptr[j * 4 + 0] / 255.0f, 2.2f);
+        //     img_[(i * width_ + j)][1] = std::pow(ptr[j * 4 + 1] / 255.0f, 2.2f);
+        //     img_[(i * width_ + j)][2] = std::pow(ptr[j * 4 + 2] / 255.0f, 2.2f);
+        // }
     }
 }
 
