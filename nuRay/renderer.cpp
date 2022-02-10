@@ -3,6 +3,7 @@
 #include "lightsampler.h"
 #include "bvh.h"
 #include <QTime>
+#include <QDebug>
 
 std::tuple<float, float, float, const Triangle *> Renderer::intersect(const vec3 &origin, const vec3 &dir, const std::vector<Triangle> &triangles, BVH &bvh)
 {
@@ -63,10 +64,10 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
         vec3 wl = light_vec.normalized();
         vec3 light_int = light_obj->mat->emission(wl, light_normal);
         float light_pdf = light_sampler.p();
-        vec3 brdf_ = hit_obj->mat->bxdf(wo, normal, wl, light_uv);
         auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 4e-4, wl, triangles, bvh);
         if (light_ray_t + 8e-4 > light_vec.norm())
         {
+            vec3 brdf_ = hit_obj->mat->bxdf(wo, normal, wl, texcoords);
             vec3 Ll = light_int / light_vec.norm2() * std::max(0.0f, light_normal.dot(-wl)) / light_pdf;
             result += Ll * brdf_ * std::max(0.0f, normal.dot((light_pos - hit_pos).normalized()));
         }
@@ -89,7 +90,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
 
 void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img)
 {
-    int SPP = 32;
+    int SPP = 8;
     LightSampler light_sampler;
     light_sampler.initialize(triangles);
 

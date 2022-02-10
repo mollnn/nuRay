@@ -20,13 +20,13 @@ int main(int argc, char *argv[])
     QGridLayout gl;
     QLabel l(&w);
 
-    const int RSIZE = 64;
+    const int RSIZE = 128;
     QImage img(QSize(RSIZE, RSIZE), QImage::Format_RGB888);
 
     // Render
 
     std::vector<Material *> user_materials;
-    user_materials.push_back(new MatLight(vec3(1.0, 1.0, 1.0) * 1000));
+    user_materials.push_back(new MatLight(vec3(1.0, 1.0, 1.0) * 10));
     user_materials.push_back(new MatLambert(vec3(0.2, 0.1, 0.1)));
     user_materials.push_back(new MatLambert(vec3(0.7, 0.7, 0.7)));
 
@@ -43,13 +43,13 @@ int main(int argc, char *argv[])
     // loader.loadObj("test/test.obj", {0.0f, 4.9f, 0.0f}, 2.0f);
     // loader.loadObj("cube.obj", {0.0f, 0.5f, 0.0f}, 1.0f);
 
-    loader.loadObj("test/test.obj", {0.0f, 1000.0f, 0.0f}, 20.0f, user_materials[0]);
+    loader.loadObj("test/test2.obj", {0.0f, 1000.0f, 0.0f}, 100.0f, user_materials[0]);
     loader.loadObj("sponza/sponza.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
 
     auto triangles = loader.getTriangles();
 
     Camera camera;
-    camera.pos = {-900.0f, 500.0f, 0.0f};
+    camera.pos = {-900.0f, 300.0f, 0.0f};
     camera.gaze = vec3(1.0f, 0.0f, 0.0f).normalized();
     camera.up = {0.0f, 1.0f, 0.0f};
     camera.img_width = RSIZE;
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     camera.fov_h = 90.0f * 3.14159f / 180.0f;
     camera.aspect = 1.0;
 
-    l.setFixedSize(QSize(1024, 1024));
+    l.setFixedSize(QSize(1280, 1280));
     gl.addWidget(&l, 0, 0, 1, 1);
     w.setLayout(&gl);
     w.show();
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     qDebug() << "Rendering...";
 
     renderer.render(camera, triangles, img);
-    l.setPixmap(QPixmap::fromImage(img.scaled(QSize(1024, 1024))));
+    l.setPixmap(QPixmap::fromImage(img.scaled(QSize(1280, 1280))));
 
     // Clear
 

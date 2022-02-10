@@ -1,11 +1,11 @@
 #include "texture.h"
 #include <QImage>
-
-// TODO: directly reimplement these with QImage, since MyImg is only for grayscale image
+#include <QDebug>
 
 void Texture::load(const std::string &filename)
 {
-    auto image_src = QImage(QString::fromStdString(filename));
+    auto image_src = QImage(QString::fromStdString(filename).replace("\\", "/"));
+    qDebug() << (QString::fromStdString(filename).replace("\\", "/"));
     width_ = image_src.width();
     height_ = image_src.height();
     img_ = new vec3[width_ * height_];
@@ -60,7 +60,7 @@ vec3 Texture::pixelBi(float x, float y) const
 
 vec3 Texture::pixelUV(float x, float y) const
 {
-    return pixelBi(fmod(fmod(x * width_, 1.0f) + 1.0f, 1.0f), fmod(fmod((1.0f - y) * height_, 1.0f) + 1.0f, 1.0f));
+    return pixelBi(fmod(fmod(x, 1.0f) + 1.0f, 1.0f) * width_, fmod(fmod((1.0f - y), 1.0f) + 1.0f, 1.0f) * height_);
 }
 
 int Texture::width() const
