@@ -11,17 +11,32 @@
 #include "renderer.h"
 #include "material.h"
 #include "matlambert.h"
+#include "matblinnphong.h"
 #include "matlight.h"
 #include <QTime>
 
 int main(int argc, char *argv[])
 {
+    // Test energy conservation
+    MatBlinnPhong mbp(0.5f, 0.5f, 1000.0f);
+    float ans = 0;
+    for (int i = 0; i < 1000000; i++)
+    {
+        vec3 n(0.0f, 1.0f, 0.0f);
+        vec3 wo(0.0f, 1.0f, 0.0f);
+        vec3 wi = mbp.sampleBxdf(wo, n);
+        float pdf = mbp.pdf(wo, n, wi);
+        vec3 bxdf = mbp.bxdf(wo, n, wi, {0.0f, 0.0f, 0.0f});
+        ans += bxdf[0] / pdf * n.dot(wi);
+    }
+    qDebug() << ans;
+
     QApplication a(argc, argv);
     Widget w;
     QGridLayout gl;
     QLabel l(&w);
 
-    const int RSIZE = 256;
+    const int RSIZE = 32;
     QImage img(QSize(RSIZE, RSIZE), QImage::Format_RGB888);
 
     // Render

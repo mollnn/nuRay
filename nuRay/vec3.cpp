@@ -69,7 +69,7 @@ float vec3::norm() const
 }
 vec3 vec3::normalized() const
 {
-    return (*this) / norm();
+    return (*this) / (norm() + 1e-8f);
 }
 float vec3::avg() const
 {

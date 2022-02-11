@@ -28,7 +28,8 @@ vec3 MatBlinnPhong::sampleBxdf(const vec3 &wo, const vec3 &normal) const
         float r2 = rand() * 1.0f / RAND_MAX;
         float theta = acos(pow(r1, 1.0f / (Ns_ + 2.0f)));
         float phi = 2.0f * 3.14159f * r2;
-        vec3 wi = cos(theta) * normal + sin(theta) * cos(phi) * ax1 + sin(theta) * sin(phi) * ax2;
+        vec3 h = cos(theta) * normal + sin(theta) * cos(phi) * ax1 + sin(theta) * sin(phi) * ax2;
+        vec3 wi = 2.0f * h.dot(wo) * h - wo;
         return wi;
     }
 }
@@ -46,13 +47,16 @@ vec3 MatBlinnPhong::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, con
 float MatBlinnPhong::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
 {
     // Todo: merge
+    // ! Maybe some bug here, energy do not conserve (shift +0%~50%)
+    if (wi.dot(normal) < 0)
+        return 1e9f;
     float lambda = 0.5f;
-    float pdf_diffuse = 1.0 / 3.14159 * (wi.dot(normal) + 1e-4f);
+    float pdf_diffuse = 1.0 / 3.14159 * (wi.dot(normal) + 1e-6f);
     vec3 h = (wo + wi).normalized();
     float cos_h = normal.dot(h);
     float sin_h = sqrt(1.0f - cos_h * cos_h);
     float pdf_specular_h = (Ns_ + 2.0f) * pow(cos_h, Ns_ + 1) * sin_h;
-    float pdf_specular = pdf_specular_h / 4.0f / wo.dot(h) / 6.28f;
+    float pdf_specular = pdf_specular_h / 4.0f / wo.dot(normal) / 2.0f / 3.14159f / (wi.cross(normal).norm() + 1e-6f);
     return lambda * pdf_diffuse + (1.0f - lambda) * pdf_specular;
 }
 

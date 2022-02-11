@@ -90,7 +90,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
 
 void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img)
 {
-    int SPP = 64;
+    int SPP = 256;
     qDebug() << "Builing Light Sampler...";
     LightSampler light_sampler;
     light_sampler.initialize(triangles);
