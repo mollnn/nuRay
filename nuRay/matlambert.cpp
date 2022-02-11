@@ -4,7 +4,7 @@ MatLambert::MatLambert(const vec3 &Kd) : Kd_(Kd), usetex_Kd_(false) {}
 
 vec3 MatLambert::sampleBxdf(const vec3 &wo, const vec3 &normal) const
 {
-    float r2 = rand() * 1.0 / RAND_MAX;
+    float r2 = rand() * 1.0 / RAND_MAX * 0.99f;
     float phi = rand() * 1.0 / RAND_MAX * 3.14159 * 2;
     float r = sqrt(r2);
     float h = sqrt(1 - r2);
@@ -31,7 +31,7 @@ vec3 MatLambert::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const 
 
 float MatLambert::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
 {
-    return 1.0 / 3.14159;
+    return 1.0 / 3.14159 * (wi.dot(normal) + 1e-4f);
 }
 
 bool MatLambert::isEmission() const

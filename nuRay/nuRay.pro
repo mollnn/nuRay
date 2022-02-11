@@ -31,6 +31,7 @@ SOURCES += \
     lightsampler.cpp \
     loader.cpp \
     main.cpp \
+    matblinnphong.cpp \
     matlambert.cpp \
     matlight.cpp \
     renderer.cpp \
@@ -45,6 +46,7 @@ HEADERS += \
     camera.h \
     lightsampler.h \
     loader.h \
+    matblinnphong.h \
     material.h \
     matlambert.h \
     matlight.h \

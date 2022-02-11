@@ -1,6 +1,7 @@
 #include "loader.h"
 #include "matlight.h"
 #include "matlambert.h"
+#include "matblinnphong.h"
 #include <QDebug>
 
 Loader::~Loader()
@@ -23,7 +24,7 @@ void Loader::loadMtl(const std::string &filename)
 {
     float Ns, Ni;
     vec3 Ka, Kd, Ks, Ke, Tf;
-    std::string map_Kd;
+    std::string map_Kd, map_Ks;
     std::string name;
 
     auto commit = [&]()
@@ -35,13 +36,31 @@ void Loader::loadMtl(const std::string &filename)
         }
         else
         {
-            MatLambert *lambert = new MatLambert(Kd);
-            if (map_Kd != "")
+            if (Ks.norm2() > 1e-6 || map_Ks != "")
             {
-                lambert->usetex_Kd_ = true;
-                lambert->map_Kd_.load(map_Kd);
+                MatBlinnPhong *bf = new MatBlinnPhong(Kd, Ks, Ns);
+                if (map_Kd != "")
+                {
+                    bf->usetex_Kd_ = true;
+                    bf->map_Kd_.load(map_Kd);
+                }
+                if (map_Ks != "")
+                {
+                    bf->usetex_Ks_ = true;
+                    bf->map_Ks_.load(map_Ks);
+                }
+                mat = bf;
             }
-            mat = lambert;
+            else
+            {
+                MatLambert *lambert = new MatLambert(Kd);
+                if (map_Kd != "")
+                {
+                    lambert->usetex_Kd_ = true;
+                    lambert->map_Kd_.load(map_Kd);
+                }
+                mat = lambert;
+            }
         }
         material_dict[filename + ":" + name] = mat;
 
@@ -53,6 +72,7 @@ void Loader::loadMtl(const std::string &filename)
         Ke = 0.0f;
         Tf = 0.0f;
         map_Kd = "";
+        map_Ks = "";
 
         return;
     };
@@ -100,6 +120,10 @@ void Loader::loadMtl(const std::string &filename)
         else if (buf[0] == "map_Kd")
         {
             map_Kd = path2dir(filename) + "/" + buf[1];
+        }
+        else if (buf[0] == "map_Ks")
+        {
+            map_Ks = path2dir(filename) + "/" + buf[1];
         }
         else if (buf[0] == "Ks")
         {
@@ -201,7 +225,7 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
 
             // std::cout << (texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f)) << (texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f)) << (texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f)) << std::endl;
 
-        for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 if (a[i][0] < 0)
                     a[i][0] += vertices.size();

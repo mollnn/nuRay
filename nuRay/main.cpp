@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     QGridLayout gl;
     QLabel l(&w);
 
-    const int RSIZE = 512;
+    const int RSIZE = 256;
     QImage img(QSize(RSIZE, RSIZE), QImage::Format_RGB888);
 
     // Render
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     // loader.loadObj("test/test.obj", {0.0f, 4.9f, 0.0f}, 2.0f);
     // loader.loadObj("cube.obj", {0.0f, 0.5f, 0.0f}, 1.0f);
 
-    loader.loadObj("test/test2.obj", {0.0f, 1000.0f, 0.0f}, 50.0f, user_materials[0]);
+    loader.loadObj("test/test2.obj", {0.0f, 1000.0f, 0.0f}, 30.0f, user_materials[0]);
     loader.loadObj("mitsuba/mitsuba.obj", {0.0f, 0.0f, 0.0f}, 100.0f);
 
     auto triangles = loader.getTriangles();

@@ -83,7 +83,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
     vec3 Li = trace(hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled);
-    result += Li * brdf / pdf / prr;
+    result += Li * wi.dot(normal) * brdf / pdf / prr;
 
     return result;
 }
