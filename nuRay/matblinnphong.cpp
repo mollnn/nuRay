@@ -4,7 +4,7 @@ MatBlinnPhong::MatBlinnPhong(const vec3 &Kd, const vec3 &Ks, float Ns) : Kd_(Kd)
 
 vec3 MatBlinnPhong::sampleBxdf(const vec3 &wo, const vec3 &normal) const
 {
-    float lambda = 0.5f;
+    float lambda = 0.3f;
     float r0 = rand() * 1.0f / RAND_MAX;
 
     vec3 ax0 = abs(normal[0]) < 0.8 ? vec3(1.0f, 0.0f, 0.0f) : vec3(0.0f, 1.0f, 0.0f);
@@ -40,7 +40,7 @@ vec3 MatBlinnPhong::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, con
     vec3 Rs = usetex_Ks_ ? map_Ks_.pixelUV(uv[0], uv[1]) : Ks_;
     vec3 diffuse = Rd / 3.14159;
     vec3 h = (wo + wi).normalized();
-    vec3 specular = (2.0f + Ns_) / (4.0f * 3.14159f * (2.0f - pow(2.0f, -0.5f * Ns_))) * Rs * pow(normal.dot(h), Ns_) / std::max(normal.dot(wi), normal.dot(wo));
+    vec3 specular = (2.0f + Ns_) / (4.0f * 3.14159f * (2.0f - pow(2.0f, -0.5f * Ns_))) * Rs * pow(normal.dot(h), Ns_);
     return diffuse + specular;
 }
 
@@ -48,15 +48,15 @@ float MatBlinnPhong::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) con
 {
     // Todo: merge
     // ! Maybe some bug here, energy do not conserve (shift +0%~50%)
-    if (wi.dot(normal) < 0)
-        return 1e9f;
-    float lambda = 0.5f;
+    if (wi.dot(normal) <= 1e-4 || wo.dot(normal) <= 1e-4f)
+        return 1e18f;
+    float lambda = 0.3f;
     float pdf_diffuse = 1.0 / 3.14159 * (wi.dot(normal) + 1e-6f);
     vec3 h = (wo + wi).normalized();
     float cos_h = normal.dot(h);
     float sin_h = sqrt(1.0f - cos_h * cos_h);
     float pdf_specular_h = (Ns_ + 2.0f) * pow(cos_h, Ns_ + 1) * sin_h;
-    float pdf_specular = pdf_specular_h / 4.0f / wo.dot(normal) / 2.0f / 3.14159f / (wi.cross(normal).norm() + 1e-6f);
+    float pdf_specular = pdf_specular_h / 4.0f / wo.dot(h) / 2.0f / 3.14159f / (h.cross(normal).norm() + 1e-6f);
     return lambda * pdf_diffuse + (1.0f - lambda) * pdf_specular;
 }
 

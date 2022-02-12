@@ -18,25 +18,25 @@
 int main(int argc, char *argv[])
 {
     // Test energy conservation
-    MatBlinnPhong mbp(0.5f, 0.5f, 1000.0f);
-    float ans = 0;
-    for (int i = 0; i < 1000000; i++)
-    {
-        vec3 n(0.0f, 1.0f, 0.0f);
-        vec3 wo(0.0f, 1.0f, 0.0f);
-        vec3 wi = mbp.sampleBxdf(wo, n);
-        float pdf = mbp.pdf(wo, n, wi);
-        vec3 bxdf = mbp.bxdf(wo, n, wi, {0.0f, 0.0f, 0.0f});
-        ans += bxdf[0] / pdf * n.dot(wi);
-    }
-    qDebug() << ans;
+    // MatBlinnPhong mbp(0.5f, 0.5f, 100.0f);
+    // float ans = 0;
+    // for (int i = 0; i < 1000000; i++)
+    // {
+    //     vec3 n(0.0f, 1.0f, 0.0f);
+    //     vec3 wo(0.0f, 1.0f, 0.0f);
+    //     vec3 wi = mbp.sampleBxdf(wo, n);
+    //     float pdf = mbp.pdf(wo, n, wi);
+    //     vec3 bxdf = mbp.bxdf(wo, n, wi, {0.0f, 0.0f, 0.0f});
+    //     ans += bxdf[0] / pdf * n.dot(wi);
+    // }
+    // qDebug() << ans;
 
     QApplication a(argc, argv);
     Widget w;
     QGridLayout gl;
     QLabel l(&w);
 
-    const int RSIZE = 32;
+    const int RSIZE = 512;
     QImage img(QSize(RSIZE, RSIZE), QImage::Format_RGB888);
 
     // Render
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     // loader.loadObj("test/test.obj", {0.0f, 4.9f, 0.0f}, 2.0f);
     // loader.loadObj("cube.obj", {0.0f, 0.5f, 0.0f}, 1.0f);
 
-    loader.loadObj("test/test2.obj", {0.0f, 1000.0f, 0.0f}, 30.0f, user_materials[0]);
+    loader.loadObj("test/test2.obj", {0.0f, 1000.0f, 0.0f}, 20.0f, user_materials[0]);
     loader.loadObj("mitsuba/mitsuba.obj", {0.0f, 0.0f, 0.0f}, 100.0f);
 
     auto triangles = loader.getTriangles();
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
 
     Camera camera;
-    camera.pos = {100.0f, 300.0f, 500.0f};
+    camera.pos = {100.0f, 320.0f, 500.0f};
     camera.gaze = vec3(-0.2f, -0.5f, -1.0f).normalized();
     vec3 camera_hand = vec3(1.0f, 0.0f, 0.1f).normalized();
     camera.up = camera_hand.cross(camera.gaze).normalized();
