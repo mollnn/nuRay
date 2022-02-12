@@ -90,7 +90,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
 
 void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img)
 {
-    int SPP = 1024;
+    int SPP = 16;
     qDebug() << "Builing Light Sampler...";
     LightSampler light_sampler;
     light_sampler.initialize(triangles);
@@ -117,11 +117,11 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
 #pragma omp parallel for
         for (int x = 0; x < camera.img_width; x++)
         {
-            vec3 ray_dir = camera.generateRay(x, y);
             vec3 result;
             for (int i = 0; i < SPP; i++)
             {
-                result += trace(camera.pos, ray_dir, triangles, light_sampler, bvh);
+                vec3 ray_dir = camera.generateRay(x + rand() * 1.0f / RAND_MAX, y + rand() * 1.0f / RAND_MAX);
+                result += max(0.0f, trace(camera.pos, ray_dir, triangles, light_sampler, bvh));
             }
             result /= SPP;
             // Gamma correction
