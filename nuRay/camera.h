@@ -17,6 +17,10 @@ struct Camera
     int img_height;
 
     vec3 generateRay(float img_x, float img_y) const;
+
+    void turnH(float k);
+    void turnV(float k);
+    void go(float x, float y, float z);
 };
 
 

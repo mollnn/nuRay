@@ -35,6 +35,10 @@ public:
     ~Widget();
 
     void renderRT();
+    void updateVertices();
+    void updateMVP();
+
+
 
 private:
     Ui::Widget *ui;

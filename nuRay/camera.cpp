@@ -9,3 +9,24 @@ vec3 Camera::generateRay(float img_x, float img_y) const
     float film_height = film_width / aspect;
     return (gaze + hand * film_width * canonical_x - up * film_height * canonical_y).normalized();
 }
+
+void Camera::turnH(float k)
+{
+    vec3 hand = gaze.cross(up).normalized();
+    vec3 tmp = gaze + k * hand;
+    gaze = tmp.normalized();
+}
+
+void Camera::turnV(float k)
+{
+    vec3 hand = gaze.cross(up).normalized();
+    vec3 tmp = gaze + k * up;
+    gaze = tmp.normalized();
+    up = hand.cross(gaze);
+}
+
+void Camera::go(float x, float y, float z)
+{
+    vec3 hand = gaze.cross(up).normalized();
+    pos += x * hand + y * up + z * gaze;
+}

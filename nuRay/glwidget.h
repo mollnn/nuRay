@@ -10,12 +10,15 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLTexture>
+#include <QMouseEvent>
 
-class GlWidget : public QOpenGLWidget,public QOpenGLExtraFunctions
+#include "camera.h"
+
+class GlWidget : public QOpenGLWidget, public QOpenGLExtraFunctions
 {
     Q_OBJECT
 
-// private:
+    // private:
 public:
     QOpenGLShaderProgram default_shader_;
     QOpenGLBuffer vbo_;
@@ -27,9 +30,18 @@ public:
 
     GlWidget(QWidget *parent = 0);
     ~GlWidget();
+
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+
+    Camera* camera = nullptr;
+
+    QPointF last_mouse_pos;
+    
+
 protected:
     virtual void initializeGL() override;
-    virtual void resizeGL(int w,int h) override;
+    virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 };
 
