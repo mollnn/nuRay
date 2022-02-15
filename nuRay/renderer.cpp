@@ -88,17 +88,20 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     return result;
 }
 
-void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img)
+void Renderer::prepare(const std::vector<Triangle> &triangles)
 {
-    int SPP = 16;
     qDebug() << "Builing Light Sampler...";
-    LightSampler light_sampler;
     light_sampler.initialize(triangles);
 
     qDebug() << "Builing BVH...";
-    BVH bvh;
     bvh.build(triangles);
 
+    qDebug() << "Prepare finish :)";
+}
+
+void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img)
+{
+    int SPP = 8;
     QTime time;
     time.start();
     auto time_last = time.elapsed();

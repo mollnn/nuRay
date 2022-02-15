@@ -75,6 +75,11 @@ void GlWidget::mousePressEvent(QMouseEvent *event)
     last_mouse_pos = event->pos();
 }
 
+void GlWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    emit renderPreview();
+}
+
 void GlWidget::mouseMoveEvent(QMouseEvent *event)
 {
     QPointF mouse_delta = event->pos() - last_mouse_pos;
@@ -88,4 +93,10 @@ void GlWidget::mouseMoveEvent(QMouseEvent *event)
         camera->go(-mouse_delta.x() * 1, mouse_delta.y() * 1, 0.0);
     }
     last_mouse_pos = event->pos();
+}
+
+void GlWidget::wheelEvent(QWheelEvent *event)
+{
+    camera->go(0.0, 0.0, event->delta() * 0.1);
+    emit renderPreview();
 }

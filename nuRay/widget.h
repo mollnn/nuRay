@@ -35,8 +35,8 @@ public:
     ~Widget();
 
     void renderRT();
+    void renderRT_preview();
     void updateVertices();
-    void updateMVP();
 
 
 
@@ -52,5 +52,7 @@ private:
 
     QPushButton btn_render;
     GlWidget glw;
+
+    Renderer renderer;
 };
 #endif // WIDGET_H

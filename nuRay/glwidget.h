@@ -33,6 +33,9 @@ public:
 
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+void wheelEvent(QWheelEvent *event);
+
 
     Camera* camera = nullptr;
 
@@ -43,6 +46,9 @@ protected:
     virtual void initializeGL() override;
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
+
+signals:
+    void renderPreview();
 };
 
 #endif // WIDGET_H

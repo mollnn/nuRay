@@ -39,13 +39,20 @@ Widget::Widget(QWidget *parent)
     loader.loadObj("mitsuba/mitsuba.obj", {0.0f, 0.0f, 0.0f}, 100.0f);
 
     updateVertices();
-    updateMVP();
 
     glw.camera = &camera;
+
+    auto& triangles = loader.getTriangles();
+    this->renderer.prepare(triangles);
+
+    connect(&glw, &GlWidget::renderPreview, [&]()
+            { renderRT_preview(); });
 }
 
 Widget::~Widget()
 {
+    for (auto i : custom_materials)
+        delete i;
 }
 
 void Widget::renderRT()
@@ -60,24 +67,26 @@ void Widget::renderRT()
     timer.start();
     std::cout << "Loading scene..." << std::endl;
 
-    auto triangles = loader.getTriangles();
+    auto& triangles = loader.getTriangles();
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
 
-    Renderer renderer;
-    renderer.render(camera, triangles, render_result);
+    this->renderer.render(camera, triangles, render_result);
     l.setPixmap(QPixmap::fromImage(render_result.scaled(QSize(1280, 1280))));
+}
 
-    for (auto i : custom_materials)
-        delete i;
+void Widget::renderRT_preview()
+{
+    const int RSIZE = 32;
+    render_result = QImage(QSize(RSIZE, RSIZE), QImage::Format_RGB888);
+    camera.img_width = RSIZE;
+    camera.img_height = RSIZE;
+
+    auto& triangles = loader.getTriangles();
+    this->renderer.render(camera, triangles, render_result);
+    l.setPixmap(QPixmap::fromImage(render_result.scaled(QSize(1280, 1280))));
 }
 
 void Widget::updateVertices()
 {
     glw.vertices_ = QVector<float>::fromStdVector(loader.getVertices());
 }
-
-void Widget::updateMVP()
-{
-
-}
-
