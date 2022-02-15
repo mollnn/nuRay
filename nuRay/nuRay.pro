@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -28,6 +28,7 @@ SOURCES += \
     bvh.cpp \
     bvhnode.cpp \
     camera.cpp \
+    glwidget.cpp \
     lightsampler.cpp \
     loader.cpp \
     main.cpp \
@@ -44,6 +45,7 @@ HEADERS += \
     bvh.h \
     bvhnode.h \
     camera.h \
+    glwidget.h \
     lightsampler.h \
     loader.h \
     matblinnphong.h \

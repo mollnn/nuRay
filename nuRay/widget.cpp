@@ -1,5 +1,6 @@
 #include "widget.h"
 #include "ui_widget.h"
+#include "glwidget.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent), ui(new Ui::Widget),
@@ -8,14 +9,19 @@ Widget::Widget(QWidget *parent)
 {
 
     l.setFixedSize(QSize(1280, 1280));
-    grid.addWidget(&l, 0, 0, 1, 1);
-
-    grid.addWidget(&btn_render, 1, 0, 1, 1);
+    grid.addWidget(&l, 0, 1, 1, 1);
+    grid.addWidget(&btn_render, 1, 1, 1, 1);
 
     connect(&btn_render, &QPushButton::clicked, [&]()
             { renderRT(); });
 
     l.setPixmap(QPixmap::fromImage(render_result.scaled(QSize(1280, 1280))));
+
+    GlWidget *pGlWidget = new GlWidget;
+    pGlWidget->setFixedHeight(720);
+
+    grid.addWidget(pGlWidget, 0, 0, 1, 1);
+
     this->setLayout(&grid);
     this->update();
 
