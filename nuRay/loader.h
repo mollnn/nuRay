@@ -15,6 +15,7 @@ public:
     void loadMtl(const std::string &filename);
     void loadObj(const std::string &filename, const vec3 &position, float scale, const Material* forcing_mat = nullptr);
     std::vector<Triangle>& getTriangles();
+    std::vector<float> getVertices();
 };
 
 

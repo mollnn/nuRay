@@ -277,3 +277,19 @@ std::vector<Triangle> &Loader::getTriangles()
 {
     return triangles;
 }
+
+std::vector<float> Loader::getVertices()
+{
+    std::vector<float> ans;
+    for (auto i : triangles)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            for (int k = 0; k < 3; k++)
+                ans.push_back(i.p[j][k]);
+            for (int k = 0; k < 3; k++)
+                ans.push_back(i.n[j][k]);
+        }
+    }
+    return ans;
+}

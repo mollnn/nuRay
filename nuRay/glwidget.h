@@ -15,14 +15,16 @@ class GlWidget : public QOpenGLWidget,public QOpenGLExtraFunctions
 {
     Q_OBJECT
 
-private:
-    QVector<float> vertices;
-    QOpenGLShaderProgram m_shaderTextureShader;
-    QOpenGLBuffer m_vboVertexBufferObject;
-    QOpenGLVertexArrayObject m_vaoVertexArrayObject;
-    QOpenGLTexture *pTexture0;
+// private:
+public:
+    QOpenGLShaderProgram default_shader_;
+    QOpenGLBuffer vbo_;
+    QOpenGLVertexArrayObject vao_;
 
 public:
+    QVector<float> vertices_;
+    QMatrix4x4 mvp;
+
     GlWidget(QWidget *parent = 0);
     ~GlWidget();
 protected:

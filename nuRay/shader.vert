@@ -1,12 +1,14 @@
 #version 330 core
 
-layout (location=0) in vec3 aPos;
-layout (location=1) in vec2 aTexCoord;
-
-out vec2 TexCoord;
+in vec3 a_pos;
+in vec3 a_normal;
+uniform mat4 u_mvp;
+out vec3 v_normal;
 
 void main()
 {
-    gl_Position = vec4(aPos, 1.0);
-    TexCoord = aTexCoord;
+    vec4 pos = u_mvp * vec4(a_pos, 1.0);
+    gl_Position = vec4(pos.xyz / pos.w, 1.0);
+    vec4 normal = u_mvp * vec4(a_normal, 0.0);
+    v_normal = normal.xyz;
 }

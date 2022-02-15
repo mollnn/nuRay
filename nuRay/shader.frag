@@ -1,12 +1,10 @@
 #version 330 core
 
+in vec3 v_normal;
 out vec4 FragColor;
-
-in vec2 TexCoord;
-
-uniform sampler2D ourTexture;
+uniform mat4 u_mvp;
 
 void main()
 {
-    FragColor = texture(ourTexture, TexCoord);
+    FragColor = vec4(max(0.0, 1.0 - 0.5 * normalize(v_normal).z) * vec3(1.0, 1.0, 1.0), 1.0);
 }

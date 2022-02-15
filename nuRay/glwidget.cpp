@@ -3,45 +3,44 @@
 GlWidget::GlWidget(QWidget *parent)
     : QOpenGLWidget(parent)
 {
-    vertices = {
-        // 位置                  //纹理坐标
-        0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // 右下
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // 左下
-        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,  // 左下
-        0.5f, 0.5f, 0.0f, 1.0f, 1.0f,   // 右上
+    vertices_ = {
+        0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        -0.5f, 0.5f, 0.0f
     };
 }
 
 GlWidget::~GlWidget()
 {
-
 }
 
 void GlWidget::initializeGL()
 {
     this->initializeOpenGLFunctions(); // 初始化opengl函数
 
-    // create and load texture
-    pTexture0 = new QOpenGLTexture(QOpenGLTexture::Target2D);
-    pTexture0->create();
-    pTexture0->setData(QImage("texture.jpg"));
+    this->glEnable(GL_DEPTH_TEST);
 
     // create and load shader
-    m_shaderTextureShader.addShaderFromSourceFile(QOpenGLShader::Vertex,"./shader.vert");
-    m_shaderTextureShader.addShaderFromSourceFile(QOpenGLShader::Fragment,"./shader.frag");
-    m_shaderTextureShader.link();
+    default_shader_.addShaderFromSourceFile(QOpenGLShader::Vertex, "./shader.vert");
+    default_shader_.addShaderFromSourceFile(QOpenGLShader::Fragment, "./shader.frag");
+    if(default_shader_.link() == false)
+    {
+        qDebug() << "link failed";
+    }
 
     // create and load vertex data
-    QOpenGLVertexArrayObject::Binder{&m_vaoVertexArrayObject};
-    m_vboVertexBufferObject.create();
-    m_vboVertexBufferObject.bind();
-    m_vboVertexBufferObject.allocate(vertices.data(),sizeof(float)*vertices.size());
+    QOpenGLVertexArrayObject::Binder{&vao_};
+    vbo_.create();
+    vbo_.bind();
+    vbo_.allocate(vertices_.data(), sizeof(float) * vertices_.size());
+    qDebug() << vertices_.size();
 
     // set attribute pointer
-    m_shaderTextureShader.setAttributeBuffer("aPos",GL_FLOAT,0,3,sizeof(GLfloat)*5);
-    m_shaderTextureShader.enableAttributeArray("aPos");
-    m_shaderTextureShader.setAttributeBuffer("aTexCoord",GL_FLOAT,sizeof(GLfloat)*3,2,sizeof(GLfloat)*5);
-    m_shaderTextureShader.enableAttributeArray("aTexCoord");
+    default_shader_.setAttributeBuffer("a_pos", GL_FLOAT, 0, 3, sizeof(GLfloat) * 6);
+    default_shader_.enableAttributeArray("a_pos");
+    default_shader_.setAttributeBuffer("a_normal", GL_FLOAT, sizeof(GLfloat) * 3, 3, sizeof(GLfloat) * 6);
+    default_shader_.enableAttributeArray("a_normal");
+
 }
 
 void GlWidget::resizeGL(int w, int h)
@@ -52,17 +51,16 @@ void GlWidget::resizeGL(int w, int h)
 void GlWidget::paintGL()
 {
     // clear
-    this->glClearColor(0.1,0.5,0.7,1.0);
-    this->glClear(GL_COLOR_BUFFER_BIT);
+    this->glClearColor(0.1, 0.5, 0.7, 1.0);
+    this->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // bind shader
-    m_shaderTextureShader.bind();
+    default_shader_.bind();
 
-    // bind texture and connect to texture unit
-    pTexture0->bind(0);
-    m_shaderTextureShader.setUniformValue("ourTexture",0);
+        
+    default_shader_.setUniformValue(default_shader_.uniformLocation("u_mvp"), mvp);
 
     // bind vao and draw
-    QOpenGLVertexArrayObject::Binder{&m_vaoVertexArrayObject};
-    this->glDrawArrays(GL_POLYGON,0,4);
+    QOpenGLVertexArrayObject::Binder{&vao_};
+    this->glDrawArrays(GL_TRIANGLES, 0, vertices_.size());
 }

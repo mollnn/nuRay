@@ -3,7 +3,6 @@
 
 #include <QWidget>
 
-
 #include <QGridLayout>
 #include <QDebug>
 #include <bits/stdc++.h>
@@ -18,9 +17,13 @@
 #include <QTime>
 #include <QLabel>
 #include <QPushButton>
+#include "glwidget.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class Widget; }
+namespace Ui
+{
+    class Widget;
+}
 QT_END_NAMESPACE
 
 class Widget : public QWidget
@@ -40,7 +43,10 @@ private:
     QLabel l;
     Camera camera;
     QImage render_result;
+    Loader loader;
+    std::vector<Material *> custom_materials;
 
     QPushButton btn_render;
+    GlWidget glw;
 };
 #endif // WIDGET_H
