@@ -128,9 +128,9 @@ std::tuple<float, float, float, const Triangle *> BVH::_traversal(const vec3 &or
 
 std::tuple<float, float, float, const Triangle *> BVH::intersection(const vec3 &origin, const vec3 &dir)
 {
-    if(root==nullptr)
+    if (root == nullptr)
     {
-        qDebug()<<"null root";
+        qDebug() << "null root";
     }
     auto ans = _traversal(origin, dir, root);
     return ans;

@@ -99,16 +99,18 @@ void Renderer::prepare(const std::vector<Triangle> &triangles)
     qDebug() << "Prepare finish :)";
 }
 
-void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP)
+void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height)
 {
+    img = QImage(QSize(img_width, img_height), QImage::Format_RGB888);
+
     QTime time;
     time.start();
     auto time_last = time.elapsed();
 
     std::cout << "Rendering... " << std::endl;
-    for (int y = 0; y < camera.img_height; y++)
+    for (int y = 0; y < img_height; y++)
     {
-        float progress = y * 1.0f / camera.img_height;
+        float progress = y * 1.0f / img_height;
         if (time.elapsed() - time_last > 1000)
         {
             std::cout << std::fixed << std::setprecision(2) << "Rendering... " << progress * 100 << "%"
@@ -117,12 +119,12 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
         }
 
 #pragma omp parallel for
-        for (int x = 0; x < camera.img_width; x++)
+        for (int x = 0; x < img_width; x++)
         {
             vec3 result;
             for (int i = 0; i < SPP; i++)
             {
-                vec3 ray_dir = camera.generateRay(x + rand() * 1.0f / RAND_MAX, y + rand() * 1.0f / RAND_MAX);
+                vec3 ray_dir = camera.generateRay(x + rand() * 1.0f / RAND_MAX, y + rand() * 1.0f / RAND_MAX, img_width, img_height);
                 result += max(0.0f, trace(camera.pos, ray_dir, triangles, light_sampler, bvh));
             }
             result /= SPP;

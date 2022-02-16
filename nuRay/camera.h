@@ -13,20 +13,15 @@ struct Camera
     float fov_h;  // horizon fov
     float aspect; // width / height
 
-    int img_width;
-    int img_height;
-
-    vec3 generateRay(float img_x, float img_y) const;
+    vec3 generateRay(float img_x, float img_y, float img_width, float img_height) const;
 
     void turnH(float k);
     void turnV(float k);
     void go(float x, float y, float z);
 
     vec3 toEuler() const;
-    void fromEuler(const vec3& euler);
+    void fromEuler(const vec3 &euler);
     void fromEuler(float yaw, float pitch, float roll);
 };
-
-
 
 #endif

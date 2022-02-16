@@ -3,8 +3,7 @@
 GlWidget::GlWidget(QWidget *parent)
     : QOpenGLWidget(parent)
 {
-    vertices_ = {
-    };
+    vertices_ = {};
 }
 
 GlWidget::~GlWidget()
@@ -49,7 +48,7 @@ void GlWidget::resizeGL(int w, int h)
 void GlWidget::paintGL()
 {
     QMatrix4x4 mvp;
-    mvp.perspective(camera->fov_h * 180.0f / 3.14159f * 2.0, camera->aspect, 1, 10000);
+    mvp.perspective(camera->fov_h * 2.0, camera->aspect, 1, 10000);
     vec3 look_at_center = camera->pos + camera->gaze * 100.0f;
     mvp.lookAt({camera->pos[0], camera->pos[1], camera->pos[2]},
                {look_at_center[0], look_at_center[1], look_at_center[2]},

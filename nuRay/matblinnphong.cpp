@@ -47,7 +47,6 @@ vec3 MatBlinnPhong::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, con
 float MatBlinnPhong::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
 {
     // Todo: merge
-    // ! Maybe some bug here, energy do not conserve (shift +0%~50%)
     if (wi.dot(normal) <= 1e-4 || wo.dot(normal) <= 1e-4f)
         return 1e18f;
     float lambda = 0.3f;

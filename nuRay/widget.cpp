@@ -18,6 +18,7 @@ Widget::Widget(QWidget *parent)
     l.setPixmap(QPixmap::fromImage(render_result.scaled(QSize(1280, 1280))));
 
     glw.setFixedHeight(500);
+
     glw.setFixedWidth(500);
 
     grid.addWidget(&glw, 0, 0, 10, 10);
@@ -26,7 +27,7 @@ Widget::Widget(QWidget *parent)
     camera.gaze = vec3(-0.2f, -0.5f, -1.0f).normalized();
     vec3 camera_hand = vec3(1.0f, 0.0f, 0.1f).normalized();
     camera.up = camera_hand.cross(camera.gaze).normalized();
-    camera.fov_h = 20.0f * 3.14159f / 180.0f;
+    camera.fov_h = 20.0f;
     camera.aspect = 1.0;
 
     custom_materials.push_back(new MatLight(vec3(1.0, 1.0, 1.0) * 10));
@@ -56,6 +57,21 @@ Widget::Widget(QWidget *parent)
         line_edit_roll.setText(QString::number(camera.toEuler()[2], 'f', 4));
 
         renderRT_preview(); });
+
+    bindLineEdit(line_edit_fov_h, camera.fov_h);
+    grid.addWidget(&line_edit_fov_h, 0, 21, 1, 1);
+
+    bindLineEdit(line_edit_aspect, camera.aspect);
+    grid.addWidget(&line_edit_aspect, 1, 21, 1, 1);
+
+    bindLineEdit(line_edit_img_w, img_width);
+    grid.addWidget(&line_edit_img_w, 2, 21, 1, 1);
+
+    bindLineEdit(line_edit_img_h, img_height);
+    grid.addWidget(&line_edit_img_h, 3, 21, 1, 1);
+
+    bindLineEdit(line_edit_preview_level, preview_level);
+    grid.addWidget(&line_edit_preview_level, 4, 21, 1, 1);
 
     bindLineEdit(line_edit_spp, spp);
     grid.addWidget(&line_edit_spp, 0, 20, 1, 1);
@@ -102,11 +118,6 @@ Widget::~Widget()
 
 void Widget::renderRT()
 {
-    const int RSIZE = 128;
-    render_result = QImage(QSize(RSIZE, RSIZE), QImage::Format_RGB888);
-    camera.img_width = RSIZE;
-    camera.img_height = RSIZE;
-
     // Render
     QTime timer;
     timer.start();
@@ -115,7 +126,7 @@ void Widget::renderRT()
     auto &triangles = loader.getTriangles();
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
 
-    this->renderer.render(camera, triangles, render_result, spp);
+    this->renderer.render(camera, triangles, render_result, spp, img_width, img_height);
     l.setPixmap(QPixmap::fromImage(render_result.scaled(QSize(1280, 1280))));
 }
 
@@ -126,13 +137,8 @@ void Widget::renderRT_preview()
 
     last_update = QTime::currentTime();
 
-    const int RSIZE = 32;
-    render_result = QImage(QSize(RSIZE, RSIZE), QImage::Format_RGB888);
-    camera.img_width = RSIZE;
-    camera.img_height = RSIZE;
-
     auto &triangles = loader.getTriangles();
-    this->renderer.render(camera, triangles, render_result, spp_preview);
+    this->renderer.render(camera, triangles, render_result, spp_preview, img_width / preview_level, img_height / preview_level);
     l.setPixmap(QPixmap::fromImage(render_result.scaled(QSize(1280, 1280))));
 
     last_update = QTime::currentTime();
