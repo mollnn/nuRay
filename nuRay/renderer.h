@@ -15,7 +15,7 @@ class Renderer
 
 public:
     void prepare(const std::vector<Triangle> &triangles);
-    void render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img);
+    void render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP);
 
 private:
     BVH bvh;

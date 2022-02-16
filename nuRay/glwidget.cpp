@@ -77,7 +77,7 @@ void GlWidget::mousePressEvent(QMouseEvent *event)
 
 void GlWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    emit renderPreview();
+    emit glwChanged();
 }
 
 void GlWidget::mouseMoveEvent(QMouseEvent *event)
@@ -98,5 +98,5 @@ void GlWidget::mouseMoveEvent(QMouseEvent *event)
 void GlWidget::wheelEvent(QWheelEvent *event)
 {
     camera->go(0.0, 0.0, event->delta() * 0.1);
-    emit renderPreview();
+    emit glwChanged();
 }

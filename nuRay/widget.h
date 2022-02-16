@@ -18,6 +18,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include "glwidget.h"
+#include <QLineEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -38,8 +39,6 @@ public:
     void renderRT_preview();
     void updateVertices();
 
-
-
 private:
     Ui::Widget *ui;
 
@@ -54,5 +53,15 @@ private:
     GlWidget glw;
 
     Renderer renderer;
+
+    QLineEdit line_edit_cam_pos_x, line_edit_cam_pos_y, line_edit_cam_pos_z;
+    int spp = 32, spp_preview = 8;
+    QLineEdit line_edit_spp, line_edit_spp_preview;
+    QLineEdit line_edit_yaw, line_edit_pitch, line_edit_roll;
+
+    void bindLineEdit(QLineEdit &line_edit, float &var);
+    void bindLineEdit(QLineEdit &line_edit, int &var);
+
+    QTime last_update;
 };
 #endif // WIDGET_H

@@ -48,7 +48,7 @@ protected:
     virtual void paintGL() override;
 
 signals:
-    void renderPreview();
+    void glwChanged();
 };
 
 #endif // WIDGET_H

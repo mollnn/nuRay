@@ -6,5 +6,5 @@ uniform mat4 u_mvp;
 
 void main()
 {
-    FragColor = vec4((-0.5 * normalize(v_normal).z + 0.5) * vec3(1.0, 1.0, 1.0), 1.0);
+    FragColor = vec4(max(-normalize(v_normal).z, 0.0) * vec3(1.0, 1.0, 1.0), 1.0);
 }

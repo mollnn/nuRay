@@ -21,6 +21,10 @@ struct Camera
     void turnH(float k);
     void turnV(float k);
     void go(float x, float y, float z);
+
+    vec3 toEuler() const;
+    void fromEuler(const vec3& euler);
+    void fromEuler(float yaw, float pitch, float roll);
 };
 
 

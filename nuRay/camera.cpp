@@ -30,3 +30,38 @@ void Camera::go(float x, float y, float z)
     vec3 hand = gaze.cross(up).normalized();
     pos += x * hand + y * up + z * gaze;
 }
+
+vec3 Camera::toEuler() const
+{
+    vec3 hand = gaze.cross(up).normalized();
+    float m13 = -gaze[0] + 1e-9f;
+    float m21 = hand[1] + 1e-9f;
+    float m22 = up[1] + 1e-9f;
+    float m23 = -gaze[1] + 1e-9f;
+    float m33 = -gaze[2] + 1e-9f;
+    return {atan2(m13, m33), asin(-m23), atan2(m21, m22)};
+}
+
+void Camera::fromEuler(const vec3 &euler)
+{
+    float c1 = cos(euler[0]), s1 = sin(euler[0]);
+    float c2 = cos(euler[1]), s2 = sin(euler[1]);
+    float c3 = cos(euler[2]), s3 = sin(euler[2]);
+    float m11 = c1 * c3 + s1 * s2 * s3;
+    float m12 = c3 * s1 * s2 - c1 * s3;
+    float m13 = c2 * s1;
+    float m21 = c2 * s3;
+    float m22 = c2 * c3;
+    float m23 = -s2;
+    float m31 = c1 * s2 * s3 - s1 * c3;
+    float m32 = s1 * s3 + c1 * c3 * s2;
+    float m33 = c1 * c2;
+    up = {m12, m22, m32};
+    gaze = {-m13, -m23, -m33};
+    std::cout << gaze <<" "<<up<<std::endl;
+}
+
+void Camera::fromEuler(float a, float b, float c)
+{
+    fromEuler({a, b, c});
+}
