@@ -7,7 +7,7 @@ vec3 Camera::generateRay(float img_x, float img_y, float img_width, float img_he
     vec3 hand = gaze.cross(up).normalized();
     float film_height = 2 * tan(fov_h * 3.14159 / 180 / 2);
     float film_width = film_height * aspect;
-    return (gaze + hand * film_width * canonical_x - up * film_height * canonical_y).normalized();
+    return (gaze + hand * film_width * canonical_x * 0.5 - up * film_height * canonical_y * 0.5).normalized();
 }
 
 void Camera::turnH(float k)

@@ -55,11 +55,16 @@ private:
     Renderer renderer;
 
     QLineEdit line_edit_cam_pos_x, line_edit_cam_pos_y, line_edit_cam_pos_z;
-    int spp = 32, spp_preview = 8;
     QLineEdit line_edit_spp, line_edit_spp_preview;
     QLineEdit line_edit_yaw, line_edit_pitch, line_edit_roll;
-    int img_width = 256, img_height = 256, preview_level = 8;
     QLineEdit line_edit_fov_h, line_edit_aspect, line_edit_img_w, line_edit_img_h, line_edit_preview_level;
+
+    QLabel label_cam_pos_x, label_cam_pos_y, label_cam_pos_z;
+    QLabel label_spp, label_spp_preview;
+    QLabel label_yaw, label_pitch, label_roll;
+    QLabel label_fov_h, label_aspect, label_img_w, label_img_h, label_preview_level;
+    int spp = 32, spp_preview = 8;
+    int img_width = 256, img_height = 256, preview_level = 8;
 
     void bindLineEdit(QLineEdit &line_edit, float &var);
     void bindLineEdit(QLineEdit &line_edit, int &var);
