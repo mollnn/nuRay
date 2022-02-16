@@ -69,23 +69,23 @@ BVHNode *BVH::_build(const std::vector<const Triangle *> &primitives)
     return new BVHNode(lc, rc);
 }
 
-BVH::BVH() : root(nullptr)
+BVH::BVH() : root_(nullptr)
 {
 }
 
 BVH::~BVH()
 {
-    delete root;
+    delete root_;
 }
 
 void BVH::build(const std::vector<const Triangle *> &primitives)
 {
-    if (root)
+    if (root_)
     {
-        delete root;
-        root = nullptr;
+        delete root_;
+        root_ = nullptr;
     }
-    root = _build(primitives);
+    root_ = _build(primitives);
 }
 
 void BVH::build(const std::vector<Triangle> &primitives)
@@ -128,10 +128,10 @@ std::tuple<float, float, float, const Triangle *> BVH::_traversal(const vec3 &or
 
 std::tuple<float, float, float, const Triangle *> BVH::intersection(const vec3 &origin, const vec3 &dir)
 {
-    if (root == nullptr)
+    if (root_ == nullptr)
     {
         qDebug() << "null root";
     }
-    auto ans = _traversal(origin, dir, root);
+    auto ans = _traversal(origin, dir, root_);
     return ans;
 }

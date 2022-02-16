@@ -2,9 +2,9 @@
 
 void LightSampler::initialize(const std::vector<Triangle> &scene)
 {
-    lighting_triangles.clear();
-    cdf.clear();
-    pdf.clear();
+    lighting_triangles_.clear();
+    cdf_.clear();
+    pdf_.clear();
 
     // Policy of probability distribution: Area currently
 
@@ -14,24 +14,24 @@ void LightSampler::initialize(const std::vector<Triangle> &scene)
         if (triangle.mat->isEmission())
         {
             float weight = triangle.area();
-            pdf.push_back(weight);
+            pdf_.push_back(weight);
             sum_weight += weight;
-            lighting_triangles.push_back(&triangle);
+            lighting_triangles_.push_back(&triangle);
         }
     }
     sum_weight += 1e-8;
-    for (auto &x : pdf)
+    for (auto &x : pdf_)
         x /= sum_weight;
     sum_weight_ = sum_weight;
 
     float sum_prob = 1e-6;
-    for (int i = 0; i < pdf.size(); i++)
+    for (int i = 0; i < pdf_.size(); i++)
     {
-        sum_prob += pdf[i];
-        cdf.push_back(sum_prob);
+        sum_prob += pdf_[i];
+        cdf_.push_back(sum_prob);
     }
 
-    if (lighting_triangles.size() == 0)
+    if (lighting_triangles_.size() == 0)
     {
         std::cerr << "LightSampler::initialize(...) called but no light" << std::endl;
     }
@@ -39,13 +39,13 @@ void LightSampler::initialize(const std::vector<Triangle> &scene)
 
 const Triangle *LightSampler::sampleLight()
 {
-    if (lighting_triangles.size() == 0)
+    if (lighting_triangles_.size() == 0)
     {
         throw("LightSampler::sampleLight() called but no light");
     }
     float r = rand() * 1.0f / RAND_MAX;
-    int id = lower_bound(cdf.begin(), cdf.end(), r) - cdf.begin();
-    return lighting_triangles[id];
+    int id = lower_bound(cdf_.begin(), cdf_.end(), r) - cdf_.begin();
+    return lighting_triangles_[id];
 }
 
 float LightSampler::p()

@@ -20,12 +20,6 @@
 #include "glwidget.h"
 #include <QLineEdit>
 
-QT_BEGIN_NAMESPACE
-namespace Ui
-{
-    class Widget;
-}
-QT_END_NAMESPACE
 
 class Widget : public QWidget
 {
@@ -40,35 +34,28 @@ public:
     void updateVertices();
 
 private:
-    Ui::Widget *ui;
-
-    QGridLayout grid;
-    QLabel l;
-    Camera camera;
-    QImage render_result;
-    Loader loader;
-    std::vector<Material *> custom_materials;
-
-    QPushButton btn_render;
-    GlWidget glw;
-
-    Renderer renderer;
-
-    QLineEdit line_edit_cam_pos_x, line_edit_cam_pos_y, line_edit_cam_pos_z;
-    QLineEdit line_edit_spp, line_edit_spp_preview;
-    QLineEdit line_edit_yaw, line_edit_pitch, line_edit_roll;
-    QLineEdit line_edit_fov_h, line_edit_aspect, line_edit_img_w, line_edit_img_h, line_edit_preview_level;
-
-    QLabel label_cam_pos_x, label_cam_pos_y, label_cam_pos_z;
-    QLabel label_spp, label_spp_preview;
-    QLabel label_yaw, label_pitch, label_roll;
-    QLabel label_fov_h, label_aspect, label_img_w, label_img_h, label_preview_level;
-    int spp = 32, spp_preview = 8;
-    int img_width = 256, img_height = 256, preview_level = 8;
+    QGridLayout grid_layout_;
+    QLabel label_render_result_;
+    Camera camera_;
+    QImage img_render_result_;
+    Loader scene_loader_;
+    QPushButton btn_render_;
+    GlWidget glwidget_preview_;
+    Renderer renderer_;
+    QLineEdit line_edit_cam_pos_x_, line_edit_cam_pos_y_, line_edit_cam_pos_z_;
+    QLineEdit line_edit_spp_, line_edit_spp_preview_;
+    QLineEdit line_edit_yaw_, line_edit_pitch_, line_edit_roll_;
+    QLineEdit line_edit_fov_h_, line_edit_aspect_, line_edit_img_w_, line_edit_img_h_, line_edit_preview_level_;
+    QLabel label_cam_pos_x_, label_cam_pos_y_, label_cam_pos_z_;
+    QLabel label_spp_, label_spp_preview_;
+    QLabel label_yaw_, label_pitch_, label_roll_;
+    QLabel label_fov_h_, label_aspect_, label_img_w_, label_img_h_, label_preview_level_;
+    int spp_ = 32, spp_preview_ = 8;
+    int img_width_ = 256, img_height_ = 256, preview_level_ = 8;
+    QTime last_review_render_time_;
 
     void bindLineEdit(QLineEdit &line_edit, float &var);
     void bindLineEdit(QLineEdit &line_edit, int &var);
 
-    QTime last_update;
 };
 #endif // WIDGET_H

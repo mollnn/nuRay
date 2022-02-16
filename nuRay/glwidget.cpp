@@ -48,11 +48,11 @@ void GlWidget::resizeGL(int w, int h)
 void GlWidget::paintGL()
 {
     QMatrix4x4 mvp;
-    mvp.perspective(camera->fov_h * std::max(1.0f, camera->aspect), 1, 1, 10000);
-    vec3 look_at_center = camera->pos + camera->gaze * 100.0f;
-    mvp.lookAt({camera->pos[0], camera->pos[1], camera->pos[2]},
+    mvp.perspective(camera_->fov_h * std::max(1.0f, camera_->aspect), 1, 1, 10000);
+    vec3 look_at_center = camera_->pos + camera_->gaze * 100.0f;
+    mvp.lookAt({camera_->pos[0], camera_->pos[1], camera_->pos[2]},
                {look_at_center[0], look_at_center[1], look_at_center[2]},
-               {camera->up[0], camera->up[1], camera->up[2]});
+               {camera_->up[0], camera_->up[1], camera_->up[2]});
 
     // clear
     this->glClearColor(0.1, 0.5, 0.7, 1.0);
@@ -71,31 +71,31 @@ void GlWidget::paintGL()
 
 void GlWidget::mousePressEvent(QMouseEvent *event)
 {
-    last_mouse_pos = event->pos();
+    last_mouse_pos_ = event->pos();
 }
 
 void GlWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    emit glwChanged();
+    emit cameraChanged();
 }
 
 void GlWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    QPointF mouse_delta = event->pos() - last_mouse_pos;
+    QPointF mouse_delta = event->pos() - last_mouse_pos_;
     if (event->buttons() & Qt::RightButton)
     {
-        camera->turnH(-mouse_delta.x() * 0.001);
-        camera->turnV(mouse_delta.y() * 0.001);
+        camera_->turnH(-mouse_delta.x() * 0.001);
+        camera_->turnV(mouse_delta.y() * 0.001);
     }
     if (event->buttons() & Qt::LeftButton)
     {
-        camera->go(-mouse_delta.x() * 1, mouse_delta.y() * 1, 0.0);
+        camera_->go(-mouse_delta.x() * 1, mouse_delta.y() * 1, 0.0);
     }
-    last_mouse_pos = event->pos();
+    last_mouse_pos_ = event->pos();
 }
 
 void GlWidget::wheelEvent(QWheelEvent *event)
 {
-    camera->go(0.0, 0.0, event->delta() * 0.1);
-    emit glwChanged();
+    camera_->go(0.0, 0.0, event->delta() * 0.1);
+    emit cameraChanged();
 }

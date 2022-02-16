@@ -91,10 +91,10 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
 void Renderer::prepare(const std::vector<Triangle> &triangles)
 {
     qDebug() << "Builing Light Sampler...";
-    light_sampler.initialize(triangles);
+    light_sampler_.initialize(triangles);
 
     qDebug() << "Builing BVH...";
-    bvh.build(triangles);
+    bvh_.build(triangles);
 
     qDebug() << "Prepare finish :)";
 }
@@ -125,7 +125,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             for (int i = 0; i < SPP; i++)
             {
                 vec3 ray_dir = camera.generateRay(x + rand() * 1.0f / RAND_MAX, y + rand() * 1.0f / RAND_MAX, img_width, img_height);
-                result += max(0.0f, trace(camera.pos, ray_dir, triangles, light_sampler, bvh));
+                result += max(0.0f, trace(camera.pos, ray_dir, triangles, light_sampler_, bvh_));
             }
             result /= SPP;
             // Gamma correction

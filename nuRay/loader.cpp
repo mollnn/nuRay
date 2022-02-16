@@ -237,7 +237,7 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
 
             if (buf.size() - 1 == 3)
             {
-                triangles.push_back(Triangle(vertices[a[0][0]], vertices[a[1][0]], vertices[a[2][0]],
+                primitives_.push_back(Triangle(vertices[a[0][0]], vertices[a[1][0]], vertices[a[2][0]],
                                              texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
@@ -248,7 +248,7 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
             }
             else if (buf.size() - 1 == 4)
             {
-                triangles.push_back(Triangle(vertices[a[0][0]], vertices[a[1][0]], vertices[a[2][0]],
+                primitives_.push_back(Triangle(vertices[a[0][0]], vertices[a[1][0]], vertices[a[2][0]],
                                              texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
@@ -256,7 +256,7 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
                                              normals.size() > a[1][2] ? normals[a[1][2]] : vec3(0.0f, 0.0f, 0.0f),
                                              normals.size() > a[2][2] ? normals[a[2][2]] : vec3(0.0f, 0.0f, 0.0f),
                                              mtl));
-                triangles.push_back(Triangle(vertices[a[2][0]], vertices[a[3][0]], vertices[a[0][0]],
+                primitives_.push_back(Triangle(vertices[a[2][0]], vertices[a[3][0]], vertices[a[0][0]],
                                              texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[3][1] ? texcoords[a[3][1]] : vec3(0.0f, 0.0f, 0.0f),
                                              texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
@@ -275,13 +275,13 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
 
 std::vector<Triangle> &Loader::getTriangles()
 {
-    return triangles;
+    return primitives_;
 }
 
-std::vector<float> Loader::getVertices()
+std::vector<float> Loader::getVerticesNormals()
 {
     std::vector<float> ans;
-    for (auto i : triangles)
+    for (auto i : primitives_)
     {
         for (int j = 0; j < 3; j++)
         {

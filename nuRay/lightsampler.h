@@ -6,9 +6,9 @@
 
 class LightSampler 
 {
-    std::vector<const Triangle*> lighting_triangles;
-    std::vector<float> cdf; // Cumulative distribution function
-    std::vector<float> pdf; // Probability distribution function
+    std::vector<const Triangle*> lighting_triangles_;
+    std::vector<float> cdf_; // Cumulative distribution function
+    std::vector<float> pdf_; // Probability distribution function
     float sum_weight_;
 
 public:

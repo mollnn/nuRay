@@ -19,6 +19,7 @@ struct BVHNode
     // Test intersection with AABB
     bool intersect(const vec3 &origin, const vec3 &dir);
     // Get intersection from primitive list (only for leaf!)
+    // Return payload: distance, bc1, bc2, primitive pointer
     std::tuple<float, float, float, const Triangle *> getIntersection(const vec3 &origin, const vec3 &dir);
 };
 
