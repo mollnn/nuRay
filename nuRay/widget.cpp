@@ -33,9 +33,6 @@ Widget::Widget(QWidget *parent)
     camera_.fov_h = 20.0f;
     camera_.aspect = 1.0;
 
-    // scene_loader_.loadObj("test/test2.obj", {0.0f, 1000.0f, 0.0f}, 50.0f);
-    // scene_loader_.loadObj("mitsuba/mitsuba.obj", {0.0f, 0.0f, 0.0f}, 50.0f);
-    // loader.loadObj("sponza/sponza.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
     text_edit_scene_.setText("test/test2.obj  0 1000 0  50 \n mitsuba/mitsuba.obj 0 0 0 50");
     scene_loader_.fromSceneDescription("test/test2.obj  0 1000 0  50 \n mitsuba/mitsuba.obj 0 0 0 50");
 

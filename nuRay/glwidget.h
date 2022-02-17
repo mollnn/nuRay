@@ -23,10 +23,12 @@ public:
     QOpenGLBuffer vbo_;
     QOpenGLVertexArrayObject vao_;
 
-public:
     QVector<float> vertices_;
     QMatrix4x4 mvp;
+    Camera *camera_ = nullptr;
+    QPointF last_mouse_pos_;
 
+public:
     GlWidget(QWidget *parent = 0);
     ~GlWidget();
 
@@ -35,9 +37,8 @@ public:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
 
-    Camera* camera_ = nullptr;
-    QPointF last_mouse_pos_;
-    
+    void setVertices(const QVector<float> &vertices);
+    void setCamera(Camera *camera);
 
 protected:
     virtual void initializeGL() override;

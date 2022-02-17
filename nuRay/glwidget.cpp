@@ -12,7 +12,7 @@ GlWidget::~GlWidget()
 
 void GlWidget::initializeGL()
 {
-    this->initializeOpenGLFunctions(); 
+    this->initializeOpenGLFunctions();
 
     this->glEnable(GL_DEPTH_TEST);
     this->glCullFace(GL_BACK);
@@ -98,4 +98,13 @@ void GlWidget::wheelEvent(QWheelEvent *event)
 {
     camera_->go(0.0, 0.0, event->delta() * 0.1);
     emit cameraChanged();
+}
+
+void GlWidget::setVertices(const QVector<float> &vertices)
+{
+    vertices_ = vertices;
+}
+void GlWidget::setCamera(Camera *camera)
+{
+    camera_ = camera;
 }
