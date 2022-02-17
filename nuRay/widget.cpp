@@ -33,9 +33,11 @@ Widget::Widget(QWidget *parent)
     camera_.fov_h = 20.0f;
     camera_.aspect = 1.0;
 
-    scene_loader_.loadObj("test/test2.obj", {0.0f, 1000.0f, 0.0f}, 50.0f);
-    scene_loader_.loadObj("mitsuba/mitsuba.obj", {0.0f, 0.0f, 0.0f}, 50.0f);
+    // scene_loader_.loadObj("test/test2.obj", {0.0f, 1000.0f, 0.0f}, 50.0f);
+    // scene_loader_.loadObj("mitsuba/mitsuba.obj", {0.0f, 0.0f, 0.0f}, 50.0f);
     // loader.loadObj("sponza/sponza.obj", {0.0f, 0.0f, 0.0f}, 1.0f);
+    text_edit_scene_.setText("test/test2.obj  0 1000 0  50 \n mitsuba/mitsuba.obj 0 0 0 50");
+    scene_loader_.fromSceneDescription("test/test2.obj  0 1000 0  50 \n mitsuba/mitsuba.obj 0 0 0 50");
 
     updateVertices();
 
@@ -54,7 +56,6 @@ Widget::Widget(QWidget *parent)
         line_edit_yaw_.setText(QString::number(camera_.toEuler()[0], 'f', 4));
         line_edit_pitch_.setText(QString::number(camera_.toEuler()[1], 'f', 4));
         line_edit_roll_.setText(QString::number(camera_.toEuler()[2], 'f', 4));
-
         renderRT_preview(); });
 
     bindLineEdit(line_edit_fov_h_, camera_.fov_h);
@@ -118,6 +119,18 @@ Widget::Widget(QWidget *parent)
     connect(&line_edit_roll_, &QLineEdit::editingFinished, [&]()
             { if(line_edit_roll_.text().toFloat() == camera_.toEuler()[2]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); });
 
+    btn_load_scene_.setText("Load");
+    grid_layout_.addWidget(&label_scene_, 40, 50, 1, 1);
+    grid_layout_.addWidget(&text_edit_scene_, 41, 50, 8, 5);
+    grid_layout_.addWidget(&btn_load_scene_, 49, 50, 1, 1);
+
+    connect(&btn_load_scene_, &QPushButton::clicked, [&]()
+            {
+        scene_loader_.fromSceneDescription(text_edit_scene_.toPlainText().toStdString());
+        renderer_.prepare(scene_loader_.getTriangles());
+        glwidget_preview_.vertices_.fromStdVector(scene_loader_.getVerticesNormals());
+        renderRT_preview(); });
+
     label_cam_pos_x_.setText(("Cam Pos X"));
     label_cam_pos_y_.setText(("Cam Pos Y"));
     label_cam_pos_z_.setText(("Cam Pos Z"));
@@ -131,6 +144,7 @@ Widget::Widget(QWidget *parent)
     label_img_w_.setText(("Img W"));
     label_img_h_.setText(("Img H"));
     label_preview_level_.setText(("Preview Level"));
+    label_scene_.setText("Scene Description");
 
     this->setLayout(&grid_layout_);
     this->update();

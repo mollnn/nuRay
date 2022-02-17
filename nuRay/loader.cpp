@@ -20,6 +20,29 @@ std::string path2dir(const std::string &path)
     return path.substr(0, pos);
 }
 
+void Loader::fromSceneDescription(const std::string &scene_desc)
+{
+    std::stringstream scene_desc_ss(scene_desc);
+    std::string desc_line;
+    primitives_.clear();
+    for (auto &[i, j] : material_dict)
+    {
+        delete j;
+    }
+    material_dict.clear();
+    while (getline(scene_desc_ss, desc_line))
+    {
+        std::stringstream desc_line_ss(desc_line);
+        std::string filename;
+        vec3 position;
+        float scale;
+        if (desc_line_ss >> filename >> position.v[0] >> position.v[1] >> position.v[2] >> scale)
+        {
+            loadObj(filename, position, scale);
+        }
+    }
+}
+
 void Loader::loadMtl(const std::string &filename)
 {
     float Ns, Ni;
@@ -238,32 +261,32 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
             if (buf.size() - 1 == 3)
             {
                 primitives_.push_back(Triangle(vertices[a[0][0]], vertices[a[1][0]], vertices[a[2][0]],
-                                             texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
-                                             texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f),
-                                             texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
-                                             normals.size() > a[0][2] ? normals[a[0][2]] : vec3(0.0f, 0.0f, 0.0f),
-                                             normals.size() > a[1][2] ? normals[a[1][2]] : vec3(0.0f, 0.0f, 0.0f),
-                                             normals.size() > a[2][2] ? normals[a[2][2]] : vec3(0.0f, 0.0f, 0.0f),
-                                             mtl));
+                                               texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                               texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                               texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                               normals.size() > a[0][2] ? normals[a[0][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                               normals.size() > a[1][2] ? normals[a[1][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                               normals.size() > a[2][2] ? normals[a[2][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                               mtl));
             }
             else if (buf.size() - 1 == 4)
             {
                 primitives_.push_back(Triangle(vertices[a[0][0]], vertices[a[1][0]], vertices[a[2][0]],
-                                             texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
-                                             texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f),
-                                             texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
-                                             normals.size() > a[0][2] ? normals[a[0][2]] : vec3(0.0f, 0.0f, 0.0f),
-                                             normals.size() > a[1][2] ? normals[a[1][2]] : vec3(0.0f, 0.0f, 0.0f),
-                                             normals.size() > a[2][2] ? normals[a[2][2]] : vec3(0.0f, 0.0f, 0.0f),
-                                             mtl));
+                                               texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                               texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                               texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                               normals.size() > a[0][2] ? normals[a[0][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                               normals.size() > a[1][2] ? normals[a[1][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                               normals.size() > a[2][2] ? normals[a[2][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                               mtl));
                 primitives_.push_back(Triangle(vertices[a[2][0]], vertices[a[3][0]], vertices[a[0][0]],
-                                             texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
-                                             texcoords.size() > a[3][1] ? texcoords[a[3][1]] : vec3(0.0f, 0.0f, 0.0f),
-                                             texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
-                                             normals.size() > a[2][2] ? normals[a[2][2]] : vec3(0.0f, 0.0f, 0.0f),
-                                             normals.size() > a[3][2] ? normals[a[3][2]] : vec3(0.0f, 0.0f, 0.0f),
-                                             normals.size() > a[0][2] ? normals[a[0][2]] : vec3(0.0f, 0.0f, 0.0f),
-                                             mtl));
+                                               texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                               texcoords.size() > a[3][1] ? texcoords[a[3][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                               texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f),
+                                               normals.size() > a[2][2] ? normals[a[2][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                               normals.size() > a[3][2] ? normals[a[3][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                               normals.size() > a[0][2] ? normals[a[0][2]] : vec3(0.0f, 0.0f, 0.0f),
+                                               mtl));
             }
             else
             {

@@ -19,6 +19,7 @@
 #include <QPushButton>
 #include "glwidget.h"
 #include <QLineEdit>
+#include <QTextEdit>
 
 
 class Widget : public QWidget
@@ -50,9 +51,13 @@ private:
     QLabel label_spp_, label_spp_preview_;
     QLabel label_yaw_, label_pitch_, label_roll_;
     QLabel label_fov_h_, label_aspect_, label_img_w_, label_img_h_, label_preview_level_;
+    QLabel label_scene_;
     int spp_ = 32, spp_preview_ = 8;
     int img_width_ = 256, img_height_ = 256, preview_level_ = 8;
     QTime last_review_render_time_;
+    QTextEdit text_edit_scene_;
+    QPushButton btn_load_scene_;
+    
 
     void bindLineEdit(QLineEdit &line_edit, float &var);
     void bindLineEdit(QLineEdit &line_edit, int &var);
