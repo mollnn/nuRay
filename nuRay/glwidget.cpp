@@ -27,7 +27,8 @@ void GlWidget::initializeGL()
     }
 
     // create and load vertex data
-    QOpenGLVertexArrayObject::Binder{&vao_};
+    vao_.create();
+    vao_.bind();
     vbo_.create();
     vbo_.bind();
     vbo_.allocate(vertices_.data(), sizeof(float) * vertices_.size());
@@ -38,6 +39,9 @@ void GlWidget::initializeGL()
     default_shader_.enableAttributeArray("a_pos");
     default_shader_.setAttributeBuffer("a_normal", GL_FLOAT, sizeof(GLfloat) * 3, 3, sizeof(GLfloat) * 6);
     default_shader_.enableAttributeArray("a_normal");
+
+    vbo_.release();
+    vao_.release();
 }
 
 void GlWidget::resizeGL(int w, int h)
@@ -47,8 +51,9 @@ void GlWidget::resizeGL(int w, int h)
 
 void GlWidget::paintGL()
 {
+    vao_.bind();
     QMatrix4x4 mvp;
-    mvp.perspective(camera_->fov_h * std::max(1.0f, camera_->aspect), 1, 1, 10000);
+    mvp.perspective(atan(tan(camera_->fov_h * 3.14159 / 180 / 2) * std::max(1.0f, camera_->aspect)) * 180 / 3.14159 * 2, 1, 1, 10000);
     vec3 look_at_center = camera_->pos + camera_->gaze * 100.0f;
     mvp.lookAt({camera_->pos[0], camera_->pos[1], camera_->pos[2]},
                {look_at_center[0], look_at_center[1], look_at_center[2]},
@@ -63,10 +68,10 @@ void GlWidget::paintGL()
     default_shader_.setUniformValue(default_shader_.uniformLocation("u_mvp"), mvp);
 
     // bind vao and draw
-    QOpenGLVertexArrayObject::Binder{&vao_};
     this->glDrawArrays(GL_TRIANGLES, 0, vertices_.size());
 
     this->update();
+    vao_.release();
 }
 
 void GlWidget::mousePressEvent(QMouseEvent *event)
@@ -103,6 +108,19 @@ void GlWidget::wheelEvent(QWheelEvent *event)
 void GlWidget::setVertices(const QVector<float> &vertices)
 {
     vertices_ = vertices;
+    if (vao_.isCreated())
+    {
+        qDebug() << "remake";
+        vao_.bind();
+        vbo_.bind();
+        vbo_.allocate(vertices_.data(), sizeof(float) * vertices_.size());
+        default_shader_.setAttributeBuffer("a_pos", GL_FLOAT, 0, 3, sizeof(GLfloat) * 6);
+        default_shader_.enableAttributeArray("a_pos");
+        default_shader_.setAttributeBuffer("a_normal", GL_FLOAT, sizeof(GLfloat) * 3, 3, sizeof(GLfloat) * 6);
+        default_shader_.enableAttributeArray("a_normal");
+        vbo_.release();
+        vao_.release();
+    }
 }
 void GlWidget::setCamera(Camera *camera)
 {
