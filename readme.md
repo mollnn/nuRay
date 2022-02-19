@@ -41,8 +41,8 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 ## Gallary
 
-![mitsuba-envmap-512x512x512](https://img2022.cnblogs.com/blog/1318245/202202/1318245-20220219211134408-1730933502.jpg)
+![mitsuba_gold_512x512x512](docs\imgs\mitsuba_gold_512x512x512.jpg)
 
-![sponza_512x512x256](https://img2022.cnblogs.com/blog/1318245/202202/1318245-20220219211138684-1547635681.jpg)
+![mitsuba-envmap-512x512x512](docs\imgs\mitsuba-envmap-512x512x512.jpg)
 
-![mitsuba_gold_512x512x512](https://img2022.cnblogs.com/blog/1318245/202202/1318245-20220219211140860-1844056350.jpg)
+![sponza_512x512x256](docs\imgs\sponza_512x512x256.jpg)
