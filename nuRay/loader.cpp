@@ -31,18 +31,43 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
         delete j;
     }
     material_dict.clear();
-    MatGGXRefl *forcing_mat = nullptr;
+    Material *forcing_mat = nullptr;
     while (getline(scene_desc_ss, desc_line))
     {
         std::stringstream desc_line_ss(desc_line);
         std::string filename;
-        vec3 position;
-        float scale;
-        if (desc_line_ss >> filename >> position.v[0] >> position.v[1] >> position.v[2] >> scale)
+        vec3 position = 0.0f;
+        float scale = 1.0f;
+        bool ggx = false;
+        vec3 ggx_fr0;
+        float ggx_alpha;
+        if (desc_line_ss >> filename)
         {
+            std::string op;
+            while (desc_line_ss >> op)
+            {
+                if (op == "-p")
+                {
+                    desc_line_ss >> position[0] >> position[1] >> position[2];
+                }
+                else if (op == "-s")
+                {
+                    desc_line_ss >> scale;
+                }
+                else if (op == "-m=ggx")
+                {
+                    desc_line_ss >> ggx_fr0[0] >> ggx_fr0[1] >> ggx_fr0[2] >> ggx_alpha;
+                    ggx = true;
+                }
+            }
+            if (ggx)
+            {
+                forcing_mat = new MatGGXRefl(ggx_fr0, ggx_alpha);
+                material_dict["__ggx_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
+            }
             loadObj(filename, position, scale, forcing_mat);
         }
-        forcing_mat = new MatGGXRefl(0.3, 0.1);
+        forcing_mat = nullptr;
     }
 }
 

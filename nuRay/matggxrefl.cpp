@@ -27,8 +27,8 @@ vec3 MatGGXRefl::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const 
 
     vec3 wh = (wo + wi).normalized();
     vec3 D = pow(alpha_, 2) / 3.14159f / pow(pow(normal.dot(wh), 2) * (pow(alpha_, 2) - 1) + 1, 2);
-    vec3 Gl = 2 * normal.dot(wi) / (normal.dot(wi) * sqrt(pow(alpha_, 2) + (1 - pow(alpha_, 2) * pow(normal.dot(wi), 2))));
-    vec3 Gv = 2 * normal.dot(wo) / (normal.dot(wo) * sqrt(pow(alpha_, 2) + (1 - pow(alpha_, 2) * pow(normal.dot(wo), 2))));
+    vec3 Gl = 2 * normal.dot(wi) / (normal.dot(wi) + sqrt(pow(alpha_ * 0.5 + 0.5, 2) + (1 - pow(alpha_ * 0.5 + 0.5, 2) * pow(normal.dot(wi), 2))));
+    vec3 Gv = 2 * normal.dot(wo) / (normal.dot(wo) + sqrt(pow(alpha_ * 0.5 + 0.5, 2) + (1 - pow(alpha_ * 0.5 + 0.5, 2) * pow(normal.dot(wo), 2))));
     vec3 F = Kd + (vec3(1.0f) - Kd) * pow(1.0f - normal.dot(wi), 5);
     vec3 f = D * Gl * Gv * F / 4 / normal.dot(wo) / normal.dot(wi);
     return f;

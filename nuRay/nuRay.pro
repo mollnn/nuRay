@@ -39,6 +39,7 @@ SOURCES += \
     renderer.cpp \
     texture.cpp \
     triangle.cpp \
+    utils.cpp \
     vec3.cpp \
     widget.cpp
 
@@ -57,6 +58,7 @@ HEADERS += \
     renderer.h \
     texture.h \
     triangle.h \
+    utils.h \
     vec3.h \
     widget.h
 
