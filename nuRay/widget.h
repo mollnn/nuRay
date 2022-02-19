@@ -20,6 +20,7 @@
 #include "glwidget.h"
 #include <QLineEdit>
 #include <QTextEdit>
+#include "texture.h"
 
 
 class Widget : public QWidget
@@ -57,7 +58,7 @@ private:
     QTime last_review_render_time_;
     QTextEdit text_edit_scene_;
     QPushButton btn_load_scene_;
-    
+    Texture env_map;
 
     void bindLineEdit(QLineEdit &line_edit, float &var);
     void bindLineEdit(QLineEdit &line_edit, int &var);

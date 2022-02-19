@@ -41,7 +41,7 @@ const Triangle *LightSampler::sampleLight()
 {
     if (lighting_triangles_.size() == 0)
     {
-        throw("LightSampler::sampleLight() called but no light");
+        return nullptr;
     }
     float r = rand() * 1.0f / RAND_MAX;
     int id = lower_bound(cdf_.begin(), cdf_.end(), r) - cdf_.begin();

@@ -10,7 +10,6 @@ class LightSampler
     std::vector<float> cdf_; // Cumulative distribution function
     std::vector<float> pdf_; // Probability distribution function
     float sum_weight_;
-
 public:
     LightSampler() = default;
     void initialize(const std::vector<Triangle> &scene);

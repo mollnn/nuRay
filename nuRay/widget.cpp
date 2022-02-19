@@ -126,8 +126,7 @@ Widget::Widget(QWidget *parent)
         scene_loader_.fromSceneDescription(text_edit_scene_.toPlainText().toStdString());
         renderer_.prepare(scene_loader_.getTriangles());
         updateVertices();
-        renderRT_preview(); 
-    });
+        renderRT_preview(); });
 
     label_cam_pos_x_.setText(("Cam Pos X"));
     label_cam_pos_y_.setText(("Cam Pos Y"));
@@ -143,6 +142,8 @@ Widget::Widget(QWidget *parent)
     label_img_h_.setText(("Img H"));
     label_preview_level_.setText(("Preview Level"));
     label_scene_.setText("Scene Description");
+
+    env_map.load("envmap.jfif");
 
     this->setLayout(&grid_layout_);
     this->update();
@@ -168,7 +169,7 @@ void Widget::renderRT()
     int padding_width = label_render_result_.width() - final_width;
     int padding_height = label_render_result_.height() - final_height;
 
-    this->renderer_.render(camera_, triangles, img_render_result_, spp_, img_width_, img_height_);
+    this->renderer_.render(camera_, triangles, img_render_result_, spp_, img_width_, img_height_, &env_map);
     label_render_result_.setPixmap(QPixmap::fromImage(img_render_result_.scaled(QSize(final_width, final_height)).copy(-padding_width / 2, -padding_height / 2, label_render_result_.width(), label_render_result_.height())));
 }
 
@@ -186,7 +187,7 @@ void Widget::renderRT_preview()
     int padding_width = label_render_result_.width() - final_width;
     int padding_height = label_render_result_.height() - final_height;
 
-    this->renderer_.render(camera_, triangles, img_render_result_, spp_preview_, img_width_ / preview_level_, img_height_ / preview_level_);
+    this->renderer_.render(camera_, triangles, img_render_result_, spp_preview_, img_width_ / preview_level_, img_height_ / preview_level_, &env_map);
     label_render_result_.setPixmap(QPixmap::fromImage(img_render_result_.scaled(QSize(final_width, final_height)).copy(-padding_width / 2, -padding_height / 2, label_render_result_.width(), label_render_result_.height())));
 }
 

@@ -25,11 +25,22 @@ std::tuple<float, float, float, const Triangle *> Renderer::intersect(const vec3
     return bvh.intersection(origin, dir);
 }
 
-vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible)
+vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Texture *env_map)
 {
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
-        return vec3(0.0f, 0.0f, 0.0f);
+    {
+        if (env_map == nullptr)
+        {
+            return 0.0f;
+        }
+        else
+        {
+            float v = 1 - acos(dir[1]) / 3.14159;
+            float u = atan2(dir[2], dir[0]) / 2 / 3.14159 + 0.5;
+            return env_map->pixelUV(u, v);
+        }
+    }
 
     vec3 wo = -dir;
     vec3 normal = hit_obj->getNormal(b1, b2);
@@ -57,19 +68,22 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     {
         is_light_sampled = true;
         const Triangle *light_obj = light_sampler.sampleLight();
-        auto [light_pos, light_bc1, light_bc2] = light_obj->sample();
-        vec3 light_normal = light_obj->getNormal(light_bc1, light_bc2);
-        vec3 light_uv = light_obj->getTexCoords(light_bc1, light_bc2);
-        vec3 light_vec = light_pos - hit_pos;
-        vec3 wl = light_vec.normalized();
-        vec3 light_int = light_obj->mat->emission(wl, light_normal);
-        float light_pdf = light_sampler.p();
-        auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 1e-3, wl, triangles, bvh);
-        if (light_ray_t + 2e-3 > light_vec.norm())
+        if (light_obj != nullptr)
         {
-            vec3 brdf_ = hit_obj->mat->bxdf(wo, normal, wl, texcoords);
-            vec3 Ll = light_int / light_vec.norm2() * std::max(0.0f, light_normal.dot(-wl)) / light_pdf;
-            result += Ll * brdf_ * std::max(0.0f, normal.dot((light_pos - hit_pos).normalized()));
+            auto [light_pos, light_bc1, light_bc2] = light_obj->sample();
+            vec3 light_normal = light_obj->getNormal(light_bc1, light_bc2);
+            vec3 light_uv = light_obj->getTexCoords(light_bc1, light_bc2);
+            vec3 light_vec = light_pos - hit_pos;
+            vec3 wl = light_vec.normalized();
+            vec3 light_int = light_obj->mat->emission(wl, light_normal);
+            float light_pdf = light_sampler.p();
+            auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 1e-3, wl, triangles, bvh);
+            if (light_ray_t + 2e-3 > light_vec.norm())
+            {
+                vec3 brdf_ = hit_obj->mat->bxdf(wo, normal, wl, texcoords);
+                vec3 Ll = light_int / light_vec.norm2() * std::max(0.0f, light_normal.dot(-wl)) / light_pdf;
+                result += Ll * brdf_ * std::max(0.0f, normal.dot((light_pos - hit_pos).normalized()));
+            }
         }
     }
 
@@ -82,7 +96,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     vec3 wi = hit_obj->mat->sampleBxdf(wo, normal);
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-    vec3 Li = trace(hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled);
+    vec3 Li = trace(hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled, env_map);
     result += Li * wi.dot(normal) * brdf / pdf / prr;
 
     return result;
@@ -99,7 +113,7 @@ void Renderer::prepare(const std::vector<Triangle> &triangles)
     qDebug() << "Prepare finish :)";
 }
 
-void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height)
+void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, const Texture *env_map)
 {
     img = QImage(QSize(img_width, img_height), QImage::Format_RGB888);
 
@@ -125,7 +139,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             for (int i = 0; i < SPP; i++)
             {
                 vec3 ray_dir = camera.generateRay(x + rand() * 1.0f / RAND_MAX, y + rand() * 1.0f / RAND_MAX, img_width, img_height);
-                result += max(0.0f, trace(camera.pos, ray_dir, triangles, light_sampler_, bvh_));
+                result += max(0.0f, trace(camera.pos, ray_dir, triangles, light_sampler_, bvh_, true, env_map));
             }
             result /= SPP;
             // Gamma correction
