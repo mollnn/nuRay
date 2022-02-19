@@ -42,4 +42,6 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 ## Gallary
 
-![](docs\imgs\mitsuba_gold_512x512x512.jpg)
+![](https://github.com/mollnn/nuRay/blob/main/docs/imgs/sponza_512x512x256.jpg?raw=true)
+
+![](https://github.com/mollnn/nuRay/blob/main/docs/imgs/mitsuba_gold_512x512x512.jpg?raw=true)

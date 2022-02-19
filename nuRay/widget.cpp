@@ -125,8 +125,9 @@ Widget::Widget(QWidget *parent)
             {
         scene_loader_.fromSceneDescription(text_edit_scene_.toPlainText().toStdString());
         renderer_.prepare(scene_loader_.getTriangles());
-        glwidget_preview_.vertices_.fromStdVector(scene_loader_.getVerticesNormals());
-        renderRT_preview(); });
+        updateVertices();
+        renderRT_preview(); 
+    });
 
     label_cam_pos_x_.setText(("Cam Pos X"));
     label_cam_pos_y_.setText(("Cam Pos Y"));
@@ -191,7 +192,7 @@ void Widget::renderRT_preview()
 
 void Widget::updateVertices()
 {
-    glwidget_preview_.vertices_ = QVector<float>::fromStdVector(scene_loader_.getVerticesNormals());
+    glwidget_preview_.setVertices(QVector<float>::fromStdVector(scene_loader_.getVerticesNormals()));
 }
 
 void Widget::bindLineEdit(QLineEdit &line_edit, float &var)
