@@ -2,6 +2,7 @@
 #include "matlight.h"
 #include "matlambert.h"
 #include "matblinnphong.h"
+#include "matggxrefl.h"
 #include <QDebug>
 
 Loader::~Loader()
@@ -30,6 +31,7 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
         delete j;
     }
     material_dict.clear();
+    MatGGXRefl *forcing_mat = nullptr;
     while (getline(scene_desc_ss, desc_line))
     {
         std::stringstream desc_line_ss(desc_line);
@@ -38,8 +40,9 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
         float scale;
         if (desc_line_ss >> filename >> position.v[0] >> position.v[1] >> position.v[2] >> scale)
         {
-            loadObj(filename, position, scale);
+            loadObj(filename, position, scale, forcing_mat);
         }
+        forcing_mat = new MatGGXRefl(0.3, 0.1);
     }
 }
 
