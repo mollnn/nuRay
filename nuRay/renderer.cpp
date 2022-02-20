@@ -57,7 +57,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     float u = texcoords[0], v = texcoords[1];
 
     if (normal.dot(dir) > 0 && hit_obj->mat->isTransmission() == false)
-        return vec3(0.0f, 0.0f, 0.0f); 
+        return vec3(0.0f, 0.0f, 0.0f);
 
     vec3 hit_pos = orig + dir * t;
     vec3 result;
@@ -148,6 +148,65 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             img.setPixel(x, y, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
         }
     }
+
+    vec3 *img_raw = new vec3[img_width * img_height];
+    vec3 *img_raw_new = new vec3[img_width * img_height];
+#pragma omp parallel for
+    for (int i = 0; i < img_height; i++)
+    {
+        for (int j = 0; j < img_width; j++)
+        {
+            QColor color = img.pixelColor(j, i);
+            img_raw[(i * img_width + j)][0] = color.red();
+            img_raw[(i * img_width + j)][1] = color.green();
+            img_raw[(i * img_width + j)][2] = color.blue();
+        }
+    }
+
+    auto getPix = [&](int x, int y) -> vec3
+    {
+        x = std::max(x, 0);
+        y = std::max(y, 0);
+        x = std::min(x, img_width - 1);
+        y = std::min(y, img_height - 1);
+        return img_raw[y * img_width + x];
+    };
+
+#pragma omp parallel for
+    for (int y = 0; y < img_height; y++)
+    {
+        for (int x = 0; x < img_width; x++)
+        {
+            float sum_weight = 0.0f;
+            vec3 color;
+            vec3 color_center = getPix(x, y);
+            for (int dy = -2; dy <= 2; dy++)
+            {
+                for (int dx = -2; dx <= 2; dx++)
+                {
+                    vec3 c = getPix(x + dx, y + dy);
+                    float w = exp(-(dx * dx + dy * dy) / (2 * 1.0f)) * exp(-((color_center - c).norm2()) / (2 * 300.0f));
+                    sum_weight += w;
+                    color += w * c;
+                }
+            }
+            img_raw_new[y * img_width + x] = color / sum_weight;
+        }
+    }
+
+#pragma omp parallel for
+    for (int i = 0; i < img_height; i++)
+    {
+        for (int j = 0; j < img_width; j++)
+        {
+            vec3 v = img_raw_new[i * img_width + j];
+            img.setPixel(j, i, qRgb(v[0], v[1], v[2]));
+        }
+    }
+
+    delete[] img_raw;
+    delete[] img_raw_new;
+
     std::cout << std::fixed << std::setprecision(2) << "Rendering... " << 100.0 << "%"
               << "   " << time.elapsed() * 0.001 << " secs used" << std::endl;
 }
