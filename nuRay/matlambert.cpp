@@ -39,6 +39,11 @@ bool MatLambert::isEmission() const
     return false;
 }
 
+bool MatLambert::isTransmission() const
+{
+    return false;
+}
+
 bool MatLambert::requireLightSampling(const vec3 &wo, const vec3 &normal) const
 {
     return true;

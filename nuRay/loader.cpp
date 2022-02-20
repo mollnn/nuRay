@@ -3,6 +3,7 @@
 #include "matlambert.h"
 #include "matblinnphong.h"
 #include "matggxrefl.h"
+#include "matglass.h"
 #include <QDebug>
 
 Loader::~Loader()
@@ -39,8 +40,9 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
         vec3 position = 0.0f;
         float scale = 1.0f;
         bool ggx = false;
-        vec3 ggx_fr0;
-        float ggx_alpha;
+        bool glass = false;
+        vec3 t_vec;
+        float t_ps;
         if (desc_line_ss >> filename)
         {
             std::string op;
@@ -56,14 +58,24 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
                 }
                 else if (op == "-m=ggx")
                 {
-                    desc_line_ss >> ggx_fr0[0] >> ggx_fr0[1] >> ggx_fr0[2] >> ggx_alpha;
+                    desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2] >> t_ps;
                     ggx = true;
+                }
+                else if (op == "-m=glass")
+                {
+                    desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2] >> t_ps;
+                    glass = true;
                 }
             }
             if (ggx)
             {
-                forcing_mat = new MatGGXRefl(ggx_fr0, ggx_alpha);
+                forcing_mat = new MatGGXRefl(t_vec, t_ps);
                 material_dict["__ggx_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
+            }
+            if (glass)
+            {
+                forcing_mat = new MatGlass(t_vec, t_ps);
+                material_dict["__glass_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
             }
             loadObj(filename, position, scale, forcing_mat);
         }

@@ -56,8 +56,8 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     vec3 texcoords = hit_obj->getTexCoords(b1, b2);
     float u = texcoords[0], v = texcoords[1];
 
-    if (normal.dot(dir) > 0)
-        return vec3(0.0f, 0.0f, 0.0f); // ! Back culling, not for refraction
+    if (normal.dot(dir) > 0 && hit_obj->mat->isTransmission() == false)
+        return vec3(0.0f, 0.0f, 0.0f); 
 
     vec3 hit_pos = orig + dir * t;
     vec3 result;
@@ -97,7 +97,7 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
     vec3 Li = trace(hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled, env_map);
-    result += Li * wi.dot(normal) * brdf / pdf / prr;
+    result += Li * abs(wi.dot(normal)) * brdf / pdf / prr;
 
     return result;
 }

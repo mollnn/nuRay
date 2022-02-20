@@ -66,6 +66,11 @@ bool MatGGXRefl::isEmission() const
     return false;
 }
 
+bool MatGGXRefl::isTransmission() const
+{
+    return false;
+}
+
 bool MatGGXRefl::requireLightSampling(const vec3 &wo, const vec3 &normal) const
 {
     return true;

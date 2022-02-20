@@ -64,6 +64,11 @@ bool MatBlinnPhong::isEmission() const
     return false;
 }
 
+bool MatBlinnPhong::isTransmission() const
+{
+    return false;
+}
+
 bool MatBlinnPhong::requireLightSampling(const vec3 &wo, const vec3 &normal) const
 {
     return true;

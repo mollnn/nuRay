@@ -22,6 +22,11 @@ bool MatLight::isEmission() const
     return true;
 }
 
+bool MatLight::isTransmission() const
+{
+    return true;
+}
+
 bool MatLight::requireLightSampling(const vec3 &wo, const vec3 &normal) const
 {
     return false;

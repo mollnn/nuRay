@@ -34,6 +34,7 @@ SOURCES += \
     main.cpp \
     matblinnphong.cpp \
     matggxrefl.cpp \
+    matglass.cpp \
     matlambert.cpp \
     matlight.cpp \
     renderer.cpp \
@@ -53,6 +54,7 @@ HEADERS += \
     matblinnphong.h \
     material.h \
     matggxrefl.h \
+    matglass.h \
     matlambert.h \
     matlight.h \
     renderer.h \

@@ -1,19 +1,18 @@
-#ifndef __MAT_GGX_REFL_H_
-#define __MAT_GGX_REFL_H_
+#ifndef __MAT_GLASS_H_
+#define __MAT_GLASS_H_
 
 #include "material.h"
 #include "texture.h"
 
-class MatGGXRefl : public Material
+class MatGlass : public Material
 {
 public:
-    // Fr0
-    vec3 Kd_;
-    bool usetex_Kd_;
-    Texture map_Kd_;
-    float alpha_;
+    vec3 Kt_;
+    bool usetex_Kt_;
+    Texture map_Kt_;
+    float It_;
 
-    MatGGXRefl(const vec3& Kd = 0.0f, float alpha = 0.5f);
+    MatGlass(const vec3& Kt = 0.0f,  float It_ = 0.0f);
 
     virtual vec3 sampleBxdf(const vec3 &wo, const vec3 &normal) const override;
     virtual vec3 bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const override;
