@@ -102,6 +102,23 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     return result;
 }
 
+vec3 Renderer::traceDepth(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh)
+{
+    auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
+    return t;
+}
+
+vec3 Renderer::traceNormal(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh)
+{
+    auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
+    if (hit_obj == nullptr)
+    {
+        return 0.0f;
+    }
+    vec3 normal = hit_obj->getNormal(b1, b2);
+    return normal;
+}
+
 void Renderer::prepare(const std::vector<Triangle> &triangles)
 {
     qDebug() << "Builing Light Sampler...";
@@ -120,6 +137,9 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
     QTime time;
     time.start();
     auto time_last = time.elapsed();
+
+    vec3 *img_depth = new vec3[img_width * img_height];
+    vec3 *img_normal = new vec3[img_width * img_height];
 
     std::cout << "Rendering... " << std::endl;
     for (int y = 0; y < img_height; y++)
@@ -146,6 +166,10 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             result = result.pow(1.0 / 2.2);
             result *= 255.0f;
             img.setPixel(x, y, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
+
+            vec3 ray_dir = camera.generateRay(x + 0.5f, y + 0.5f, img_width, img_height);
+            img_depth[y * img_width + x] = traceDepth(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
+            img_normal[y * img_width + x] = traceNormal(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
         }
     }
 
@@ -163,13 +187,13 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
         }
     }
 
-    auto getPix = [&](int x, int y) -> vec3
+    auto getPix = [&](vec3 *arr, int x, int y) -> vec3
     {
         x = std::max(x, 0);
         y = std::max(y, 0);
         x = std::min(x, img_width - 1);
         y = std::min(y, img_height - 1);
-        return img_raw[y * img_width + x];
+        return arr[y * img_width + x];
     };
 
 #pragma omp parallel for
@@ -179,13 +203,17 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
         {
             float sum_weight = 0.0f;
             vec3 color;
-            vec3 color_center = getPix(x, y);
+            vec3 color_center = getPix(img_raw, x, y);
+            vec3 depth_center = getPix(img_depth, x, y);
+            vec3 normal_center = getPix(img_depth, x, y);
             for (int dy = -2; dy <= 2; dy++)
             {
                 for (int dx = -2; dx <= 2; dx++)
                 {
-                    vec3 c = getPix(x + dx, y + dy);
-                    float w = exp(-(dx * dx + dy * dy) / (2 * 1.0f)) * exp(-((color_center - c).norm2()) / (2 * 300.0f));
+                    vec3 c = getPix(img_raw, x + dx, y + dy);
+                    vec3 d = getPix(img_depth, x + dx, y + dy);
+                    vec3 n = getPix(img_normal, x + dx, y + dy);
+                    float w = exp(-(dx * dx + dy * dy) / (2 * 1.0f)) * exp(-((color_center - c).norm2()) / (2 * 300.0f)) * exp(-((depth_center - d).norm2()) / (2 * 500.0f)) * exp(-((depth_center - d).norm2()) / 1.0f);
                     sum_weight += w;
                     color += w * c;
                 }
@@ -206,6 +234,8 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
 
     delete[] img_raw;
     delete[] img_raw_new;
+    delete[] img_depth;
+    delete[] img_normal;
 
     std::cout << std::fixed << std::setprecision(2) << "Rendering... " << 100.0 << "%"
               << "   " << time.elapsed() * 0.001 << " secs used" << std::endl;
