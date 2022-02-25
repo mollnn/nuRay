@@ -28,16 +28,15 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 - CPU parallelization via multithreading (OpenMP)
 
-- GUI with Qt, Raster-based preview via OpenGL and interactive camera control
-
-
-### WIP
+- Denoising (JBF)
 
 - Transmission Materials
 
-- Bump mapping
+- GUI with Qt, Raster-based preview via OpenGL and interactive camera control
 
-- Denoising (JBF)
+### WIP
+
+- Bump mapping
 
 
 ### Future
