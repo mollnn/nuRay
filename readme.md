@@ -37,6 +37,9 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 ### WIP
 
 - Bump mapping
+- Tessellation Displacement Mapping
+- Multiple Importance Sampling
+- Bidirectional Path Tracing
 
 
 ### Future
