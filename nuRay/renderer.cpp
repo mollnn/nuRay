@@ -130,9 +130,9 @@ void Renderer::prepare(const std::vector<Triangle> &triangles)
     qDebug() << "Prepare finish :)";
 }
 
-void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> callback, const Texture *env_map)
+void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, const Texture *env_map)
 {
-    callback(false);
+    requestDisplayUpdate(false);
     img = QImage(QSize(img_width, img_height), QImage::Format_RGB888);
     img.fill(Qt::black);
 
@@ -144,37 +144,84 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
     vec3 *img_normal = new vec3[img_width * img_height];
 
     std::cout << "Rendering... " << std::endl;
-    for (int y = 0; y < img_height; y++)
+
+    std::atomic<int> pxc = 0;
+
+    auto requestProgressUpdate = [&]()
     {
-        float progress = y * 1.0f / img_height;
+        float progress = pxc * 1.0f / img_height / img_width;
         if (time.elapsed() - time_last > 1000)
         {
             std::cout << std::fixed << std::setprecision(2) << "Rendering... " << progress * 100 << "%"
                       << "   " << time.elapsed() * 0.001 << " secs used" << std::endl;
             time_last = time.elapsed();
         }
+    };
 
-#pragma omp parallel for
-        for (int x = 0; x < img_width; x++)
+    int block_size = 8;
+    std::vector<std::pair<int, int>> task_queue;
+    std::mutex task_mutex;
+
+    for (int y = 0; y < img_height; y += block_size)
+    {
+        for (int x = 0; x < img_width; x += block_size)
         {
-            vec3 result;
-            for (int i = 0; i < SPP; i++)
-            {
-                vec3 ray_dir = camera.generateRay(x + rand() * 1.0f / RAND_MAX, y + rand() * 1.0f / RAND_MAX, img_width, img_height);
-                result += max(0.0f, trace(camera.pos, ray_dir, triangles, light_sampler_, bvh_, true, env_map));
-            }
-            result /= SPP;
-            // Gamma correction
-            result = result.pow(1.0 / 2.2);
-            result *= 255.0f;
-            img.setPixel(x, y, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
-
-            vec3 ray_dir = camera.generateRay(x + 0.5f, y + 0.5f, img_width, img_height);
-            img_depth[y * img_width + x] = traceDepth(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
-            img_normal[y * img_width + x] = traceNormal(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
+            task_queue.push_back({x, y});
         }
+    }
 
-        callback(false);
+    std::random_shuffle(task_queue.begin(), task_queue.end());
+
+    auto workerFunc = [&]()
+    {
+        while (true)
+        {
+            task_mutex.lock();
+            if (task_queue.size() == 0)
+            {
+                task_mutex.unlock();
+                break;
+            }
+            auto [x0, y0] = task_queue.back();
+            task_queue.pop_back();
+            task_mutex.unlock();
+
+            for (int y = y0; y < img_height && y < y0 + block_size; y++)
+            {
+                for (int x = x0; x < img_width && x < x0 + block_size; x++)
+                {
+                    vec3 result;
+                    for (int i = 0; i < SPP; i++)
+                    {
+                        vec3 ray_dir = camera.generateRay(x + rand() * 1.0f / RAND_MAX, y + rand() * 1.0f / RAND_MAX, img_width, img_height);
+                        result += max(0.0f, trace(camera.pos, ray_dir, triangles, light_sampler_, bvh_, true, env_map));
+                    }
+                    result /= SPP;
+                    // Gamma correction
+                    result = result.pow(1.0 / 2.2);
+                    result *= 255.0f;
+                    img.setPixel(x, y, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
+
+                    vec3 ray_dir = camera.generateRay(x + 0.5f, y + 0.5f, img_width, img_height);
+                    img_depth[y * img_width + x] = traceDepth(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
+                    img_normal[y * img_width + x] = traceNormal(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
+                }
+            }
+            pxc += block_size * block_size;
+            requestProgressUpdate();
+            // requestDisplayUpdate(false);
+        }
+    };
+
+    int num_threads = 8;
+    std::vector<std::thread> ths;
+    for (int i = 0; i < num_threads; i++)
+    {
+        ths.push_back(std::thread(workerFunc));
+    }
+    for (auto &i : ths)
+    {
+        i.join();
     }
 
     // Post processing
@@ -245,5 +292,5 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
 
     std::cout << std::fixed << std::setprecision(2) << "Rendering... " << 100.0 << "%"
               << "   " << time.elapsed() * 0.001 << " secs used" << std::endl;
-    callback(true);
+    requestDisplayUpdate(true);
 }
