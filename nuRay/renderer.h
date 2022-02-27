@@ -23,6 +23,7 @@ public:
 private:
     BVH bvh_;
     LightSampler light_sampler_;
+
 };
 
 #endif

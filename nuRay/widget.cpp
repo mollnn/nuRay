@@ -1,6 +1,7 @@
 #include "widget.h"
 #include <QDoubleValidator>
 #include <QSizePolicy>
+#include <QApplication>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
@@ -215,4 +216,5 @@ void Widget::framebufferUpdated(bool forcing)
     int padding_height = label_render_result_.height() - final_height;
     label_render_result_.setPixmap(QPixmap::fromImage(framebuffer_.scaled(QSize(final_width, final_height)).copy(-padding_width / 2, -padding_height / 2, label_render_result_.width(), label_render_result_.height())));
     label_render_result_.repaint();
+    QApplication::processEvents();
 }

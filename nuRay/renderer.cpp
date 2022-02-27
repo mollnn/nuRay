@@ -4,6 +4,8 @@
 #include "bvh.h"
 #include <QTime>
 #include <QDebug>
+#include <QTimer>
+#include <QEventLoop>
 
 std::tuple<float, float, float, const Triangle *> Renderer::intersect(const vec3 &origin, const vec3 &dir, const std::vector<Triangle> &triangles, BVH &bvh)
 {
@@ -162,6 +164,8 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
     std::vector<std::pair<int, int>> task_queue;
     std::mutex task_mutex;
 
+    std::atomic request_disp_update = 0;
+
     for (int y = 0; y < img_height; y += block_size)
     {
         for (int x = 0; x < img_width; x += block_size)
@@ -209,7 +213,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             }
             pxc += block_size * block_size;
             requestProgressUpdate();
-            // requestDisplayUpdate(false);
+            request_disp_update = 1;
         }
     };
 
@@ -219,6 +223,24 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
     {
         ths.push_back(std::thread(workerFunc));
     }
+
+    while (pxc < img_width * img_height)
+    {
+        if (request_disp_update == 1)
+        {
+            request_disp_update = 0;
+            requestDisplayUpdate(false);
+        }
+        // Just delay
+        QEventLoop loop;
+        QTimer timer;
+        timer.setInterval(100);
+        timer.start();
+        QObject::connect(&timer, &QTimer::timeout, [&]()
+                { loop.quit(); });
+        loop.exec();
+    }
+
     for (auto &i : ths)
     {
         i.join();
