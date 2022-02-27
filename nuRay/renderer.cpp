@@ -130,9 +130,11 @@ void Renderer::prepare(const std::vector<Triangle> &triangles)
     qDebug() << "Prepare finish :)";
 }
 
-void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, const Texture *env_map)
+void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> callback, const Texture *env_map)
 {
+    callback(false);
     img = QImage(QSize(img_width, img_height), QImage::Format_RGB888);
+    img.fill(Qt::black);
 
     QTime time;
     time.start();
@@ -171,7 +173,11 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             img_depth[y * img_width + x] = traceDepth(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
             img_normal[y * img_width + x] = traceNormal(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
         }
+
+        callback(false);
     }
+
+    // Post processing
 
     vec3 *img_raw = new vec3[img_width * img_height];
     vec3 *img_raw_new = new vec3[img_width * img_height];
@@ -239,4 +245,5 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
 
     std::cout << std::fixed << std::setprecision(2) << "Rendering... " << 100.0 << "%"
               << "   " << time.elapsed() * 0.001 << " secs used" << std::endl;
+    callback(true);
 }

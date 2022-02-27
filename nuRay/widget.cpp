@@ -4,7 +4,7 @@
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
-      img_render_result_(QSize(1, 1), QImage::Format_RGB888),
+      framebuffer_(QSize(1, 1), QImage::Format_RGB888),
       btn_render_("Render")
 {
 
@@ -159,18 +159,13 @@ void Widget::renderRT()
     QTime timer;
     timer.start();
     std::cout << "Loading scene..." << std::endl;
-
     auto &triangles = scene_loader_.getTriangles();
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
-
-    int final_width = std::min(label_render_result_.width(), label_render_result_.height() * img_width_ / img_height_);
-    int final_height = std::min(label_render_result_.height(), label_render_result_.width() * img_height_ / img_width_);
-
-    int padding_width = label_render_result_.width() - final_width;
-    int padding_height = label_render_result_.height() - final_height;
-
-    this->renderer_.render(camera_, triangles, img_render_result_, spp_, img_width_, img_height_, &env_map);
-    label_render_result_.setPixmap(QPixmap::fromImage(img_render_result_.scaled(QSize(final_width, final_height)).copy(-padding_width / 2, -padding_height / 2, label_render_result_.width(), label_render_result_.height())));
+    this->renderer_.render(
+        camera_, triangles, framebuffer_, spp_, img_width_, img_height_, [&](bool f)
+        { framebufferUpdated(f); },
+        &env_map);
+    framebufferUpdated();
 }
 
 void Widget::renderRT_preview()
@@ -179,16 +174,12 @@ void Widget::renderRT_preview()
         return;
 
     last_review_render_time_ = QTime::currentTime();
-
     auto &triangles = scene_loader_.getTriangles();
-
-    int final_width = std::min(label_render_result_.width(), label_render_result_.height() * img_width_ / img_height_);
-    int final_height = std::min(label_render_result_.height(), label_render_result_.width() * img_height_ / img_width_);
-    int padding_width = label_render_result_.width() - final_width;
-    int padding_height = label_render_result_.height() - final_height;
-
-    this->renderer_.render(camera_, triangles, img_render_result_, spp_preview_, img_width_ / preview_level_, img_height_ / preview_level_, &env_map);
-    label_render_result_.setPixmap(QPixmap::fromImage(img_render_result_.scaled(QSize(final_width, final_height)).copy(-padding_width / 2, -padding_height / 2, label_render_result_.width(), label_render_result_.height())));
+    this->renderer_.render(
+        camera_, triangles, framebuffer_, spp_preview_, img_width_ / preview_level_, img_height_ / preview_level_, [&](bool f)
+        { framebufferUpdated(f); },
+        &env_map);
+    framebufferUpdated();
 }
 
 void Widget::updateVertices()
@@ -210,4 +201,18 @@ void Widget::bindLineEdit(QLineEdit &line_edit, int &var)
     line_edit.setText(QString::number(var));
     connect(&line_edit, &QLineEdit::editingFinished, [&]()
             { var = line_edit.text().toDouble(); renderRT_preview(); });
+}
+
+void Widget::framebufferUpdated(bool forcing)
+{
+    static QTime last_time = QTime::currentTime().addMSecs(-1e9);
+    if (!forcing && last_time.msecsTo(QTime::currentTime()) < 200) // Minimal refresh interval
+        return;
+    last_time = QTime::currentTime();
+    int final_width = std::min(label_render_result_.width(), label_render_result_.height() * img_width_ / img_height_);
+    int final_height = std::min(label_render_result_.height(), label_render_result_.width() * img_height_ / img_width_);
+    int padding_width = label_render_result_.width() - final_width;
+    int padding_height = label_render_result_.height() - final_height;
+    label_render_result_.setPixmap(QPixmap::fromImage(framebuffer_.scaled(QSize(final_width, final_height)).copy(-padding_width / 2, -padding_height / 2, label_render_result_.width(), label_render_result_.height())));
+    label_render_result_.repaint();
 }

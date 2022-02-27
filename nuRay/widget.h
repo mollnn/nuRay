@@ -34,12 +34,14 @@ public:
     void renderRT();
     void renderRT_preview();
     void updateVertices();
+    
+    void framebufferUpdated(bool forcing = true);
 
 private:
     QGridLayout grid_layout_;
     QLabel label_render_result_;
     Camera camera_;
-    QImage img_render_result_;
+    QImage framebuffer_;
     Loader scene_loader_;
     QPushButton btn_render_;
     GlWidget glwidget_preview_;
