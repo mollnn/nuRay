@@ -18,7 +18,7 @@ class GlWidget : public QOpenGLWidget, public QOpenGLExtraFunctions
 {
     Q_OBJECT
 
-public:
+private:
     QOpenGLShaderProgram default_shader_;
     QOpenGLBuffer vbo_;
     QOpenGLVertexArrayObject vao_;

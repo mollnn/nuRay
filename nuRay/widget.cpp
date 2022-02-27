@@ -38,7 +38,7 @@ Widget::Widget(QWidget *parent)
 
     updateVertices();
 
-    glwidget_preview_.camera_ = &camera_;
+    glwidget_preview_.setCamera(&camera_);
 
     auto &triangles = scene_loader_.getTriangles();
     this->renderer_.prepare(triangles);
@@ -100,21 +100,21 @@ Widget::Widget(QWidget *parent)
     line_edit_yaw_.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit_yaw_.setText(QString::number(camera_.toEuler()[0], 'f', 4));
     connect(&line_edit_yaw_, &QLineEdit::editingFinished, [&]()
-            { if(line_edit_yaw_.text().toFloat() == camera_.toEuler()[0]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); });
+            { if(line_edit_yaw_.text().toFloat() == camera_.toEuler()[0]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); glwidget_preview_.update(); });
 
     grid_layout_.addWidget(&line_edit_pitch_, 31, 51, 1, 4);
     grid_layout_.addWidget(&label_pitch_, 31, 50, 1, 1);
     line_edit_pitch_.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit_pitch_.setText(QString::number(camera_.toEuler()[1], 'f', 4));
     connect(&line_edit_pitch_, &QLineEdit::editingFinished, [&]()
-            { if(line_edit_pitch_.text().toFloat() == camera_.toEuler()[1]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); });
+            { if(line_edit_pitch_.text().toFloat() == camera_.toEuler()[1]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); glwidget_preview_.update(); });
 
     grid_layout_.addWidget(&line_edit_roll_, 32, 51, 1, 4);
     grid_layout_.addWidget(&label_roll_, 32, 50, 1, 1);
     line_edit_roll_.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit_roll_.setText(QString::number(camera_.toEuler()[2], 'f', 4));
     connect(&line_edit_roll_, &QLineEdit::editingFinished, [&]()
-            { if(line_edit_roll_.text().toFloat() == camera_.toEuler()[2]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); });
+            { if(line_edit_roll_.text().toFloat() == camera_.toEuler()[2]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); glwidget_preview_.update(); });
 
     btn_load_scene_.setText("Load");
     grid_layout_.addWidget(&label_scene_, 40, 50, 1, 1);

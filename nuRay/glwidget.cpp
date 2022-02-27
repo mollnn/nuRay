@@ -69,8 +69,6 @@ void GlWidget::paintGL()
 
     // bind vao and draw
     this->glDrawArrays(GL_TRIANGLES, 0, vertices_.size());
-
-    this->update();
     vao_.release();
 }
 
@@ -82,6 +80,7 @@ void GlWidget::mousePressEvent(QMouseEvent *event)
 void GlWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     emit cameraChanged();
+    this->update();
 }
 
 void GlWidget::mouseMoveEvent(QMouseEvent *event)
@@ -97,12 +96,14 @@ void GlWidget::mouseMoveEvent(QMouseEvent *event)
         camera_->go(-mouse_delta.x() * 1, mouse_delta.y() * 1, 0.0);
     }
     last_mouse_pos_ = event->pos();
+    this->update();
 }
 
 void GlWidget::wheelEvent(QWheelEvent *event)
 {
     camera_->go(0.0, 0.0, event->delta() * 0.1);
     emit cameraChanged();
+    this->update();
 }
 
 void GlWidget::setVertices(const QVector<float> &vertices)
@@ -121,8 +122,11 @@ void GlWidget::setVertices(const QVector<float> &vertices)
         vbo_.release();
         vao_.release();
     }
+    this->update();
 }
+
 void GlWidget::setCamera(Camera *camera)
 {
     camera_ = camera;
+    this->update();
 }
