@@ -11,13 +11,13 @@ Widget::Widget(QWidget *parent)
 {
 
     label_render_result_.setMinimumSize(QSize(512, 384));
-    QSizePolicy qsp = label_render_result_.sizePolicy();
-    qsp.setHorizontalPolicy(QSizePolicy::MinimumExpanding);
-    qsp.setVerticalStretch(5);
-    qsp.setHorizontalStretch(5);
-    label_render_result_.setSizePolicy(qsp);
+    QSizePolicy qt_size_policy = label_render_result_.sizePolicy();
+    qt_size_policy.setHorizontalPolicy(QSizePolicy::MinimumExpanding);
+    qt_size_policy.setVerticalStretch(5);
+    qt_size_policy.setHorizontalStretch(5);
+    label_render_result_.setSizePolicy(qt_size_policy);
 
-    grid_layout_.addWidget(&label_render_result_, 0, 0, 50, 50);
+    grid_layout_.addWidget(&label_render_result_, 0, 0, 49, 50);
     grid_layout_.addWidget(&btn_render_, 49, 52, 1, 1);
     grid_layout_.addWidget(&btn_cancel_, 49, 54, 1, 1);
 
@@ -125,6 +125,7 @@ Widget::Widget(QWidget *parent)
     grid_layout_.addWidget(&label_scene_, 40, 50, 1, 1);
     grid_layout_.addWidget(&text_edit_scene_, 41, 50, 8, 5);
     grid_layout_.addWidget(&btn_load_scene_, 49, 50, 1, 1);
+    grid_layout_.addWidget(&progress_bar_, 49, 0, 1, 50);
 
     connect(&btn_load_scene_, &QPushButton::clicked, [&]()
             {
@@ -147,6 +148,11 @@ Widget::Widget(QWidget *parent)
     label_img_h_.setText(("Img H"));
     label_preview_level_.setText(("Preview Level"));
     label_scene_.setText("Scene Description");
+
+    progress_bar_.setMinimum(0);
+    progress_bar_.setMaximum(100 * 100);
+    progress_bar_.setOrientation(Qt::Horizontal);
+    progress_bar_.setValue(50);
 
     env_map.load("envmap.jfif");
 
@@ -176,6 +182,8 @@ void Widget::renderRT()
         camera_, triangles, framebuffer_, spp_, img_width_, img_height_, [&](bool f)
         { framebufferUpdated(f); },
         render_control_flag_,
+        [&](float p)
+        { progress_ = p / 100.0f; },
         &env_map);
     framebufferUpdated();
 }
@@ -192,6 +200,8 @@ void Widget::renderRT_preview()
         camera_, triangles, framebuffer_, spp_preview_, img_width_ / preview_level_, img_height_ / preview_level_, [&](bool f)
         { framebufferUpdated(f); },
         render_control_flag_,
+        [&](float p)
+        { progress_ = p / 100.0f; },
         &env_map);
     framebufferUpdated();
 }
@@ -229,5 +239,6 @@ void Widget::framebufferUpdated(bool forcing)
     int padding_height = label_render_result_.height() - final_height;
     label_render_result_.setPixmap(QPixmap::fromImage(framebuffer_.scaled(QSize(final_width, final_height)).copy(-padding_width / 2, -padding_height / 2, label_render_result_.width(), label_render_result_.height())));
     label_render_result_.repaint();
+    progress_bar_.setValue(progress_ * 10000);
     QApplication::processEvents();
 }

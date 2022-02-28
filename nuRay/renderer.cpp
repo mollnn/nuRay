@@ -132,7 +132,7 @@ void Renderer::prepare(const std::vector<Triangle> &triangles)
     qDebug() << "Prepare finish :)";
 }
 
-void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, const Texture *env_map)
+void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, const Texture *env_map)
 {
     requestDisplayUpdate(false);
     img = QImage(QSize(img_width, img_height), QImage::Format_RGB888);
@@ -152,6 +152,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
     auto requestProgressUpdate = [&]()
     {
         float progress = pxc * 1.0f / img_height / img_width;
+        progress_report(progress * 100);
         if (time.elapsed() - time_last > 1000)
         {
             std::cout << std::fixed << std::setprecision(2) << "Rendering... " << progress * 100 << "%"

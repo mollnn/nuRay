@@ -20,8 +20,8 @@
 #include "glwidget.h"
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QProgressBar>
 #include "texture.h"
-
 
 class Widget : public QWidget
 {
@@ -36,7 +36,7 @@ public:
     void renderRT();
     void renderRT_preview();
     void updateVertices();
-    
+
     void framebufferUpdated(bool forcing = true);
 
 private:
@@ -65,9 +65,10 @@ private:
     QPushButton btn_load_scene_;
     Texture env_map;
     std::atomic<int> render_control_flag_;
+    std::atomic<float> progress_;
+    QProgressBar progress_bar_;
 
     void bindLineEdit(QLineEdit &line_edit, float &var);
     void bindLineEdit(QLineEdit &line_edit, int &var);
-
 };
 #endif // WIDGET_H
