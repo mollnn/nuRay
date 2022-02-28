@@ -38,8 +38,11 @@ Widget::Widget(QWidget *parent)
     camera_.fov_h = 20.0f;
     camera_.aspect = 1.0;
 
-    text_edit_scene_.setText("test/test2.obj -p 0 1000 0 -s 50 \nmitsuba/mitsuba.obj -p 0 0 0 -s 50");
-    scene_loader_.fromSceneDescription("test/test2.obj -p 0 1000 0 -s 50 \nmitsuba/mitsuba.obj -p 0 0 0 -s 50");
+    text_edit_scene_.setText("cube/cube.obj -p 0 0 0 -s 100 -m=ggx 0.8 0.8 0.8 0.3 1.5");
+    scene_loader_.fromSceneDescription("cube/cube.obj -p 0 0 0 -s 100 -m=ggx 0.8 0.8 0.8 0.3 1.5");
+
+    // text_edit_scene_.setText("test/test2.obj -p 0 1000 0 -s 50 \nmitsuba/mitsuba.obj -p 0 0 0 -s 50");
+    // scene_loader_.fromSceneDescription("test/test2.obj -p 0 1000 0 -s 50 \nmitsuba/mitsuba.obj -p 0 0 0 -s 50");
 
     updateVertices();
 

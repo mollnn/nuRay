@@ -22,6 +22,8 @@ vec3 MatGGX::sampleBxdf(const vec3 &wo, const vec3 &normal) const
 
 vec3 MatGGX::F(const vec3 &v, const vec3 &m, const vec3 &Kd) const
 {
+    if (v.dot(m) < 0)
+        return 0.0f;
     return Kd + (vec3(1.0f) - Kd) * pow(1 - v.dot(m), 5);
 }
 
@@ -31,7 +33,7 @@ float MatGGX::G1(const vec3 &v, const vec3 &m, const vec3 &n) const
     float vn = v.dot(n);
     if (vm * vn < 0)
         return 0.0f;
-    float r2 = 1.0f + pow(alpha_ * tan(acos(vm)), 2);
+    float r2 = 1.0f + pow(alpha_ * tan(acos(vn)), 2);
     return 2.0f / (1.0f + sqrt(r2));
 }
 
@@ -49,6 +51,7 @@ float MatGGX::D(const vec3 &m, const vec3 &n) const
 
 vec3 MatGGX::fr(const vec3 &i, const vec3 &o, const vec3 &n, const vec3 &Kd) const
 {
+    return 0.0f;
     vec3 h = (i + o).normalized();
     vec3 nn = i.dot(n) > 0 ? n : -n;
     vec3 f = F(i, h, Kd);
@@ -60,14 +63,15 @@ vec3 MatGGX::fr(const vec3 &i, const vec3 &o, const vec3 &n, const vec3 &Kd) con
 
 vec3 MatGGX::ft(const vec3 &i, const vec3 &o, const vec3 &n, const vec3 &Kd) const
 {
-    float eta = i.dot(n) > 0 ? eta : 1.0f / eta; // eta_o / eta_i
+    float eta = i.dot(n) > 0 ? ior_ : 1.0f / ior_; // eta_o / eta_i
     vec3 h = -(i + eta * o).normalized();
     float A = abs(i.dot(h) * o.dot(h) / i.dot(n) / o.dot(n));
     vec3 nn = i.dot(n) > 0 ? n : -n;
+    vec3 hh = i.dot(h) > 0 ? h : -h;
     vec3 f = F(i, h, Kd);
-    vec3 g = G(i, o, h, nn);
-    vec3 d = D(h, nn);
-    vec3 numer = pow(eta, 2) * (vec3(1.0f) - f) * g * h;
+    vec3 g = G(i, o, h, n);
+    vec3 d = D(h, n);
+    vec3 numer = pow(eta, 2) * (vec3(1.0f) - f) * g * d;
     float denom = pow(i.dot(h) + eta * o.dot(h), 2);
     return A * numer / (denom + 1e-6f);
 }
