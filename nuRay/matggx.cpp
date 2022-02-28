@@ -149,7 +149,7 @@ bool MatGGX::isTransmission() const
 
 bool MatGGX::requireLightSampling(const vec3 &wo, const vec3 &normal) const
 {
-    return true;
+    return false;
 }
 
 vec3 MatGGX::emission(const vec3 &wo, const vec3 &normal) const
