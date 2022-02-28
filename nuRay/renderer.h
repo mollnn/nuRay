@@ -18,7 +18,7 @@ class Renderer
 
 public:
     void prepare(const std::vector<Triangle> &triangles);
-    void render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> callback, const Texture *env_map = nullptr);
+    void render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> callback, std::atomic<int>& con_flag, const Texture *env_map = nullptr);
 
 private:
     BVH bvh_;

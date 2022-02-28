@@ -132,7 +132,7 @@ void Renderer::prepare(const std::vector<Triangle> &triangles)
     qDebug() << "Prepare finish :)";
 }
 
-void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, const Texture *env_map)
+void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, const Texture *env_map)
 {
     requestDisplayUpdate(false);
     img = QImage(QSize(img_width, img_height), QImage::Format_RGB888);
@@ -180,6 +180,11 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
     {
         while (true)
         {
+            if (con_flag == 0)
+            {
+                break;
+            }
+
             task_mutex.lock();
             if (task_queue.size() == 0)
             {
@@ -237,13 +242,23 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
         timer.setInterval(100);
         timer.start();
         QObject::connect(&timer, &QTimer::timeout, [&]()
-                { loop.quit(); });
+                         { loop.quit(); });
         loop.exec();
+        if (con_flag == 0)
+        {
+            break;
+        }
     }
 
     for (auto &i : ths)
     {
         i.join();
+    }
+
+    if (con_flag == 0)
+    {
+        std::cout << "Cancelled" << std::endl;
+        return;
     }
 
     // Post processing
@@ -314,5 +329,6 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
 
     std::cout << std::fixed << std::setprecision(2) << "Rendering... " << 100.0 << "%"
               << "   " << time.elapsed() * 0.001 << " secs used" << std::endl;
+    con_flag = 0;
     requestDisplayUpdate(true);
 }

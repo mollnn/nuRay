@@ -6,7 +6,8 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
       framebuffer_(QSize(1, 1), QImage::Format_RGB888),
-      btn_render_("Render")
+      btn_render_("Render"),
+      btn_cancel_("Cancel")
 {
 
     label_render_result_.setMinimumSize(QSize(512, 384));
@@ -17,10 +18,13 @@ Widget::Widget(QWidget *parent)
     label_render_result_.setSizePolicy(qsp);
 
     grid_layout_.addWidget(&label_render_result_, 0, 0, 50, 50);
-    grid_layout_.addWidget(&btn_render_, 49, 54, 1, 1);
+    grid_layout_.addWidget(&btn_render_, 49, 52, 1, 1);
+    grid_layout_.addWidget(&btn_cancel_, 49, 54, 1, 1);
 
     connect(&btn_render_, &QPushButton::clicked, [&]()
             { renderRT(); });
+    connect(&btn_cancel_, &QPushButton::clicked, [&]()
+            { render_control_flag_ = 0; });
 
     glwidget_preview_.setFixedHeight(512);
     glwidget_preview_.setFixedWidth(512);
@@ -154,8 +158,14 @@ Widget::~Widget()
 {
 }
 
+void Widget::resizeEvent(QResizeEvent *event)
+{
+    framebufferUpdated();
+}
+
 void Widget::renderRT()
 {
+    render_control_flag_ = 1;
     // Render
     QTime timer;
     timer.start();
@@ -165,6 +175,7 @@ void Widget::renderRT()
     this->renderer_.render(
         camera_, triangles, framebuffer_, spp_, img_width_, img_height_, [&](bool f)
         { framebufferUpdated(f); },
+        render_control_flag_,
         &env_map);
     framebufferUpdated();
 }
@@ -174,11 +185,13 @@ void Widget::renderRT_preview()
     if (last_review_render_time_.msecsTo(QTime::currentTime()) < 500)
         return;
 
+    render_control_flag_ = 1;
     last_review_render_time_ = QTime::currentTime();
     auto &triangles = scene_loader_.getTriangles();
     this->renderer_.render(
         camera_, triangles, framebuffer_, spp_preview_, img_width_ / preview_level_, img_height_ / preview_level_, [&](bool f)
         { framebufferUpdated(f); },
+        render_control_flag_,
         &env_map);
     framebufferUpdated();
 }

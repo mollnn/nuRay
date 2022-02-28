@@ -31,6 +31,8 @@ public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
+    virtual void resizeEvent(QResizeEvent *event) override;
+
     void renderRT();
     void renderRT_preview();
     void updateVertices();
@@ -44,6 +46,7 @@ private:
     QImage framebuffer_;
     Loader scene_loader_;
     QPushButton btn_render_;
+    QPushButton btn_cancel_;
     GlWidget glwidget_preview_;
     Renderer renderer_;
     QLineEdit line_edit_cam_pos_x_, line_edit_cam_pos_y_, line_edit_cam_pos_z_;
@@ -61,6 +64,7 @@ private:
     QTextEdit text_edit_scene_;
     QPushButton btn_load_scene_;
     Texture env_map;
+    std::atomic<int> render_control_flag_;
 
     void bindLineEdit(QLineEdit &line_edit, float &var);
     void bindLineEdit(QLineEdit &line_edit, int &var);
