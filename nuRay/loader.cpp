@@ -40,6 +40,7 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
         std::string filename;
         vec3 position = 0.0f;
         float scale = 1.0f;
+        bool light = false;
         bool ggx = false;
         bool ggxr = false;
         bool glass = false;
@@ -59,6 +60,11 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
                 {
                     desc_line_ss >> scale;
                 }
+                else if (op == "-m=light")
+                {
+                    desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2];
+                    light = true;
+                }
                 else if (op == "-m=ggx")
                 {
                     desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2] >> t_ps >> t_ps2;
@@ -74,6 +80,11 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
                     desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2] >> t_ps;
                     glass = true;
                 }
+            }
+            if (light)
+            {
+                forcing_mat = new MatLight(t_vec);
+                material_dict["__light_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
             }
             if (ggx)
             {
