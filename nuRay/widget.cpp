@@ -270,17 +270,30 @@ void Widget::framebufferUpdated(bool forcing)
         return;
     last_time = QTime::currentTime();
 
+    progress_bar_.setValue(progress_ * 10000);
+    QApplication::processEvents();
+
     int final_width = std::min(label_render_result_.width(), label_render_result_.height() * img_width_ / img_height_);
     int final_height = std::min(label_render_result_.height(), label_render_result_.width() * img_height_ / img_width_);
     int padding_width = label_render_result_.width() - final_width;
     int padding_height = label_render_result_.height() - final_height;
-    lock_framebuffer_.lock();
+
+    if (!forcing)
+    {
+        if (lock_framebuffer_.tryLock(500) == false)
+        {
+            return;
+        }
+    }
+    else
+    {
+        lock_framebuffer_.lock();
+    }
     QImage framebuffer_tmp = framebuffer_.copy();
     label_render_result_.setPixmap(QPixmap::fromImage(framebuffer_tmp.scaled(QSize(final_width, final_height)).copy(-padding_width / 2, -padding_height / 2, label_render_result_.width(), label_render_result_.height())));
     label_render_result_.repaint();
     lock_framebuffer_.unlock();
 
     progress_bar_.setValue(progress_ * 10000);
-
     QApplication::processEvents();
 }

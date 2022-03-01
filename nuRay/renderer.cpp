@@ -236,7 +236,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
         }
     };
 
-    int num_threads = 16;
+    int num_threads = 4;
     std::vector<std::thread> ths;
     for (int i = 0; i < num_threads; i++)
     {
