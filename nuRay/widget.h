@@ -22,6 +22,7 @@
 #include <QTextEdit>
 #include <QProgressBar>
 #include "texture.h"
+#include <QMutex>
 
 class Widget : public QWidget
 {
@@ -66,6 +67,7 @@ private:
     Texture env_map;
     std::atomic<int> render_control_flag_;
     std::atomic<float> progress_;
+    QMutex lock_framebuffer_;
     QProgressBar progress_bar_;
 
     void bindLineEdit(QLineEdit &line_edit, float &var);

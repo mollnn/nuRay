@@ -8,6 +8,7 @@
 #include "lightsampler.h"
 #include "bvh.h"
 #include "texture.h"
+#include <QMutex>
 
 class Renderer
 {
@@ -18,12 +19,17 @@ class Renderer
 
 public:
     void prepare(const std::vector<Triangle> &triangles);
-    void render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> callback, std::atomic<int>& con_flag, std::function<void(float)> progress_report, const Texture *env_map = nullptr);
+    void render(const Camera &camera,
+                const std::vector<Triangle> &triangles, 
+                QImage &img, int SPP, int img_width, int img_height, 
+                std::function<void(bool)> callback, std::atomic<int> &con_flag, 
+                std::function<void(float)> progress_report, 
+                QMutex& framebuffer_mutex,
+                const Texture *env_map = nullptr);
 
 private:
     BVH bvh_;
     LightSampler light_sampler_;
-
 };
 
 #endif

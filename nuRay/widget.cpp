@@ -187,6 +187,7 @@ void Widget::renderRT()
         render_control_flag_,
         [&](float p)
         { progress_ = p / 100.0f; },
+        lock_framebuffer_,
         &env_map);
     framebufferUpdated();
 }
@@ -205,6 +206,7 @@ void Widget::renderRT_preview()
         render_control_flag_,
         [&](float p)
         { progress_ = p / 100.0f; },
+        lock_framebuffer_,
         &env_map);
     framebufferUpdated();
 }
@@ -233,15 +235,21 @@ void Widget::bindLineEdit(QLineEdit &line_edit, int &var)
 void Widget::framebufferUpdated(bool forcing)
 {
     static QTime last_time = QTime::currentTime().addMSecs(-1e9);
-    if (!forcing && last_time.msecsTo(QTime::currentTime()) < 200) // Minimal refresh interval
+    if (!forcing && last_time.msecsTo(QTime::currentTime()) < 100) // Minimal refresh interval
         return;
     last_time = QTime::currentTime();
+
     int final_width = std::min(label_render_result_.width(), label_render_result_.height() * img_width_ / img_height_);
     int final_height = std::min(label_render_result_.height(), label_render_result_.width() * img_height_ / img_width_);
     int padding_width = label_render_result_.width() - final_width;
     int padding_height = label_render_result_.height() - final_height;
-    label_render_result_.setPixmap(QPixmap::fromImage(framebuffer_.scaled(QSize(final_width, final_height)).copy(-padding_width / 2, -padding_height / 2, label_render_result_.width(), label_render_result_.height())));
+    lock_framebuffer_.lock();
+    QImage framebuffer_tmp = framebuffer_.copy();
+    label_render_result_.setPixmap(QPixmap::fromImage(framebuffer_tmp.scaled(QSize(final_width, final_height)).copy(-padding_width / 2, -padding_height / 2, label_render_result_.width(), label_render_result_.height())));
     label_render_result_.repaint();
+    lock_framebuffer_.unlock();
+
     progress_bar_.setValue(progress_ * 10000);
+
     QApplication::processEvents();
 }

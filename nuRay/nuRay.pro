@@ -6,13 +6,13 @@ CONFIG += c++17
 LIBS += -fopenmp
 
 
-#QMAKE_CXXFLAGS -= -O
-#QMAKE_CXXFLAGS -= -O1
-#QMAKE_CXXFLAGS -= -O2
-#QMAKE_CXXFLAGS -= -O3
-#QMAKE_CXXFLAGS += -O3
+QMAKE_CXXFLAGS -= -O
+QMAKE_CXXFLAGS -= -O1
+QMAKE_CXXFLAGS -= -O2
+QMAKE_CXXFLAGS -= -O3
+QMAKE_CXXFLAGS += -O3
 
-#QMAKE_CXXFLAGS += -fopenmp
+QMAKE_CXXFLAGS += -fopenmp
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings

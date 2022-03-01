@@ -140,12 +140,14 @@ void Renderer::prepare(const std::vector<Triangle> &triangles)
     qDebug() << "Prepare finish :)";
 }
 
-void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, const Texture *env_map)
+void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Texture *env_map)
 {
 
     requestDisplayUpdate(false);
+    framebuffer_mutex.lock();
     img = QImage(QSize(img_width, img_height), QImage::Format_RGB888);
     img.fill(Qt::black);
+    framebuffer_mutex.unlock();
 
     QTime time;
     time.start();
@@ -219,7 +221,9 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
                     // Gamma correction
                     result = result.pow(1.0 / 2.2);
                     result *= 255.0f;
+                    framebuffer_mutex.lock();
                     img.setPixel(x, y, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
+                    framebuffer_mutex.unlock();
 
                     vec3 ray_dir = camera.generateRay(x + 0.5f, y + 0.5f, img_width, img_height);
                     img_depth[y * img_width + x] = traceDepth(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
@@ -228,7 +232,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             }
             pxc += block_size * block_size;
             requestProgressUpdate();
-            // request_disp_update = 1;
+            request_disp_update = 1;
         }
     };
 
@@ -275,7 +279,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
 
     vec3 *img_raw = new vec3[img_width * img_height];
     vec3 *img_raw_new = new vec3[img_width * img_height];
-#pragma omp parallel for
+    framebuffer_mutex.lock();
     for (int i = 0; i < img_height; i++)
     {
         for (int j = 0; j < img_width; j++)
@@ -286,6 +290,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             img_raw[(i * img_width + j)][2] = color.blue();
         }
     }
+    framebuffer_mutex.unlock();
 
     auto getPix = [&](vec3 *arr, int x, int y) -> vec3
     {
@@ -322,7 +327,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
         }
     }
 
-#pragma omp parallel for
+    framebuffer_mutex.lock();
     for (int i = 0; i < img_height; i++)
     {
         for (int j = 0; j < img_width; j++)
@@ -331,6 +336,7 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             img.setPixel(j, i, qRgb(v[0], v[1], v[2]));
         }
     }
+    framebuffer_mutex.unlock();
 
     delete[] img_raw;
     delete[] img_raw_new;
