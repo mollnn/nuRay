@@ -142,6 +142,7 @@ void Renderer::prepare(const std::vector<Triangle> &triangles)
 
 void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, const Texture *env_map)
 {
+
     requestDisplayUpdate(false);
     img = QImage(QSize(img_width, img_height), QImage::Format_RGB888);
     img.fill(Qt::black);
@@ -227,11 +228,11 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
             }
             pxc += block_size * block_size;
             requestProgressUpdate();
-            request_disp_update = 1;
+            // request_disp_update = 1;
         }
     };
 
-    int num_threads = 8;
+    int num_threads = 16;
     std::vector<std::thread> ths;
     for (int i = 0; i < num_threads; i++)
     {

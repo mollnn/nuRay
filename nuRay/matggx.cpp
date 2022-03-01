@@ -125,7 +125,7 @@ float MatGGX::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
         // reflect
         vec3 wh = (wo + wi).normalized();
         float D = pow(alpha_, 2) / 3.14159f / pow(pow(normal.dot(wh), 2) * (pow(alpha_, 2) - 1) + 1, 2);
-        return D * normal.dot(wh) / 4 + 1e-8f * 0.5f;
+        return D * normal.dot(wh) / 4;
     }
     else
     {
@@ -133,7 +133,13 @@ float MatGGX::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
         float eta = wo.dot(normal) > 0 ? ior_ : 1.0f / ior_; // eta_o / eta_i
         vec3 wh = -(wi + eta * wo).normalized();
         float D = pow(alpha_, 2) / 3.14159f / pow(pow(normal.dot(wh), 2) * (pow(alpha_, 2) - 1) + 1, 2);
-        return D * normal.dot(wh) / 4 + 1e-8f * 0.5f;
+
+        if (D * normal.dot(wh) < 0.001f)
+        {
+            std::cerr << "ERROR D: " << D << std::endl;
+        }
+
+        return D * normal.dot(wh) / 4;
     }
 }
 
