@@ -312,7 +312,7 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
 
             // std::cout << (texcoords.size() > a[0][1] ? texcoords[a[0][1]] : vec3(0.0f, 0.0f, 0.0f)) << (texcoords.size() > a[1][1] ? texcoords[a[1][1]] : vec3(0.0f, 0.0f, 0.0f)) << (texcoords.size() > a[2][1] ? texcoords[a[2][1]] : vec3(0.0f, 0.0f, 0.0f)) << std::endl;
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < buf.size() - 1; i++)
             {
                 if (a[i][0] < 0)
                     a[i][0] += vertices.size();
