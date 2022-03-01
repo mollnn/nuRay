@@ -102,12 +102,12 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     vec3 contri = Li * abs(wi.dot(normal)) * brdf / pdf / prr;
     result += contri;
 
-    if (contri.norm() > 1000.0f)
-    {
-        std::stringstream t_stream;
-        t_stream << std::fixed << std::setprecision(4) << "Large Value Detected: " << contri << "   " << brdf << "   " << pdf << std::endl;
-        std::cerr << t_stream.str();
-    }
+    // if (contri.norm() > 1000.0f)
+    // {
+    //     std::stringstream t_stream;
+    //     t_stream << std::fixed << std::setprecision(4) << "Large Value Detected: " << contri << "   " << brdf << "   " << pdf << std::endl;
+    //     std::cerr << t_stream.str();
+    // }
 
     return result;
 }
