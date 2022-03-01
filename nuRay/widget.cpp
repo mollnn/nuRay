@@ -185,6 +185,11 @@ void Widget::resizeEvent(QResizeEvent *event)
 void Widget::renderRT()
 {
     render_control_flag_ = 1;
+    if (lock_render_.tryLock() == false)
+    {
+        qDebug() << "Already rendering, action ignored.";
+        return;
+    }
     // Render
     QTime timer;
     timer.start();
@@ -200,6 +205,7 @@ void Widget::renderRT()
         { progress_ = p / 100.0f; },
         lock_framebuffer_,
         &env_map);
+    lock_render_.unlock();
     framebufferUpdated();
 }
 
@@ -208,6 +214,11 @@ void Widget::renderRT_preview()
     if (last_review_render_time_.msecsTo(QTime::currentTime()) < 300)
         return;
 
+    if (lock_render_.tryLock() == false)
+    {
+        qDebug() << "Already rendering, action ignored.";
+        return;
+    }
     env_map.load(str_envmap_.toStdString());
     render_control_flag_ = 1;
     last_review_render_time_ = QTime::currentTime();
@@ -220,6 +231,7 @@ void Widget::renderRT_preview()
         { progress_ = p / 100.0f; },
         lock_framebuffer_,
         &env_map);
+    lock_render_.unlock();
     framebufferUpdated();
 }
 

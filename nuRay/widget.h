@@ -70,6 +70,7 @@ private:
     std::atomic<int> render_control_flag_;
     std::atomic<float> progress_;
     QMutex lock_framebuffer_;
+    QMutex lock_render_;
     QProgressBar progress_bar_;
     QString str_envmap_;
 
