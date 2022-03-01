@@ -51,9 +51,9 @@ Widget::Widget(QWidget *parent)
     auto &triangles = scene_loader_.getTriangles();
     this->renderer_.prepare(triangles);
 
-    for(auto i:triangles)
+    for (auto i : triangles)
     {
-        std::cout <<i<<std::endl;
+        std::cout << i << std::endl;
     }
 
     last_review_render_time_ = QTime::currentTime().addSecs(-1);
@@ -129,6 +129,10 @@ Widget::Widget(QWidget *parent)
     connect(&line_edit_roll_, &QLineEdit::editingFinished, [&]()
             { if(line_edit_roll_.text().toFloat() == camera_.toEuler()[2]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); glwidget_preview_.update(); });
 
+    bindLineEdit(line_edit_envmap_, str_envmap_);
+    grid_layout_.addWidget(&line_edit_envmap_, 36, 51, 1, 4);
+    grid_layout_.addWidget(&label_envmap_, 36, 50, 1, 1);
+
     btn_load_scene_.setText("Load");
     grid_layout_.addWidget(&label_scene_, 40, 50, 1, 1);
     grid_layout_.addWidget(&text_edit_scene_, 41, 50, 8, 5);
@@ -162,7 +166,8 @@ Widget::Widget(QWidget *parent)
     progress_bar_.setOrientation(Qt::Horizontal);
     progress_bar_.setValue(50);
 
-    env_map.load("envmap.jfif");
+    line_edit_envmap_.setText("envmap.jfif");
+    str_envmap_ = line_edit_envmap_.text();
 
     this->setLayout(&grid_layout_);
     this->update();
@@ -184,6 +189,7 @@ void Widget::renderRT()
     QTime timer;
     timer.start();
     std::cout << "Loading scene..." << std::endl;
+    env_map.load(str_envmap_.toStdString());
     auto &triangles = scene_loader_.getTriangles();
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
     this->renderer_.render(
@@ -199,9 +205,10 @@ void Widget::renderRT()
 
 void Widget::renderRT_preview()
 {
-    if (last_review_render_time_.msecsTo(QTime::currentTime()) < 500)
+    if (last_review_render_time_.msecsTo(QTime::currentTime()) < 300)
         return;
 
+    env_map.load(str_envmap_.toStdString());
     render_control_flag_ = 1;
     last_review_render_time_ = QTime::currentTime();
     auto &triangles = scene_loader_.getTriangles();
@@ -235,6 +242,13 @@ void Widget::bindLineEdit(QLineEdit &line_edit, int &var)
     line_edit.setText(QString::number(var));
     connect(&line_edit, &QLineEdit::editingFinished, [&]()
             { var = line_edit.text().toDouble(); renderRT_preview(); });
+}
+
+void Widget::bindLineEdit(QLineEdit &line_edit, QString &var)
+{
+    line_edit.setText(var);
+    connect(&line_edit, &QLineEdit::editingFinished, [&]()
+            { var = line_edit.text(); renderRT_preview(); });
 }
 
 void Widget::framebufferUpdated(bool forcing)

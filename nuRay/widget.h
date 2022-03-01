@@ -54,10 +54,12 @@ private:
     QLineEdit line_edit_spp_, line_edit_spp_preview_;
     QLineEdit line_edit_yaw_, line_edit_pitch_, line_edit_roll_;
     QLineEdit line_edit_fov_h_, line_edit_aspect_, line_edit_img_w_, line_edit_img_h_, line_edit_preview_level_;
+    QLineEdit line_edit_envmap_;
     QLabel label_cam_pos_x_, label_cam_pos_y_, label_cam_pos_z_;
     QLabel label_spp_, label_spp_preview_;
     QLabel label_yaw_, label_pitch_, label_roll_;
     QLabel label_fov_h_, label_aspect_, label_img_w_, label_img_h_, label_preview_level_;
+    QLabel label_envmap_;
     QLabel label_scene_;
     int spp_ = 32, spp_preview_ = 8;
     int img_width_ = 256, img_height_ = 256, preview_level_ = 8;
@@ -69,8 +71,10 @@ private:
     std::atomic<float> progress_;
     QMutex lock_framebuffer_;
     QProgressBar progress_bar_;
+    QString str_envmap_;
 
     void bindLineEdit(QLineEdit &line_edit, float &var);
     void bindLineEdit(QLineEdit &line_edit, int &var);
+    void bindLineEdit(QLineEdit &line_edit, QString &var);
 };
 #endif // WIDGET_H
