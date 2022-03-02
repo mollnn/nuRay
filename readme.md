@@ -36,10 +36,12 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 ### WIP
 
+- Primary Sample Space Metropolis Light Transport
+- Bidirectional Path Tracing
+- Photon Mapping with kd-tree
+- Continuous mode, Denoising with SVGF and RAE
 - Bump mapping
 - Tessellation Displacement Mapping
-- Multiple Importance Sampling
-- Bidirectional Path Tracing
 
 
 ### Future
