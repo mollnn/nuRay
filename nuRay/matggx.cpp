@@ -25,9 +25,9 @@ vec3 MatGGX::sampleBxdf(const vec3 &wo, const vec3 &normal) const
 
     float r1 = rand() * 1.0f / RAND_MAX;
     float r2 = rand() * 1.0f / RAND_MAX;
-    // float cos_theta = sqrt((1 - r1) / (1 + (alpha_ * alpha_ - 1) * r1));
-    // float theta = acos(cos_theta) * 0.9999;
-    float theta = atan(alpha_ * sqrt(r1 / (1 - r1))) * 0.9999;
+    float cos_theta = sqrt((1 - r1) / (1 + (alpha_ * alpha_ - 1) * r1));
+    float theta = acos(cos_theta) * 0.9999;
+    // float theta = atan(alpha_ * sqrt(r1 / (1 - r1))) * 0.9999;
     float phi = 2.0f * 3.14159f * r2;
     vec3 h = cos(theta) * normal + sin(theta) * cos(phi) * ax1 + sin(theta) * sin(phi) * ax2;
     vec3 wi;
@@ -41,7 +41,7 @@ vec3 MatGGX::sampleBxdf(const vec3 &wo, const vec3 &normal) const
     {
         // refract
         float eta = wi.dot(normal) > 0 ? ior_ : 1.0f / ior_; // eta_o / eta_i
-        float norm_h = -(eta + 1.0f) * wo.dot(h);
+        float norm_h = abs((eta + 1.0f) * wo.dot(h));
         wi = -eta * wo - h * norm_h;
     }
     return wi.normalized();
@@ -78,6 +78,8 @@ float MatGGX::D(const vec3 &m, const vec3 &n) const
 
 vec3 MatGGX::fr(const vec3 &i, const vec3 &o, const vec3 &n, const vec3 &Kd) const
 {
+    if (n.dot(i) * n.dot(o) < 0)
+        return 0.0f;
     vec3 h = (i + o).normalized();
     vec3 nn = i.dot(n) > 0 ? n : -n;
     vec3 f = F(i, h, Kd);
@@ -89,6 +91,8 @@ vec3 MatGGX::fr(const vec3 &i, const vec3 &o, const vec3 &n, const vec3 &Kd) con
 
 vec3 MatGGX::ft(const vec3 &i, const vec3 &o, const vec3 &n, const vec3 &Kd) const
 {
+    if (n.dot(i) * n.dot(o) > 0)
+        return 0.0f;
     float eta = i.dot(n) > 0 ? ior_ : 1.0f / ior_; // eta_o / eta_i
     vec3 h = -(i + eta * o).normalized();
     float A = abs(i.dot(h) * o.dot(h) / i.dot(n) / o.dot(n));
@@ -97,7 +101,7 @@ vec3 MatGGX::ft(const vec3 &i, const vec3 &o, const vec3 &n, const vec3 &Kd) con
     vec3 d = D(h, n);
     vec3 numer = pow(eta, 2) * (vec3(1.0f) - f) * g * d;
     float denom = pow(i.dot(h) + eta * o.dot(h), 2);
-    return A * numer / (denom + 1e-6f);
+    return A * numer / (denom + 1e-8f);
 }
 
 vec3 MatGGX::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
@@ -110,7 +114,7 @@ vec3 MatGGX::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3
 
     float bi = wi.dot(normal);
     float bo = wo.dot(normal);
-    if (bi * bo > 0)
+    if (bi * bo >= 0)
         return fr(wi, wo, normal, Kd);
     else
         return ft(wi, wo, normal, Kd);
@@ -120,26 +124,25 @@ float MatGGX::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
 {
     // Naive
     // return 1.0 / 3.14159 * (abs(wi.dot(normal)) + 1e-4f) / 2.0;
+
     if (wi.dot(normal) * wo.dot(normal) > 0)
     {
         // reflect
         vec3 wh = (wo + wi).normalized();
-        float D = pow(alpha_, 2) / 3.14159f / pow(pow(normal.dot(wh), 2) * (pow(alpha_, 2) - 1) + 1, 2);
-        return D * normal.dot(wh) / 4;
+        float d = D(wh, normal);
+        if (d < 1e-9f)
+            return 1e18f;
+        return d * normal.dot(wh) / 4;
     }
     else
     {
         // refract
-        float eta = wo.dot(normal) > 0 ? ior_ : 1.0f / ior_; // eta_o / eta_i
+        float eta = wi.dot(normal) > 0 ? ior_ : 1.0f / ior_; // eta_o / eta_i
         vec3 wh = -(wi + eta * wo).normalized();
-        float D = pow(alpha_, 2) / 3.14159f / pow(pow(normal.dot(wh), 2) * (pow(alpha_, 2) - 1) + 1, 2);
-
-        if (D * normal.dot(wh) < 0.001f)
-        {
-            std::cerr << "ERROR D: " << D << std::endl;
-        }
-
-        return D * normal.dot(wh) / 4;
+        float d = D(wh, normal);
+        if (d < 1e-9f)
+            return 1e18f;
+        return d * normal.dot(wh) / 4;
     }
 }
 

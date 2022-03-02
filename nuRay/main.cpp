@@ -10,6 +10,8 @@ int main(int argc, char *argv[])
     Utils utils;
     utils.testEnergyConversion();
 
+    
+
     QApplication a(argc, argv);
     Widget w;
     w.show();
