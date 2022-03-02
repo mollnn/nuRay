@@ -139,10 +139,11 @@ float MatGGX::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
         // refract
         float eta = wi.dot(normal) > 0 ? ior_ : 1.0f / ior_; // eta_o / eta_i
         vec3 wh = -(wi + eta * wo).normalized();
+        if(wh.dot(normal)<0) wh=-wh;
         float d = D(wh, normal);
-        if (d < 1e-9f)
+        if (d < 1e-6f)
             return 1e18f;
-        return d * normal.dot(wh) / 4;
+        return std::max(d * normal.dot(wh) / 4, 1.0f); // !!! NEED FIX !!!
     }
 }
 
