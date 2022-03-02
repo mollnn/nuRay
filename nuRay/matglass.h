@@ -7,12 +7,12 @@
 class MatGlass : public Material
 {
 public:
-    vec3 Kt_;
-    bool usetex_Kt_;
-    Texture map_Kt_;
-    float It_;
+    vec3 F0_;
+    bool usetex_F0_;
+    Texture map_F0_;
+    float Ior_;
 
-    MatGlass(const vec3& Kt = 0.0f,  float It_ = 0.0f);
+    MatGlass(const vec3& F0 = 0.0f,  float ior = 0.0f);
 
     virtual vec3 sampleBxdf(const vec3 &wo, const vec3 &normal) const override;
     virtual vec3 bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const override;

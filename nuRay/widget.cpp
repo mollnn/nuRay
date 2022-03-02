@@ -51,11 +51,6 @@ Widget::Widget(QWidget *parent)
     auto &triangles = scene_loader_.getTriangles();
     this->renderer_.prepare(triangles);
 
-    for (auto i : triangles)
-    {
-        std::cout << i << std::endl;
-    }
-
     last_review_render_time_ = QTime::currentTime().addSecs(-1);
 
     connect(&glwidget_preview_, &GlWidget::cameraChanged, [&]()

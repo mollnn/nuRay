@@ -43,7 +43,7 @@ vec3 MatBlinnPhong::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, con
     vec3 Rs = usetex_Ks_ ? map_Ks_.pixelUV(uv[0], uv[1]) : Ks_;
     vec3 diffuse = Rd / 3.14159;
     vec3 h = (wo + wi).normalized();
-    vec3 specular = (Ns_ + 2) / 3.14159 / 8 * Rs * pow(normal.dot(h), Ns_);
+    vec3 specular = (Ns_ + 2) / 3.14159 / 8 * Rs * pow(normal.dot(h), Ns_);     // ! NEED FIX
     return diffuse + specular;
 }
 
