@@ -46,7 +46,10 @@ Widget::Widget(QWidget *parent)
     glwidget_preview_.setCamera(&camera_);
 
     auto &triangles = scene_loader_.getTriangles();
-    this->renderer_.prepare(triangles);
+
+    renderer_ = new RendererPT();
+
+    renderer_-> prepare(triangles);
 
     last_review_render_time_ = QTime::currentTime().addSecs(-1);
 
@@ -134,7 +137,7 @@ Widget::Widget(QWidget *parent)
     connect(&btn_load_scene_, &QPushButton::clicked, [&]()
             {
         scene_loader_.fromSceneDescription(text_edit_scene_.toPlainText().toStdString());
-        renderer_.prepare(scene_loader_.getTriangles());
+        renderer_->prepare(scene_loader_.getTriangles());
         updateVertices();
         renderRT_preview(); });
 
@@ -189,7 +192,7 @@ void Widget::renderRT()
     env_map.load(str_envmap_.toStdString());
     auto &triangles = scene_loader_.getTriangles();
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
-    this->renderer_.render(
+    this->renderer_->render(
         camera_, triangles, framebuffer_, spp_, img_width_, img_height_, [&](bool f)
         { framebufferUpdated(f); },
         render_control_flag_,
@@ -215,7 +218,7 @@ void Widget::renderRT_preview()
     render_control_flag_ = 1;
     last_review_render_time_ = QTime::currentTime();
     auto &triangles = scene_loader_.getTriangles();
-    this->renderer_.render(
+    this->renderer_->render(
         camera_, triangles, framebuffer_, spp_preview_, img_width_ / preview_level_, img_height_ / preview_level_, [&](bool f)
         { framebufferUpdated(f); },
         render_control_flag_,

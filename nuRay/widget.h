@@ -10,6 +10,7 @@
 #include "loader.h"
 #include "camera.h"
 #include "renderer.h"
+#include "rendererpt.h"
 #include "material.h"
 #include "matlambert.h"
 #include "matblinnphong.h"
@@ -49,7 +50,7 @@ private:
     QPushButton btn_render_;
     QPushButton btn_cancel_;
     GlWidget glwidget_preview_;
-    Renderer renderer_;
+    Renderer* renderer_;
     QLineEdit line_edit_cam_pos_x_, line_edit_cam_pos_y_, line_edit_cam_pos_z_;
     QLineEdit line_edit_spp_, line_edit_spp_preview_;
     QLineEdit line_edit_yaw_, line_edit_pitch_, line_edit_roll_;

@@ -12,20 +12,20 @@
 
 class Renderer
 {
+protected:
     std::tuple<float, float, float, const Triangle *> intersect(const vec3 &origin, const vec3 &dir, const std::vector<Triangle> &triangles, BVH &bvh_);
-    vec3 trace(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, bool light_source_visible = true, const Texture *env_map = nullptr);
 
 public:
-    void prepare(const std::vector<Triangle> &triangles);
-    void render(const Camera &camera,
+    virtual void prepare(const std::vector<Triangle> &triangles);
+    virtual void render(const Camera &camera,
                 const std::vector<Triangle> &triangles, 
                 QImage &img, int SPP, int img_width, int img_height, 
                 std::function<void(bool)> callback, std::atomic<int> &con_flag, 
                 std::function<void(float)> progress_report, 
                 QMutex& framebuffer_mutex,
-                const Texture *env_map = nullptr);
+                const Texture *env_map = nullptr) = 0;
 
-private:
+protected:
     BVH bvh_;
     LightSampler light_sampler_;
 };
