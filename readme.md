@@ -28,7 +28,7 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 - CPU parallelization via multithreading (OpenMP)
 
-- Denoising (JBF)
+- (Disabled now) Denoising (JBF)
 
 - Transmission Materials
 

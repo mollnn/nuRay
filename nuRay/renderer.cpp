@@ -112,22 +112,6 @@ vec3 Renderer::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triang
     return result;
 }
 
-vec3 Renderer::traceDepth(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh)
-{
-    auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
-    return t;
-}
-
-vec3 Renderer::traceNormal(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh)
-{
-    auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
-    if (hit_obj == nullptr)
-    {
-        return 0.0f;
-    }
-    vec3 normal = hit_obj->getNormal(b1, b2);
-    return normal;
-}
 
 void Renderer::prepare(const std::vector<Triangle> &triangles)
 {
@@ -152,9 +136,6 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
     QTime time;
     time.start();
     auto time_last = time.elapsed();
-
-    vec3 *img_depth = new vec3[img_width * img_height];
-    vec3 *img_normal = new vec3[img_width * img_height];
 
     std::cout << "Rendering... " << std::endl;
 
@@ -226,8 +207,6 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
                     framebuffer_mutex.unlock();
 
                     vec3 ray_dir = camera.generateRay(x + 0.5f, y + 0.5f, img_width, img_height);
-                    img_depth[y * img_width + x] = traceDepth(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
-                    img_normal[y * img_width + x] = traceNormal(camera.pos, ray_dir, triangles, light_sampler_, bvh_);
                 }
             }
             pxc += block_size * block_size;
@@ -275,73 +254,6 @@ void Renderer::render(const Camera &camera, const std::vector<Triangle> &triangl
         return;
     }
 
-    // Post processing
-
-    vec3 *img_raw = new vec3[img_width * img_height];
-    vec3 *img_raw_new = new vec3[img_width * img_height];
-    framebuffer_mutex.lock();
-    for (int i = 0; i < img_height; i++)
-    {
-        for (int j = 0; j < img_width; j++)
-        {
-            QColor color = img.pixelColor(j, i);
-            img_raw[(i * img_width + j)][0] = color.red();
-            img_raw[(i * img_width + j)][1] = color.green();
-            img_raw[(i * img_width + j)][2] = color.blue();
-        }
-    }
-    framebuffer_mutex.unlock();
-
-    auto getPix = [&](vec3 *arr, int x, int y) -> vec3
-    {
-        x = std::max(x, 0);
-        y = std::max(y, 0);
-        x = std::min(x, img_width - 1);
-        y = std::min(y, img_height - 1);
-        return arr[y * img_width + x];
-    };
-
-#pragma omp parallel for
-    for (int y = 0; y < img_height; y++)
-    {
-        for (int x = 0; x < img_width; x++)
-        {
-            float sum_weight = 0.0f;
-            vec3 color;
-            vec3 color_center = getPix(img_raw, x, y);
-            vec3 depth_center = getPix(img_depth, x, y);
-            vec3 normal_center = getPix(img_depth, x, y);
-            for (int dy = -2; dy <= 2; dy++)
-            {
-                for (int dx = -2; dx <= 2; dx++)
-                {
-                    vec3 c = getPix(img_raw, x + dx, y + dy);
-                    vec3 d = getPix(img_depth, x + dx, y + dy);
-                    vec3 n = getPix(img_normal, x + dx, y + dy);
-                    float w = exp(-(dx * dx + dy * dy) / (2 * 1.0f)) * exp(-((color_center - c).norm2()) / (2 * 300.0f)) * exp(-((depth_center - d).norm2()) / (2 * 500.0f)) * exp(-((depth_center - d).norm2()) / 1.0f);
-                    sum_weight += w;
-                    color += w * c;
-                }
-            }
-            img_raw_new[y * img_width + x] = color / sum_weight;
-        }
-    }
-
-    framebuffer_mutex.lock();
-    for (int i = 0; i < img_height; i++)
-    {
-        for (int j = 0; j < img_width; j++)
-        {
-            vec3 v = img_raw_new[i * img_width + j];
-            img.setPixel(j, i, qRgb(v[0], v[1], v[2]));
-        }
-    }
-    framebuffer_mutex.unlock();
-
-    delete[] img_raw;
-    delete[] img_raw_new;
-    delete[] img_depth;
-    delete[] img_normal;
 
     std::cout << std::fixed << std::setprecision(2) << "Rendering... " << 100.0 << "%"
               << "   " << time.elapsed() * 0.001 << " secs used" << std::endl;
