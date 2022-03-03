@@ -2,6 +2,7 @@
 #include <QDoubleValidator>
 #include <QSizePolicy>
 #include <QApplication>
+#include "rendererpssmlt.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
@@ -47,9 +48,9 @@ Widget::Widget(QWidget *parent)
 
     auto &triangles = scene_loader_.getTriangles();
 
-    renderer_ = new RendererPT();
+    renderer_ = new RendererPSSMLT();
 
-    renderer_-> prepare(triangles);
+    renderer_->prepare(triangles);
 
     last_review_render_time_ = QTime::currentTime().addSecs(-1);
 

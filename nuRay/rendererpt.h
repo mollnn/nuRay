@@ -15,7 +15,8 @@
 
 class RendererPT : public Renderer
 {
-    virtual vec3 trace(Sampler& sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Texture *env_map = nullptr);
+protected:
+    virtual vec3 trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Texture *env_map = nullptr);
 
 public:
     virtual void render(const Camera &camera,

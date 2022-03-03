@@ -40,9 +40,11 @@ SOURCES += \
     matlambert.cpp \
     matlight.cpp \
     renderer.cpp \
+    rendererpssmlt.cpp \
     rendererpt.cpp \
     rendererptls.cpp \
     sampler.cpp \
+    samplerpssmlt.cpp \
     samplerstd.cpp \
     texture.cpp \
     triangle.cpp \
@@ -65,9 +67,11 @@ HEADERS += \
     matlambert.h \
     matlight.h \
     renderer.h \
+    rendererpssmlt.h \
     rendererpt.h \
     rendererptls.h \
     sampler.h \
+    samplerpssmlt.h \
     samplerstd.h \
     texture.h \
     triangle.h \

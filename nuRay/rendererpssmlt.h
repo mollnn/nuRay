@@ -1,7 +1,5 @@
-#ifndef __RENDERER_PTLS_H__
-#define __RENDERER_PTLS_H__
-
-// Path Tracing with Light Sampler
+#ifndef RENDERERPSSMLT_H
+#define RENDERERPSSMLT_H
 
 #include <bits/stdc++.h>
 #include "camera.h"
@@ -11,13 +9,12 @@
 #include "bvh.h"
 #include "texture.h"
 #include "renderer.h"
+#include "rendererpt.h"
 #include <QMutex>
 
-class RendererPTLS : public Renderer
-{
-protected:
-    virtual vec3 trace(Sampler& sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, bool light_source_visible = true, const Texture *env_map = nullptr);
 
+class RendererPSSMLT: public RendererPT
+{
 public:
     virtual void render(const Camera &camera,
                         const std::vector<Triangle> &triangles,
@@ -32,4 +29,4 @@ public:
                         const Texture *env_map = nullptr) override;
 };
 
-#endif
+#endif // RENDERERPSSMLT_H
