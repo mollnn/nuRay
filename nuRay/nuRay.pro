@@ -41,6 +41,7 @@ SOURCES += \
     matlight.cpp \
     renderer.cpp \
     rendererpt.cpp \
+    rendererptls.cpp \
     sampler.cpp \
     samplerstd.cpp \
     texture.cpp \
@@ -65,6 +66,7 @@ HEADERS += \
     matlight.h \
     renderer.h \
     rendererpt.h \
+    rendererptls.h \
     sampler.h \
     samplerstd.h \
     texture.h \

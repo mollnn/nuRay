@@ -1,4 +1,4 @@
-#include "rendererpt.h"
+#include "rendererptls.h"
 #include "texture.h"
 #include "lightsampler.h"
 #include "bvh.h"
@@ -8,10 +8,11 @@
 #include <QEventLoop>
 #include "samplerstd.h"
 
-// Path Tracing without Light Sampler
+// Path Tracing with Light Sampler
 
-vec3 RendererPT::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, const Texture *env_map)
+vec3 RendererPTLS::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Texture *env_map)
 {
+
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
     {
@@ -32,7 +33,10 @@ vec3 RendererPT::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, cons
 
     if (hit_obj->mat->isEmission())
     {
-        return hit_obj->mat->emission(wo, normal);
+        if (light_source_visible)
+            return hit_obj->mat->emission(wo, normal);
+        else
+            return vec3(0.0f, 0.0f, 0.0f);
     }
 
     vec3 texcoords = hit_obj->getTexCoords(b1, b2);
@@ -44,6 +48,31 @@ vec3 RendererPT::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, cons
     vec3 hit_pos = orig + dir * t;
     vec3 result;
 
+    // sample the light
+    bool is_light_sampled = false;
+    if (hit_obj->mat->requireLightSampling(wo, normal))
+    {
+        is_light_sampled = true;
+        const Triangle *light_obj = light_sampler.sampleLight(sampler);
+        if (light_obj != nullptr)
+        {
+            auto [light_pos, light_bc1, light_bc2] = light_obj->sample(sampler);
+            vec3 light_normal = light_obj->getNormal(light_bc1, light_bc2);
+            vec3 light_uv = light_obj->getTexCoords(light_bc1, light_bc2);
+            vec3 light_vec = light_pos - hit_pos;
+            vec3 wl = light_vec.normalized();
+            vec3 light_int = light_obj->mat->emission(wl, light_normal);
+            float light_pdf = light_sampler.p();
+            auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 1e-3, wl, triangles, bvh);
+            if (light_ray_t + 2e-3 > light_vec.norm())
+            {
+                vec3 brdf_ = hit_obj->mat->bxdf(wo, normal, wl, texcoords);
+                vec3 Ll = light_int / light_vec.norm2() * std::max(0.0f, light_normal.dot(-wl)) / light_pdf;
+                result += Ll * brdf_ * std::max(0.0f, normal.dot((light_pos - hit_pos).normalized()));
+            }
+        }
+    }
+
     // Round Robin
     float prr = 0.8;
     if (sampler.random() > prr)
@@ -53,14 +82,21 @@ vec3 RendererPT::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, cons
     vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-    vec3 Li = trace(sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, env_map);
+    vec3 Li = trace(sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled, env_map);
     vec3 contri = Li * abs(wi.dot(normal)) * brdf / pdf / prr;
     result += contri;
+
+    // if (contri.norm() > 1000.0f)
+    // {
+    //     std::stringstream t_stream;
+    //     t_stream << std::fixed << std::setprecision(4) << "Large Value Detected: " << contri << "   " << brdf << "   " << pdf << std::endl;
+    //     std::cerr << t_stream.str();
+    // }
 
     return result;
 }
 
-void RendererPT::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Texture *env_map)
+void RendererPTLS::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Texture *env_map)
 {
     SamplerStd sampler;
 
@@ -133,7 +169,7 @@ void RendererPT::render(const Camera &camera, const std::vector<Triangle> &trian
                     for (int i = 0; i < SPP; i++)
                     {
                         vec3 ray_dir = camera.generateRay(x + sampler.random(), y + sampler.random(), img_width, img_height);
-                        result += max(0.0f, trace(sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, env_map));
+                        result += max(0.0f, trace(sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, true, env_map));
                     }
                     result /= SPP;
                     // Gamma correction
