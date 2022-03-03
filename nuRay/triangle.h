@@ -28,7 +28,7 @@ struct Triangle
     vec3 getNormal(float b1, float b2)const;
     vec3 getTexCoords(float b1, float b2)const;
 
-    std::tuple<vec3, float, float> sample() const;
+    std::tuple<vec3, float, float> sample(Sampler& sampler) const;
     float area() const;
 
     vec3 pMin() const;

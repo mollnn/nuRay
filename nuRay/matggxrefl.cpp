@@ -2,11 +2,11 @@
 
 MatGGXRefl::MatGGXRefl(const vec3 &Kd, float alpha) : Kd_(Kd), usetex_Kd_(false), alpha_(alpha) {}
 
-vec3 MatGGXRefl::sampleBxdf(const vec3 &wo, const vec3 &normal) const
+vec3 MatGGXRefl::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) const
 {
     // Naive
-    // float r2 = rand() * 1.0 / RAND_MAX * 0.99f;
-    // float phi = rand() * 1.0 / RAND_MAX * 3.14159 * 2;
+    // float r2 = sampler.random() * 0.99f;
+    // float phi = sampler.random() * 3.14159 * 2;
     // float r = sqrt(r2);
     // float h = sqrt(1 - r2);
 
@@ -21,8 +21,8 @@ vec3 MatGGXRefl::sampleBxdf(const vec3 &wo, const vec3 &normal) const
     vec3 ax1 = ax0.cross(normal).normalized();
     vec3 ax2 = normal.cross(ax1).normalized();
 
-    float r1 = rand() * 1.0f / RAND_MAX;
-    float r2 = rand() * 1.0f / RAND_MAX;
+    float r1 = sampler.random();
+    float r2 = sampler.random();
     // float cos_theta = sqrt((1 - r1) / (1 + (alpha_ * alpha_ - 1) * r1));
     // float theta = acos(cos_theta) * 0.9999;
     float theta = atan(alpha_ * sqrt(r1 / (1 - r1))) * 0.9999;

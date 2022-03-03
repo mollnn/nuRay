@@ -13,7 +13,7 @@ class LightSampler
 public:
     LightSampler() = default;
     void initialize(const std::vector<Triangle> &scene);
-    const Triangle* sampleLight();
+    const Triangle* sampleLight(Sampler& sampler);
     float p();
 };
 

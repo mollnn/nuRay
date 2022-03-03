@@ -42,10 +42,10 @@ vec3 Triangle::getTexCoords(float b1, float b2) const
     return (1.0f - b1 - b2) * t[0] + b1 * t[1] + b2 * t[2];
 }
 
-std::tuple<vec3, float, float> Triangle::sample() const
+std::tuple<vec3, float, float> Triangle::sample(Sampler& sampler) const
 {
-    float r1 = rand() * 1.0f / RAND_MAX;
-    float r2 = rand() * 1.0f / RAND_MAX;
+    float r1 = sampler.random();
+    float r2 = sampler.random();
     if (r1 + r2 > 1)
     {
         r1 = 1 - r1;

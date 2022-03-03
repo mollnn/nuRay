@@ -2,11 +2,11 @@
 
 MatGGX::MatGGX(const vec3 &Kd, float alpha, float ior) : Kd_(Kd), usetex_Kd_(false), alpha_(alpha), ior_(ior) {}
 
-vec3 MatGGX::sampleBxdf(const vec3 &wo, const vec3 &normal) const
+vec3 MatGGX::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) const
 {
     // Naive
-    // float r2 = rand() * 1.0 / RAND_MAX * 0.99f;
-    // float phi = rand() * 1.0 / RAND_MAX * 3.14159 * 2;
+    // float r2 = sampler.random() * 0.99f;
+    // float phi = sampler.random() * 3.14159 * 2;
     // float r = sqrt(r2);
     // float h = sqrt(1 - r2);
 
@@ -14,7 +14,7 @@ vec3 MatGGX::sampleBxdf(const vec3 &wo, const vec3 &normal) const
     // vec3 ax1 = ax0.cross(normal).normalized();
     // vec3 ax2 = normal.cross(ax1).normalized();
     // vec3 wi = h * normal + r * cos(phi) * ax1 + r * sin(phi) * ax2;
-    // if (rand() % 2)
+    // if (sampler.random() < 0.5)
     //     wi = -wi;
 
     // return wi;
@@ -23,8 +23,8 @@ vec3 MatGGX::sampleBxdf(const vec3 &wo, const vec3 &normal) const
     vec3 ax1 = ax0.cross(normal).normalized();
     vec3 ax2 = normal.cross(ax1).normalized();
 
-    float r1 = rand() * 1.0f / RAND_MAX;
-    float r2 = rand() * 1.0f / RAND_MAX;
+    float r1 = sampler.random();
+    float r2 = sampler.random();
     float cos_theta = sqrt((1 - r1) / (1 + (alpha_ * alpha_ - 1) * r1));
     float theta = acos(cos_theta) * 0.9999;
     // float theta = atan(alpha_ * sqrt(r1 / (1 - r1))) * 0.9999;
@@ -32,7 +32,7 @@ vec3 MatGGX::sampleBxdf(const vec3 &wo, const vec3 &normal) const
     vec3 h = cos(theta) * normal + sin(theta) * cos(phi) * ax1 + sin(theta) * sin(phi) * ax2;
     vec3 wi;
 
-    if (rand() % 2)
+    if (sampler.random() < 0.5)
     {
         // reflect
         wi = 2.0f * h.dot(wo) * h - wo;

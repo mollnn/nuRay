@@ -2,10 +2,10 @@
 
 MatLambert::MatLambert(const vec3 &Kd) : Kd_(Kd), usetex_Kd_(false) {}
 
-vec3 MatLambert::sampleBxdf(const vec3 &wo, const vec3 &normal) const
+vec3 MatLambert::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) const
 {
-    float r2 = rand() * 1.0 / RAND_MAX * 0.99f;
-    float phi = rand() * 1.0 / RAND_MAX * 3.14159 * 2;
+    float r2 = sampler.random() * 0.99f;
+    float phi = sampler.random() * 3.14159 * 2;
     float r = sqrt(r2);
     float h = sqrt(1 - r2);
 

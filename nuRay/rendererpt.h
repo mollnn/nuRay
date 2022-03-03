@@ -13,7 +13,7 @@
 
 class RendererPT : public Renderer
 {
-    virtual vec3 trace(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, bool light_source_visible = true, const Texture *env_map = nullptr);
+    virtual vec3 trace(Sampler& sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, bool light_source_visible = true, const Texture *env_map = nullptr);
 
 public:
     virtual void render(const Camera &camera,

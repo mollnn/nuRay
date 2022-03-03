@@ -6,9 +6,11 @@
 #include <QDebug>
 #include <QTimer>
 #include <QEventLoop>
+#include "samplerstd.h"
 
-vec3 RendererPT::trace(const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Texture *env_map)
+vec3 RendererPT::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Texture *env_map)
 {
+
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
     {
@@ -49,10 +51,10 @@ vec3 RendererPT::trace(const vec3 &orig, const vec3 &dir, const std::vector<Tria
     if (hit_obj->mat->requireLightSampling(wo, normal))
     {
         is_light_sampled = true;
-        const Triangle *light_obj = light_sampler.sampleLight();
+        const Triangle *light_obj = light_sampler.sampleLight(sampler);
         if (light_obj != nullptr)
         {
-            auto [light_pos, light_bc1, light_bc2] = light_obj->sample();
+            auto [light_pos, light_bc1, light_bc2] = light_obj->sample(sampler);
             vec3 light_normal = light_obj->getNormal(light_bc1, light_bc2);
             vec3 light_uv = light_obj->getTexCoords(light_bc1, light_bc2);
             vec3 light_vec = light_pos - hit_pos;
@@ -71,14 +73,14 @@ vec3 RendererPT::trace(const vec3 &orig, const vec3 &dir, const std::vector<Tria
 
     // Round Robin
     float prr = 0.8;
-    if (rand() * 1.0 / RAND_MAX > prr)
+    if (sampler.random() > prr)
         return result;
 
     // sample bxdf
-    vec3 wi = hit_obj->mat->sampleBxdf(wo, normal);
+    vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-    vec3 Li = trace(hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled, env_map);
+    vec3 Li = trace(sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled, env_map);
     vec3 contri = Li * abs(wi.dot(normal)) * brdf / pdf / prr;
     result += contri;
 
@@ -94,6 +96,7 @@ vec3 RendererPT::trace(const vec3 &orig, const vec3 &dir, const std::vector<Tria
 
 void RendererPT::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Texture *env_map)
 {
+    SamplerStd sampler;
 
     requestDisplayUpdate(false);
     framebuffer_mutex.lock();
@@ -163,8 +166,8 @@ void RendererPT::render(const Camera &camera, const std::vector<Triangle> &trian
                     vec3 result;
                     for (int i = 0; i < SPP; i++)
                     {
-                        vec3 ray_dir = camera.generateRay(x + rand() * 1.0f / RAND_MAX, y + rand() * 1.0f / RAND_MAX, img_width, img_height);
-                        result += max(0.0f, trace(camera.pos, ray_dir, triangles, light_sampler_, bvh_, true, env_map));
+                        vec3 ray_dir = camera.generateRay(x + sampler.random(), y + sampler.random(), img_width, img_height);
+                        result += max(0.0f, trace(sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, true, env_map));
                     }
                     result /= SPP;
                     // Gamma correction

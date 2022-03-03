@@ -2,7 +2,7 @@
 
 MatLight::MatLight(const vec3& Ke) : Ke_(Ke) {}
 
-vec3 MatLight::sampleBxdf(const vec3 &wo, const vec3 &normal) const
+vec3 MatLight::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) const
 {
     return vec3(0.0f, 0.0f, 0.0f);
 }

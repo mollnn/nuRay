@@ -2,9 +2,9 @@
 
 MatGlass::MatGlass(const vec3 &F0, float ior) : F0_(F0), usetex_F0_(false), Ior_(ior) {}
 
-vec3 MatGlass::sampleBxdf(const vec3 &wo, const vec3 &normal) const
+vec3 MatGlass::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) const
 {
-    if (rand() % 2)
+    if (sampler.random() < 0.5)
     {
         float I = wo.dot(normal) > 0 ? 1.0f / Ior_ : Ior_;
         vec3 n = wo.dot(normal) < 0 ? normal : -normal;

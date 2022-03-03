@@ -2,10 +2,10 @@
 
 MatBlinnPhong::MatBlinnPhong(const vec3 &Kd, const vec3 &Ks, float Ns) : Kd_(Kd), usetex_Kd_(false), Ks_(Ks), usetex_Ks_(false), Ns_(Ns) {}
 
-vec3 MatBlinnPhong::sampleBxdf(const vec3 &wo, const vec3 &normal) const
+vec3 MatBlinnPhong::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) const
 {
     float lambda = 0.5f;
-    float r0 = rand() * 1.0f / RAND_MAX;
+    float r0 = sampler.random();
 
     vec3 ax0 = abs(normal[0]) < 0.8 ? vec3(1.0f, 0.0f, 0.0f) : vec3(0.0f, 1.0f, 0.0f);
     vec3 ax1 = ax0.cross(normal).normalized();
@@ -13,8 +13,8 @@ vec3 MatBlinnPhong::sampleBxdf(const vec3 &wo, const vec3 &normal) const
 
     if (r0 < lambda)
     {
-        float r2 = rand() * 1.0 / RAND_MAX * 0.99f;
-        float phi = rand() * 1.0 / RAND_MAX * 3.14159 * 2;
+        float r2 = sampler.random() * 0.99f;
+        float phi = sampler.random() * 3.14159 * 2;
         float r = sqrt(r2);
         float h = sqrt(1 - r2);
 
@@ -24,8 +24,8 @@ vec3 MatBlinnPhong::sampleBxdf(const vec3 &wo, const vec3 &normal) const
     }
     else
     {
-        double r1 = rand() * 1.0f / RAND_MAX;
-        double r2 = rand() * 1.0f / RAND_MAX;
+        double r1 = sampler.random();
+        double r2 = sampler.random();
         double cos_theta = pow(r1, 1.0f / (Ns_ + 2.0f));
         double sin_theta = sqrt(1 - cos_theta);
         double phi = 2.0f * 3.14159f * r2;

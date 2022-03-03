@@ -37,13 +37,13 @@ void LightSampler::initialize(const std::vector<Triangle> &scene)
     }
 }
 
-const Triangle *LightSampler::sampleLight()
+const Triangle *LightSampler::sampleLight(Sampler& sampler)
 {
     if (lighting_triangles_.size() == 0)
     {
         return nullptr;
     }
-    float r = rand() * 1.0f / RAND_MAX;
+    float r = sampler.random();
     int id = lower_bound(cdf_.begin(), cdf_.end(), r) - cdf_.begin();
     return lighting_triangles_[id];
 }
