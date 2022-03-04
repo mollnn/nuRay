@@ -2,7 +2,7 @@
 
 SamplerPSSMLT::SamplerPSSMLT()
 {
-    a.resize(200);
+    a.resize(100);
     ptr = 0;
     newSample();
 }

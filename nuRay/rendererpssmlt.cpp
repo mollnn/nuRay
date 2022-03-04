@@ -38,7 +38,7 @@ void RendererPSSMLT::render(const Camera &camera,
 
     vec3 *render_buf = new vec3[img_width * img_height];
     float b = 0;
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 10000; i++)
     {
         sampler.newSample();
         SamplerPSSMLT &original_sampler = sampler;
@@ -48,17 +48,19 @@ void RendererPSSMLT::render(const Camera &camera,
         vec3 original_ray_dir = camera.generateRay(original_r1 * img_width, original_r2 * img_height, img_width, img_height);
         vec3 original_radiance = RendererPT::trace(original_sampler, camera.pos, original_ray_dir, triangles, light_sampler_, bvh_, env_map);
         float original_importance = original_radiance.norm();
-        b += original_importance;
+        if (!std::isnan(original_importance))
+            b += original_importance;
     }
-    b /= 1000;
-    float bdM = b / 20000 * img_width * img_height;
+    b /= 10000;
+    int N = img_width * img_height * SPP;
+    float bdM = b / N * img_width * img_height;
     std::cout << "bdM=" << bdM << std::endl;
 
     float large_jump_prob = 0.2f;
 
     sampler.newSample();
     SamplerStd std_sampler;
-    for (int i = 0; i < 20000; i++)
+    for (int i = 0; i < N; i++)
     {
         SamplerPSSMLT &original_sampler = sampler;
         SamplerPSSMLT tentative_sampler = sampler;
