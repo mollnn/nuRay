@@ -17,6 +17,7 @@ struct BDPTVertexInfo
     vec3 pos;
     float b1,b2;
     vec3 alpha;
+    float pf,pr;
 };
 
 class RendererBDPT : public Renderer

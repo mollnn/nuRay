@@ -29,7 +29,7 @@ vec3 RendererBDPT::connect(const std::vector<BDPTVertexInfo> &light_path, const 
                 continue;
             if (s == 0)
                 continue; // handled by return value of trace()
-            // TODO: MIS weight
+
             const Triangle *py = light_path[s].primitive;
             const Triangle *pz = eye_path[t].primitive;
             if (!py || !pz)
@@ -46,7 +46,21 @@ vec3 RendererBDPT::connect(const std::vector<BDPTVertexInfo> &light_path, const 
             vec3 fs = py->mat->bxdf(ywo, yn, ywi, py->getTexCoords(yb1, yb2));
             vec3 ft = pz->mat->bxdf(zwo, zn, zwi, pz->getTexCoords(zb1, zb2));
             vec3 c = fs * g * ft;
-            ans += light_path[s].alpha * c * eye_path[t].alpha;
+
+            float wL = 0, wE = 0, pL = 1, pE = 1;
+            for (int i = s - 1; i >= 0; i--)
+            {
+                pL *= light_path[i].pr / light_path[i].pf;
+                wL += pL;
+            }
+            for (int i = t - 1; i >= 2; i--)
+            {
+                pE *= eye_path[i].pr / eye_path[i].pf;
+                wE += pE;
+            }
+            float wMIS = 1.0f / (wL + 1.0f + wE);
+
+            ans += light_path[s].alpha * c * eye_path[t].alpha * wMIS;
         }
     }
     return ans;
@@ -57,6 +71,7 @@ vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initia
     vec3 value = initial;
 
     vec3 o = orig0, d = dir0;
+    float p_next = 1;
     while (true)
     {
         auto [t, b1, b2, hit_obj] = intersect(o, d, triangles, bvh_);
@@ -89,6 +104,8 @@ vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initia
             vi.primitive = hit_obj;
             vi.b1 = u;
             vi.b2 = v;
+            vi.pf = p_next / pow(t, 2); // p(xi-2,xi-1,xi)
+            vi.pr = 1;                  // p(xi,xi+1,xi+2)
             record.push_back(vi);
         }
 
@@ -122,8 +139,16 @@ vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initia
         float pdf = hit_obj->mat->pdf(wo, normal, wi);
         vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
         value *= abs(wi.dot(normal)) * brdf / pdf / prr;
+        p_next = pdf * abs(wi.dot(normal) * wo.dot(normal)); // divide d^2 in next iteration
         d = wi;
         o = hit_pos + d * 1e-3f;
+
+        // now stack top is xi and we gonna gen xi+1 (wi = xi to xi+1)
+        // we can fill Pr of xi-1 (subtop of stack)
+        if (record.size() > 2) // note that we do not have to fill Fr for record[0] since it's placeholder
+        {
+            record[record.size() - 2].pr = hit_obj->mat->pdf(wi, normal, wo) * abs(wi.dot(normal) * wo.dot(normal)) / (hit_pos - record[record.size() - 2].pos).norm2();
+        }
     }
 
     return value;
@@ -221,15 +246,15 @@ void RendererBDPT::render(const Camera &camera, const std::vector<Triangle> &tri
                         auto light_obj = light_sampler_.sampleLight(sampler);
                         auto [light_pos, light_b1, light_b2] = light_obj->sample(sampler);
                         auto light_dir = hemisphereSampler(light_obj->getNormal(light_b1, light_b2));
-                        auto light_int = light_obj->mat->emission(light_dir, light_obj->getNormal(light_b1, light_b2)) / light_sampler_.p();
-                        light_path.push_back({nullptr, 0, 0, 0, 1});
-                        light_path.push_back({light_obj, light_pos, 0, 0, light_int}); // u,v is temply replaced with 0,0
+                        auto light_int = light_obj->mat->emission(light_dir, light_obj->getNormal(light_b1, light_b2));
+                        light_path.push_back({nullptr, 0, 0, 0, 1, 1, 1});
+                        light_path.push_back({light_obj, light_pos, 0, 0, light_int / light_sampler_.p(), light_sampler_.p(), 1}); // u,v is temply replaced with 0,0
 
                         trace(light_path, light_int * 1.0f, sampler, light_pos, light_dir, triangles, light_sampler_, bvh_, env_map);
 
                         std::vector<BDPTVertexInfo> eye_path;
-                        eye_path.push_back({nullptr, 0, 0, 0, 1});
-                        eye_path.push_back({nullptr, camera.pos, 0, 0, 1});
+                        eye_path.push_back({nullptr, 0, 0, 0, 1, 1, 1});
+                        eye_path.push_back({nullptr, camera.pos, 0, 0, 1, 1, 1});
                         ans += trace(eye_path, 1.0f, sampler, camera.pos, eye_ray_dir, triangles, light_sampler_, bvh_, env_map);
                         ans += connect(light_path, eye_path, triangles);
                         result += max(0.0f, ans);
