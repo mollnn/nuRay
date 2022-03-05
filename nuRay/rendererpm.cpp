@@ -145,7 +145,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
 
     std::vector<Photon> photon_list;
 
-    int n_photons = 10000;
+    int n_photons = 1000;
     for (int i = 0; i < n_photons; i++)
     {
         // emit photon
@@ -157,11 +157,11 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
             vec3 light_uv = light_obj->getTexCoords(light_bc1, light_bc2);
             float light_pdf = light_sampler_.p();
             vec3 light_dir = hemisphereSampler(light_normal);
-            auto light_int = light_obj->mat->emission(light_dir, light_obj->getNormal(light_bc1, light_bc2)) / light_pdf;
+            auto light_int = light_obj->mat->emission(light_dir, light_obj->getNormal(light_bc1, light_bc2));
             Photon photon;
             photon.pos = light_pos;
             photon.dir = light_dir;
-            photon.power = light_int / light_pdf / n_photons / 2000; // ! TEMP
+            photon.power = light_int / light_pdf / n_photons; 
 
             // trace photon
             while (true)
