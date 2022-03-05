@@ -2,7 +2,7 @@
 
 MatBlinnPhong::MatBlinnPhong(const vec3 &Kd, const vec3 &Ks, float Ns) : Kd_(Kd), usetex_Kd_(false), Ks_(Ks), usetex_Ks_(false), Ns_(Ns) {}
 
-vec3 MatBlinnPhong::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) const
+vec3 MatBlinnPhong::sampleBxdf(Sampler &sampler, const vec3 &wo, const vec3 &normal) const
 {
     float lambda = 0.5f;
     float r0 = sampler.random();
@@ -45,7 +45,7 @@ vec3 MatBlinnPhong::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, con
     vec3 Rs = usetex_Ks_ ? map_Ks_.pixelUV(uv[0], uv[1]) : Ks_;
     vec3 diffuse = Rd / 3.14159;
     vec3 h = (wo + wi).normalized();
-    vec3 specular = (Ns_ + 2) / 3.14159 / 8 * Rs * pow(normal.dot(h), Ns_);     // ! NEED FIX
+    vec3 specular = (Ns_ + 2) / 3.14159 / 8 * Rs * pow(normal.dot(h), Ns_); // ! NEED FIX
     return diffuse + specular;
 }
 
@@ -67,6 +67,20 @@ bool MatBlinnPhong::isEmission() const
 
 bool MatBlinnPhong::isTransmission() const
 {
+    return false;
+}
+
+bool MatBlinnPhong::isSpecular(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
+{
+    if (Ns_ < 10)
+        return false;
+    vec3 Rd = usetex_Kd_ ? map_Kd_.pixelUV(uv[0], uv[1]) : Kd_;
+    vec3 Rs = usetex_Ks_ ? map_Ks_.pixelUV(uv[0], uv[1]) : Ks_;
+    float Id = Rd.norm();
+    float Is = Rs.norm();
+    float r = Is / (Is + Id);
+    if (rand() * 1.0f / RAND_MAX < r)
+        return true;
     return false;
 }
 

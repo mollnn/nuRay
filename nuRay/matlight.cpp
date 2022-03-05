@@ -27,6 +27,11 @@ bool MatLight::isTransmission() const
     return true;
 }
 
+bool MatLight::isSpecular(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
+{
+    return true;
+}
+
 bool MatLight::requireLightSampling(const vec3 &wo, const vec3 &normal) const
 {
     return false;

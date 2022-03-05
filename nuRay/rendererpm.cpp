@@ -49,7 +49,7 @@ vec3 RendererPM::trace(const std::vector<Photon> &photon_map, Sampler &sampler, 
         return dist_a < dist_b;
     };
 
-    if (true) // TODO: diffuse check
+    if (hit_obj->mat->isSpecular(wo, normal, wo, texcoords) == false)
     {
         const int photon_limit = 10;
 
@@ -161,7 +161,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
             Photon photon;
             photon.pos = light_pos;
             photon.dir = light_dir;
-            photon.power = light_int / light_pdf / n_photons /2000; // ! TEMP
+            photon.power = light_int / light_pdf / n_photons / 2000; // ! TEMP
 
             // trace photon
             while (true)
@@ -173,8 +173,6 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
                 vec3 wo = -dir;
                 vec3 normal = hit_obj->getNormal(b1, b2);
 
-                photon_list.push_back(photon); // TODO: diffuse check
-
                 if (hit_obj->mat->isEmission())
                 {
                     break;
@@ -182,6 +180,9 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
 
                 vec3 texcoords = hit_obj->getTexCoords(b1, b2);
                 float u = texcoords[0], v = texcoords[1];
+
+                if (hit_obj->mat->isSpecular(wo, normal, wo, texcoords) == false)
+                    photon_list.push_back(photon);
 
                 if (normal.dot(dir) > 0 && hit_obj->mat->isTransmission() == false)
                     break;
@@ -196,7 +197,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
                 vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
                 photon.pos = hit_pos + wi * 1e-3;
                 photon.dir = wi;
-                photon.power *= brdf * abs(wi.dot(normal)); // is cos term needed?
+                photon.power *= brdf * abs(wi.dot(normal)) / prr; // is cos term needed?
             }
         }
     }

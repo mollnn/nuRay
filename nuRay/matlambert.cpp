@@ -46,6 +46,11 @@ bool MatLambert::isTransmission() const
     return false;
 }
 
+bool MatLambert::isSpecular(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
+{
+    return false;
+}
+
 bool MatLambert::requireLightSampling(const vec3 &wo, const vec3 &normal) const
 {
     return true;

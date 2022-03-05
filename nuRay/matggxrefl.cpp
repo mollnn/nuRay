@@ -73,6 +73,11 @@ bool MatGGXRefl::isTransmission() const
     return false;
 }
 
+bool MatGGXRefl::isSpecular(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
+{
+    return rand() % 2;
+}
+
 bool MatGGXRefl::requireLightSampling(const vec3 &wo, const vec3 &normal) const
 {
     return true;
