@@ -40,6 +40,7 @@ SOURCES += \
     matlambert.cpp \
     matlight.cpp \
     renderer.cpp \
+    rendererbdpt.cpp \
     rendererpssmlt.cpp \
     rendererpt.cpp \
     rendererptls.cpp \
@@ -67,6 +68,7 @@ HEADERS += \
     matlambert.h \
     matlight.h \
     renderer.h \
+    rendererbdpt.h \
     rendererpssmlt.h \
     rendererpt.h \
     rendererptls.h \

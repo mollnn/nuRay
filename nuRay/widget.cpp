@@ -5,6 +5,7 @@
 #include "rendererpt.h"
 #include "rendererptls.h"
 #include "rendererpssmlt.h"
+#include "rendererbdpt.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
@@ -50,7 +51,7 @@ Widget::Widget(QWidget *parent)
 
     auto &triangles = scene_loader_.getTriangles();
 
-    renderer_ = new RendererPT();
+    renderer_ = new RendererBDPT();
     // renderer_ = new RendererPSSMLT();
 
     renderer_->prepare(triangles);
