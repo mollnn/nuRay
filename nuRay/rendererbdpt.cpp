@@ -40,10 +40,11 @@ vec3 RendererBDPT::connect(const std::vector<BDPTVertexInfo> &light_path, const 
             vec3 zwi = (y1 - z1).normalized(), zwo = (z2 - z1).normalized();
             float yb1 = light_path[s].b1, yb2 = light_path[s].b2;
             float zb1 = eye_path[s].b1, zb2 = eye_path[s].b2;
-            float g = visibility(y1, z1, triangles) * abs(ywi.dot(py->getNormal(yb1, yb2)) * zwi.dot(pz->getNormal(zb1, zb2))) / (z1 - y1).norm2();
-
-            vec3 fs = py->mat->bxdf((z1 - y1).normalized(), py->getNormal(yb1, yb2), (y2 - y1).normalized(), py->getTexCoords(yb1, yb2));
-            vec3 ft = pz->mat->bxdf((z2 - z1).normalized(), pz->getNormal(zb1, zb2), (y1 - z1).normalized(), pz->getTexCoords(zb1, zb2));
+            vec3 yn = py->getNormal(yb1, yb2);
+            vec3 zn = pz->getNormal(zb1, zb2);
+            float g = visibility(y1, z1, triangles) * abs(ywi.dot(yn) * zwi.dot(zn)) / (z1 - y1).norm2();
+            vec3 fs = py->mat->bxdf(ywo, yn, ywi, py->getTexCoords(yb1, yb2));
+            vec3 ft = pz->mat->bxdf(zwo, zn, zwi, pz->getTexCoords(zb1, zb2));
             vec3 c = fs * g * ft;
             ans += light_path[s].alpha * c * eye_path[t].alpha;
         }

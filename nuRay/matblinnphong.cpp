@@ -37,6 +37,8 @@ vec3 MatBlinnPhong::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &nor
 
 vec3 MatBlinnPhong::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
 {
+    if (wi.dot(normal) * wo.dot(normal) < 0)
+        return 0.0f;
     if (wi.dot(normal) <= 1e-4 || wo.dot(normal) <= 1e-4f)
         return 0.0f;
     vec3 Rd = usetex_Kd_ ? map_Kd_.pixelUV(uv[0], uv[1]) : Kd_;

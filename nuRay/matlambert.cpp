@@ -2,7 +2,7 @@
 
 MatLambert::MatLambert(const vec3 &Kd) : Kd_(Kd), usetex_Kd_(false) {}
 
-vec3 MatLambert::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) const
+vec3 MatLambert::sampleBxdf(Sampler &sampler, const vec3 &wo, const vec3 &normal) const
 {
     float r2 = sampler.random() * 0.99f;
     float phi = sampler.random() * 3.14159 * 2;
@@ -19,6 +19,8 @@ vec3 MatLambert::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal
 
 vec3 MatLambert::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
 {
+    if (wi.dot(normal) * wo.dot(normal) < 0)
+        return 0.0f;
     if (usetex_Kd_)
     {
         return map_Kd_.pixelUV(uv[0], uv[1]) / 3.14159;

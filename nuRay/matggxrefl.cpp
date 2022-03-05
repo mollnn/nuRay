@@ -2,7 +2,7 @@
 
 MatGGXRefl::MatGGXRefl(const vec3 &Kd, float alpha) : Kd_(Kd), usetex_Kd_(false), alpha_(alpha) {}
 
-vec3 MatGGXRefl::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) const
+vec3 MatGGXRefl::sampleBxdf(Sampler &sampler, const vec3 &wo, const vec3 &normal) const
 {
     // Naive
     // float r2 = sampler.random() * 0.99f;
@@ -34,6 +34,8 @@ vec3 MatGGXRefl::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal
 
 vec3 MatGGXRefl::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
 {
+    if (wi.dot(normal) * wo.dot(normal) < 0)
+        return 0.0f;
     vec3 Kd = Kd_;
     if (usetex_Kd_)
     {
