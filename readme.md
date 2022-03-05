@@ -1,4 +1,4 @@
-# Night-Up Ray: Physical-based Path Tracer
+# Night-Up Ray: Physically-based Offline Renderer
 
 ## Dependency
 
@@ -10,7 +10,7 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 - Monte Carlo samplers
 
-- Bounding volume hierarchy (BVH): Surface Area Heuristic
+- Bounding volume hierarchy: Surface Area Heuristic
 
 - Area (mesh) lights
 
@@ -26,7 +26,7 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 - Environment Mapping (IBL)
 
-- CPU parallelization via multithreading (OpenMP)
+- CPU parallelization via multithreading
 
 - (Disabled now) Denoising (JBF)
 
@@ -36,10 +36,13 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 ### WIP
 
-- Primary Sample Space Metropolis Light Transport
-- Bidirectional Path Tracing
+- Primary Sample Space Metropolis Light Transport (need fix)
+- Bidirectional Path Tracing (need fix)
 - Photon Mapping with kd-tree
-- Continuous mode, Denoising with SVGF and RAE
+- Continuous mode
+- SVGF Denoiser
+- RAE Denoiser
+- Neural Radiance Caching
 - Bump mapping
 - Tessellation Displacement Mapping
 

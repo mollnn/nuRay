@@ -8,8 +8,6 @@
 #include <QEventLoop>
 #include "samplerstd.h"
 
-// ! THIS IMPLEMENTATION IS JUST FOR TEST. IT'S NOT CORRECT.
-
 bool RendererBDPT::visibility(vec3 p, vec3 q, const std::vector<Triangle> &triangles)
 {
     vec3 d = q - p;

@@ -6,6 +6,7 @@
 #include "rendererptls.h"
 #include "rendererpssmlt.h"
 #include "rendererbdpt.h"
+#include "rendererpm.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
@@ -51,7 +52,7 @@ Widget::Widget(QWidget *parent)
 
     auto &triangles = scene_loader_.getTriangles();
 
-    renderer_ = new RendererBDPT();
+    renderer_ = new RendererPM();
     // renderer_ = new RendererPSSMLT();
     renderer_->prepare(triangles);
 
@@ -60,7 +61,8 @@ Widget::Widget(QWidget *parent)
     combo_renderer_.addItem("Path Trace (NEE)");
     combo_renderer_.addItem("PSSMLT");
     combo_renderer_.addItem("BDPT");
-    combo_renderer_.setCurrentIndex(3);
+    combo_renderer_.addItem("Photon Mapping (Global)");
+    combo_renderer_.setCurrentIndex(4);
 
     connect(&combo_renderer_, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int id)
             {
@@ -80,6 +82,10 @@ Widget::Widget(QWidget *parent)
         else if (id == 3)
         {
             renderer_ = new RendererBDPT;
+        }
+        else if (id == 4)
+        {
+            renderer_ = new RendererPM;
         }
         renderer_->prepare(triangles); });
 
