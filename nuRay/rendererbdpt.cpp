@@ -36,9 +36,11 @@ vec3 RendererBDPT::connect(const std::vector<BDPTVertexInfo> &light_path, const 
                 continue;
             vec3 y1 = light_path[s].pos, y2 = light_path[s - 1].pos;
             vec3 z1 = eye_path[t].pos, z2 = eye_path[t - 1].pos;
-            float g = visibility(y1, z1, triangles); // TODO: need cos here
+            vec3 ywi = (y2 - y1).normalized(), ywo = (z1 - y1).normalized();
+            vec3 zwi = (y1 - z1).normalized(), zwo = (z2 - z1).normalized();
             float yb1 = light_path[s].b1, yb2 = light_path[s].b2;
             float zb1 = eye_path[s].b1, zb2 = eye_path[s].b2;
+            float g = visibility(y1, z1, triangles) * abs(ywi.dot(py->getNormal(yb1, yb2)) * zwi.dot(pz->getNormal(zb1, zb2))) / (z1 - y1).norm2();
 
             vec3 fs = py->mat->bxdf((z1 - y1).normalized(), py->getNormal(yb1, yb2), (y2 - y1).normalized(), py->getTexCoords(yb1, yb2));
             vec3 ft = pz->mat->bxdf((z2 - z1).normalized(), pz->getNormal(zb1, zb2), (y1 - z1).normalized(), pz->getTexCoords(zb1, zb2));
@@ -49,13 +51,14 @@ vec3 RendererBDPT::connect(const std::vector<BDPTVertexInfo> &light_path, const 
     return ans;
 }
 
-vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initial, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Texture *env_map)
+vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initial, Sampler &sampler, const vec3 &orig0, const vec3 &dir0, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Texture *env_map)
 {
     vec3 value = initial;
 
+    vec3 o = orig0, d = dir0;
     while (true)
     {
-        auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh_);
+        auto [t, b1, b2, hit_obj] = intersect(o, d, triangles, bvh_);
 
         if (hit_obj == nullptr)
         {
@@ -66,15 +69,15 @@ vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initia
             }
             else
             {
-                float v = 1 - acos(dir[1]) / 3.14159;
-                float u = atan2(dir[2], dir[0]) / 2 / 3.14159 + 0.5;
+                float v = 1 - acos(d[1]) / 3.14159;
+                float u = atan2(d[2], d[0]) / 2 / 3.14159 + 0.5;
                 value *= env_map->pixelUV(u, v);
                 break;
             }
         }
 
         vec3 texcoords = hit_obj->getTexCoords(b1, b2);
-        vec3 hit_pos = orig + dir * t;
+        vec3 hit_pos = o + d * t;
         float u = texcoords[0], v = texcoords[1];
 
         if (hit_obj != nullptr)
@@ -88,7 +91,7 @@ vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initia
             record.push_back(vi);
         }
 
-        vec3 wo = -dir;
+        vec3 wo = -d;
         vec3 normal = hit_obj->getNormal(b1, b2);
 
         if (hit_obj->mat->isEmission())
@@ -97,7 +100,7 @@ vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initia
             break;
         }
 
-        if (normal.dot(dir) > 0 && hit_obj->mat->isTransmission() == false)
+        if (normal.dot(d) > 0 && hit_obj->mat->isTransmission() == false)
         {
             value *= 0.0f;
             break;
@@ -118,6 +121,8 @@ vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initia
         float pdf = hit_obj->mat->pdf(wo, normal, wi);
         vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
         value *= abs(wi.dot(normal)) * brdf / pdf / prr;
+        d = wi;
+        o = hit_pos + d * 1e-3f;
     }
 
     return value;
@@ -171,7 +176,7 @@ void RendererBDPT::render(const Camera &camera, const std::vector<Triangle> &tri
 
     auto hemisphereSampler = [&](const vec3 &normal) -> vec3
     {
-        float r2 = sampler.random() * 0.99f;
+        float r2 = sampler.random() * 0.999f;
         float phi = sampler.random() * 3.14159 * 2;
         float r = sqrt(r2);
         float h = sqrt(1 - r2);
@@ -224,8 +229,7 @@ void RendererBDPT::render(const Camera &camera, const std::vector<Triangle> &tri
                         std::vector<BDPTVertexInfo> eye_path;
                         eye_path.push_back({nullptr, 0, 0, 0, 1});
                         eye_path.push_back({nullptr, camera.pos, 0, 0, 1});
-                        trace(eye_path, 1.0f, sampler, camera.pos, eye_ray_dir, triangles, light_sampler_, bvh_, env_map);
-
+                        ans += trace(eye_path, 1.0f, sampler, camera.pos, eye_ray_dir, triangles, light_sampler_, bvh_, env_map);
                         ans += connect(light_path, eye_path, triangles);
                         result += max(0.0f, ans);
                     }
@@ -244,7 +248,7 @@ void RendererBDPT::render(const Camera &camera, const std::vector<Triangle> &tri
         }
     };
 
-    int num_threads = 4;
+    int num_threads = 8;
     std::vector<std::thread> ths;
     for (int i = 0; i < num_threads; i++)
     {
