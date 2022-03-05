@@ -24,6 +24,7 @@
 #include <QProgressBar>
 #include "texture.h"
 #include <QMutex>
+#include <QComboBox>
 
 class Widget : public QWidget
 {
@@ -74,6 +75,7 @@ private:
     QMutex lock_render_;
     QProgressBar progress_bar_;
     QString str_envmap_;
+    QComboBox combo_renderer_;
 
     void bindLineEdit(QLineEdit &line_edit, float &var);
     void bindLineEdit(QLineEdit &line_edit, int &var);

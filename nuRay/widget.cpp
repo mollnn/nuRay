@@ -33,7 +33,7 @@ Widget::Widget(QWidget *parent)
     glwidget_preview_.setFixedHeight(512);
     glwidget_preview_.setFixedWidth(512);
 
-    grid_layout_.addWidget(&glwidget_preview_, 0, 50, 10, 10);
+    grid_layout_.addWidget(&glwidget_preview_, 0, 50, 1, 10);
 
     camera_.pos = {50.0f, 320.0f, 500.0f};
     camera_.gaze = vec3(-0.2f, -0.5f, -1.0f).normalized();
@@ -53,13 +53,40 @@ Widget::Widget(QWidget *parent)
 
     renderer_ = new RendererBDPT();
     // renderer_ = new RendererPSSMLT();
-
     renderer_->prepare(triangles);
+
+    grid_layout_.addWidget(&combo_renderer_, 2, 50, 1, 5);
+    combo_renderer_.addItem("Path Trace (no NEE)");
+    combo_renderer_.addItem("Path Trace (NEE)");
+    combo_renderer_.addItem("PSSMLT");
+    combo_renderer_.addItem("BDPT");
+    combo_renderer_.setCurrentIndex(3);
+
+    connect(&combo_renderer_, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int id)
+            {
+        delete renderer_;
+        if (id == 0)
+        {
+            renderer_ = new RendererPT;
+        }
+        else if (id == 1)
+        {
+            renderer_ = new RendererPTLS;
+        }
+        else if (id == 2)
+        {
+            renderer_ = new RendererPSSMLT;
+        }
+        else if (id == 3)
+        {
+            renderer_ = new RendererBDPT;
+        }
+        renderer_->prepare(triangles); });
 
     last_review_render_time_ = QTime::currentTime().addSecs(-1);
 
     connect(&glwidget_preview_, &GlWidget::cameraChanged, [&]()
-            { 
+            {
         line_edit_cam_pos_x_.setText(QString::number(camera_.pos[0], 'f', 4));
         line_edit_cam_pos_y_.setText(QString::number(camera_.pos[1], 'f', 4));
         line_edit_cam_pos_z_.setText(QString::number(camera_.pos[2], 'f', 4));
@@ -113,21 +140,36 @@ Widget::Widget(QWidget *parent)
     line_edit_yaw_.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit_yaw_.setText(QString::number(camera_.toEuler()[0], 'f', 4));
     connect(&line_edit_yaw_, &QLineEdit::editingFinished, [&]()
-            { if(line_edit_yaw_.text().toFloat() == camera_.toEuler()[0]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); glwidget_preview_.update(); });
+            {
+        if (line_edit_yaw_.text().toFloat() == camera_.toEuler()[0])
+            return;
+        camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat());
+        renderRT_preview();
+        glwidget_preview_.update(); });
 
     grid_layout_.addWidget(&line_edit_pitch_, 31, 51, 1, 4);
     grid_layout_.addWidget(&label_pitch_, 31, 50, 1, 1);
     line_edit_pitch_.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit_pitch_.setText(QString::number(camera_.toEuler()[1], 'f', 4));
     connect(&line_edit_pitch_, &QLineEdit::editingFinished, [&]()
-            { if(line_edit_pitch_.text().toFloat() == camera_.toEuler()[1]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); glwidget_preview_.update(); });
+            {
+        if (line_edit_pitch_.text().toFloat() == camera_.toEuler()[1])
+            return;
+        camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat());
+        renderRT_preview();
+        glwidget_preview_.update(); });
 
     grid_layout_.addWidget(&line_edit_roll_, 32, 51, 1, 4);
     grid_layout_.addWidget(&label_roll_, 32, 50, 1, 1);
     line_edit_roll_.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit_roll_.setText(QString::number(camera_.toEuler()[2], 'f', 4));
     connect(&line_edit_roll_, &QLineEdit::editingFinished, [&]()
-            { if(line_edit_roll_.text().toFloat() == camera_.toEuler()[2]) return; camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat()); renderRT_preview(); glwidget_preview_.update(); });
+            {
+        if (line_edit_roll_.text().toFloat() == camera_.toEuler()[2])
+            return;
+        camera_.fromEuler(line_edit_yaw_.text().toFloat(), line_edit_pitch_.text().toFloat(), line_edit_roll_.text().toFloat());
+        renderRT_preview();
+        glwidget_preview_.update(); });
 
     bindLineEdit(line_edit_envmap_, str_envmap_);
     grid_layout_.addWidget(&line_edit_envmap_, 36, 51, 1, 4);
