@@ -7,6 +7,7 @@
 #include "rendererpssmlt.h"
 #include "rendererbdpt.h"
 #include "rendererpm.h"
+#include "envmap.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
@@ -238,11 +239,12 @@ void Widget::renderRT()
         qDebug() << "Already rendering, action ignored.";
         return;
     }
+    Envmap envmap(&env_map_);
     // Render
     QTime timer;
     timer.start();
     std::cout << "Loading scene..." << std::endl;
-    env_map.load(str_envmap_.toStdString());
+    env_map_.load(str_envmap_.toStdString());
     auto &triangles = scene_loader_.getTriangles();
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
     this->renderer_->render(
@@ -252,7 +254,7 @@ void Widget::renderRT()
         [&](float p)
         { progress_ = p / 100.0f; },
         lock_framebuffer_,
-        &env_map);
+        &envmap);
     lock_render_.unlock();
     framebufferUpdated();
 }
@@ -267,7 +269,8 @@ void Widget::renderRT_preview()
         qDebug() << "Already rendering, action ignored.";
         return;
     }
-    env_map.load(str_envmap_.toStdString());
+    Envmap envmap(&env_map_);
+    env_map_.load(str_envmap_.toStdString());
     render_control_flag_ = 1;
     last_review_render_time_ = QTime::currentTime();
     auto &triangles = scene_loader_.getTriangles();
@@ -278,7 +281,7 @@ void Widget::renderRT_preview()
         [&](float p)
         { progress_ = p / 100.0f; },
         lock_framebuffer_,
-        &env_map);
+        &envmap);
     lock_render_.unlock();
     framebufferUpdated();
 }

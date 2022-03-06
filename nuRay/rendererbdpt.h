@@ -26,7 +26,7 @@ protected:
     // return value of trace is answer for case s=0
     bool visibility(vec3 p, vec3 q, const std::vector<Triangle> &triangles);
     vec3 connect(const std::vector<BDPTVertexInfo> &light_path, const std::vector<BDPTVertexInfo> &eye_path, const std::vector<Triangle> &triangles);
-    vec3 trace(std::vector<BDPTVertexInfo> &record, const vec3& initial, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Texture *env_map = nullptr);
+    vec3 trace(std::vector<BDPTVertexInfo> &record, const vec3& initial, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Envmap *env_map = nullptr);
 
 public:
     virtual void render(const Camera &camera,
@@ -39,7 +39,7 @@ public:
                         std::atomic<int> &con_flag,
                         std::function<void(float)> progress_report,
                         QMutex &framebuffer_mutex,
-                        const Texture *env_map = nullptr) override;
+                        const Envmap *env_map = nullptr) override;
 };
 
 #endif

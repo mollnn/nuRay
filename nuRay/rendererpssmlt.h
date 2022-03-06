@@ -26,7 +26,7 @@ public:
                         std::atomic<int> &con_flag,
                         std::function<void(float)> progress_report,
                         QMutex &framebuffer_mutex,
-                        const Texture *env_map = nullptr) override;
+                        const Envmap *env_map = nullptr) override;
 };
 
 #endif // RENDERERPSSMLT_H

@@ -10,7 +10,7 @@
 
 // Path Tracing with Light Sampler
 
-vec3 RendererPTLS::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Texture *env_map)
+vec3 RendererPTLS::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Envmap *env_map)
 {
 
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
@@ -96,7 +96,7 @@ vec3 RendererPTLS::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, co
     return result;
 }
 
-void RendererPTLS::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Texture *env_map)
+void RendererPTLS::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Envmap *env_map)
 {
     SamplerStd sampler;
 

@@ -29,6 +29,8 @@ SOURCES += \
     bvh.cpp \
     bvhnode.cpp \
     camera.cpp \
+    envmap.cpp \
+    envmapsampler.cpp \
     glwidget.cpp \
     lightsampler.cpp \
     loader.cpp \
@@ -58,6 +60,8 @@ HEADERS += \
     bvh.h \
     bvhnode.h \
     camera.h \
+    envmap.h \
+    envmapsampler.h \
     glwidget.h \
     lightsampler.h \
     loader.h \

@@ -8,6 +8,7 @@
 #include "lightsampler.h"
 #include "bvh.h"
 #include "texture.h"
+#include "envmap.h"
 #include <QMutex>
 
 class Renderer
@@ -23,7 +24,7 @@ public:
                 std::function<void(bool)> callback, std::atomic<int> &con_flag, 
                 std::function<void(float)> progress_report, 
                 QMutex& framebuffer_mutex,
-                const Texture *env_map = nullptr) = 0;
+                const Envmap *env_map = nullptr) = 0;
 
 protected:
     BVH bvh_;

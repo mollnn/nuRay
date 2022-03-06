@@ -68,7 +68,7 @@ private:
     QTime last_review_render_time_;
     QTextEdit text_edit_scene_;
     QPushButton btn_load_scene_;
-    Texture env_map;
+    Texture env_map_;
     std::atomic<int> render_control_flag_;
     std::atomic<float> progress_;
     QMutex lock_framebuffer_;

@@ -20,7 +20,7 @@ void RendererPSSMLT::render(const Camera &camera,
                             std::atomic<int> &con_flag,
                             std::function<void(float)> progress_report,
                             QMutex &framebuffer_mutex,
-                            const Texture *env_map)
+                            const Envmap *env_map)
 {
     SamplerPSSMLT sampler;
 

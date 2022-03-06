@@ -21,7 +21,7 @@ class RendererPM : public Renderer
     };
 
 protected:
-    virtual vec3 trace(const std::vector<Photon>& photon_map, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Texture *env_map = nullptr);
+    virtual vec3 trace(const std::vector<Photon>& photon_map, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Envmap *env_map = nullptr);
 
 public:
     virtual void render(const Camera &camera,
@@ -34,7 +34,7 @@ public:
                         std::atomic<int> &con_flag,
                         std::function<void(float)> progress_report,
                         QMutex &framebuffer_mutex,
-                        const Texture *env_map = nullptr) override;
+                        const Envmap *env_map = nullptr) override;
 };
 
 #endif

@@ -64,7 +64,7 @@ vec3 RendererBDPT::connect(const std::vector<BDPTVertexInfo> &light_path, const 
     return ans;
 }
 
-vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initial, Sampler &sampler, const vec3 &orig0, const vec3 &dir0, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Texture *env_map)
+vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initial, Sampler &sampler, const vec3 &orig0, const vec3 &dir0, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Envmap *env_map)
 {
     vec3 value = initial;
 
@@ -152,7 +152,7 @@ vec3 RendererBDPT::trace(std::vector<BDPTVertexInfo> &record, const vec3 &initia
     return value;
 }
 
-void RendererBDPT::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Texture *env_map)
+void RendererBDPT::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Envmap *env_map)
 {
     SamplerStd sampler;
 
