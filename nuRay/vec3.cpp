@@ -75,6 +75,10 @@ float vec3::avg() const
 {
     return (v[0] + v[1] + v[2]) / 3;
 }
+float vec3::lumin() const
+{
+    return  0.21 * v[0] + 0.71 * v[1] + 0.08 * v[2];
+}
 vec3 operator*(float lhs, const vec3 &rhs)
 {
     return rhs * lhs;

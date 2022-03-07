@@ -22,7 +22,7 @@ void RendererPSSMLT::render(const Camera &camera,
                             QMutex &framebuffer_mutex,
                             const Envmap *env_map)
 {
-    SamplerPSSMLT sampler;
+    SamplerPSSMLT original_sampler;
 
     requestDisplayUpdate(false);
     framebuffer_mutex.lock();
@@ -37,33 +37,30 @@ void RendererPSSMLT::render(const Camera &camera,
     std::cout << "Rendering... " << std::endl;
 
     vec3 *render_buf = new vec3[img_width * img_height];
+
     float b = 0;
     for (int i = 0; i < 10000; i++)
     {
-        sampler.newSample();
-        SamplerPSSMLT &original_sampler = sampler;
+        original_sampler.newSample();
         float original_r1 = original_sampler.random();
         float original_r2 = original_sampler.random();
         int original_x = original_r1 * img_width, original_y = original_r2 * img_height;
         vec3 original_ray_dir = camera.generateRay(original_r1 * img_width, original_r2 * img_height, img_width, img_height);
         vec3 original_radiance = RendererPT::trace(original_sampler, camera.pos, original_ray_dir, triangles, light_sampler_, bvh_, env_map);
-        float original_importance = original_radiance.norm();
+        float original_importance = original_radiance.lumin();
         if (!std::isnan(original_importance))
             b += original_importance;
     }
     b /= 10000;
     int N = img_width * img_height * SPP;
-    float bdM = b / N * img_width * img_height;
-    std::cout << "bdM=" << bdM << std::endl;
+    float bdM = 1.0 / SPP;
 
-    float large_jump_prob = 0.2f;
-
-    sampler.newSample();
+    float large_jump_prob = 0.99f;
+    original_sampler.newSample();
     SamplerStd std_sampler;
     for (int i = 0; i < N; i++)
     {
-        SamplerPSSMLT &original_sampler = sampler;
-        SamplerPSSMLT tentative_sampler = sampler;
+        SamplerPSSMLT tentative_sampler = original_sampler;
 
         bool large_jump = std_sampler.random() < large_jump_prob;
         tentative_sampler.nextIter(large_jump);
@@ -80,33 +77,34 @@ void RendererPSSMLT::render(const Camera &camera,
         vec3 tentative_ray_dir = camera.generateRay(tentative_r1 * img_width, tentative_r2 * img_height, img_width, img_height);
         vec3 tentative_radiance = RendererPT::trace(tentative_sampler, camera.pos, tentative_ray_dir, triangles, light_sampler_, bvh_, env_map);
 
-        // TODO: use luminance rather than algebra norm
-        float original_importance = original_radiance.norm() + 1e-8f;
-        float tentative_importance = tentative_radiance.norm() + 1e-8f;
-        vec3 original_contrib = original_radiance / original_importance;
-        vec3 tentative_contrib = tentative_radiance / tentative_importance;
+        float original_importance = original_radiance.lumin() + 1e-8f;
+        float tentative_importance = tentative_radiance.lumin() + 1e-8f;
+        vec3 original_contrib = original_radiance;
+        vec3 tentative_contrib = tentative_radiance;
 
-        float accept_prob = std::min(1.0f, tentative_importance / original_importance);
+        float accept_prob = std::max(0.0f, std::min(1.0f, tentative_importance / original_importance));
 
-        vec3 original_weight = (1 - accept_prob) / (original_importance / b + large_jump_prob);
-        vec3 tentative_weight = (accept_prob + large_jump) / (tentative_importance / b + large_jump_prob);
+        float original_weight = (1 - accept_prob) / (original_importance / b + large_jump_prob);
+        float tentative_weight = (accept_prob + (large_jump ? 1.0 : 0.0)) / (tentative_importance / b + large_jump_prob);
 
         original_x = std::max(0, std::min(img_width - 1, original_x));
         original_y = std::max(0, std::min(img_height - 1, original_y));
         tentative_x = std::max(0, std::min(img_width - 1, tentative_x));
         tentative_y = std::max(0, std::min(img_height - 1, tentative_y));
-        render_buf[original_y * img_width + original_x] += bdM * original_weight * original_contrib * (1 - accept_prob);
-        render_buf[tentative_y * img_width + tentative_x] += bdM * tentative_weight * tentative_contrib * accept_prob;
+        render_buf[original_y * img_width + original_x] += bdM * original_weight * original_contrib;
+        render_buf[tentative_y * img_width + tentative_x] += bdM * tentative_weight * tentative_contrib;
 
-        float accept_r = rand() * 1.0f / RAND_MAX;
-        if (accept_r < accept_prob)
+        if (std_sampler.random() < accept_prob)
         {
-            sampler = tentative_sampler;
+            original_sampler = tentative_sampler;
+        }
+        else
+        {
         }
 
-        if (i % 5000 == 0)
+        if (i % 10000 == 0)
         {
-            std::cout << i << " / " << 20000 << std::endl;
+            std::cout << i << " / " << N << std::endl;
         }
     }
 

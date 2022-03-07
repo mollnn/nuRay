@@ -9,7 +9,7 @@ SamplerPSSMLT::SamplerPSSMLT()
 
 float SamplerPSSMLT::random()
 {
-    return a[++ptr];
+    return a[ptr++];
 }
 
 void SamplerPSSMLT::nextIter(bool large_jump)
@@ -24,9 +24,9 @@ void SamplerPSSMLT::nextIter(bool large_jump)
     }
     else
     {
-        float s1 = 1.0 / 1024, s2 = 1.0 / 64;
         for (int i = 0; i < a.size(); i++)
         {
+            float s1 = 1.0 / 1024, s2 = 1.0 / 64;
             float r = SamplerStd::random();
             if (r < 0.5f)
             {
@@ -39,9 +39,9 @@ void SamplerPSSMLT::nextIter(bool large_jump)
                 a[i] -= s2 * exp(-r * log(s2 / s1));
             }
             if (a[i] < 0.0f)
-                a[i] += 1.0f;
+                a[i] = 0.0f;
             if (a[i] > 1.0f)
-                a[i] -= 1.0f;
+                a[i] = 1.0f;
         }
     }
 }
