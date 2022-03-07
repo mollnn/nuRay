@@ -240,11 +240,12 @@ void Widget::renderRT()
         return;
     }
     Envmap envmap(&env_map_);
+    env_map_.load(str_envmap_.toStdString());
+    renderer_->setEnvmap(envmap);
     // Render
     QTime timer;
     timer.start();
     std::cout << "Loading scene..." << std::endl;
-    env_map_.load(str_envmap_.toStdString());
     auto &triangles = scene_loader_.getTriangles();
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
     this->renderer_->render(
@@ -271,6 +272,8 @@ void Widget::renderRT_preview()
     }
     Envmap envmap(&env_map_);
     env_map_.load(str_envmap_.toStdString());
+    renderer_->setEnvmap(envmap);
+    std::cerr << "ok";
     render_control_flag_ = 1;
     last_review_render_time_ = QTime::currentTime();
     auto &triangles = scene_loader_.getTriangles();

@@ -18,7 +18,12 @@ vec3 Envmap::pixelUV(float x, float y) const
 {
     if (envmap_ != nullptr)
     {
-        return envmap_->pixelUV(x, y);
+        return envmap_->pixelUV(x, y) * gain_;
     }
     return 0.0f;
+}
+
+vec3 Envmap::pixelUniform(float x, float y) const
+{
+    return pixelUV(x, acos(2 * y - 1) / 3.14159);
 }

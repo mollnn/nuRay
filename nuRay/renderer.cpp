@@ -27,15 +27,18 @@ std::tuple<float, float, float, const Triangle *> Renderer::intersect(const vec3
     return bvh.intersection(origin, dir);
 }
 
-
-
 void Renderer::prepare(const std::vector<Triangle> &triangles)
 {
     qDebug() << "Builing Light Sampler...";
-    light_sampler_.initialize(triangles);
+    light_sampler_.setPrimitives(triangles);
 
     qDebug() << "Builing BVH...";
     bvh_.build(triangles);
 
     qDebug() << "Prepare finish :)";
+}
+
+void Renderer::setEnvmap(const Envmap &env_map)
+{
+    light_sampler_.setEnvmap(env_map);
 }

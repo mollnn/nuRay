@@ -100,7 +100,6 @@ vec3 RendererPM::trace(const std::vector<Photon> &photon_map, Sampler &sampler, 
 void RendererPM::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Envmap *env_map)
 {
     SamplerStd sampler;
-
     requestDisplayUpdate(false);
     framebuffer_mutex.lock();
     img = QImage(QSize(img_width, img_height), QImage::Format_RGB888);
@@ -152,16 +151,11 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
         const Triangle *light_obj = light_sampler_.sampleLight(sampler);
         if (light_obj != nullptr)
         {
-            auto [light_pos, light_bc1, light_bc2] = light_obj->sample(sampler);
-            vec3 light_normal = light_obj->getNormal(light_bc1, light_bc2);
-            vec3 light_uv = light_obj->getTexCoords(light_bc1, light_bc2);
-            float light_pdf = light_sampler_.p();
-            vec3 light_dir = hemisphereSampler(light_normal);
-            auto light_int = light_obj->mat->emission(light_dir, light_obj->getNormal(light_bc1, light_bc2));
+            auto [light_pos, light_dir, light_int] = light_sampler_.sampleAllLight(sampler);
             Photon photon;
             photon.pos = light_pos;
             photon.dir = light_dir;
-            photon.power = light_int / light_pdf / n_photons; 
+            photon.power = light_int / n_photons;
 
             // trace photon
             while (true)

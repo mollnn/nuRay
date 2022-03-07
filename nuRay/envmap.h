@@ -13,6 +13,7 @@ public:
     void setEnvmap(const Texture *envmap);
     void setGain(float gain);
     vec3 pixelUV(float x, float y) const;
+    vec3 pixelUniform(float x, float y) const;
 };
 
 #endif // ENVMAP_H

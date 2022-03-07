@@ -10,11 +10,13 @@
 
 class EnvmapSampler
 {
-
+    const Envmap* envmap_;
+    float avg_value_;
 public:
     EnvmapSampler();
     void initialize(const Envmap &envmap);
     vec3 sampleLight(Sampler &sampler);
+    float weight();
 };
 
 #endif // ENVMAPSAMPLER_H

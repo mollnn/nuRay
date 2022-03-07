@@ -19,12 +19,13 @@ protected:
 public:
     virtual void prepare(const std::vector<Triangle> &triangles);
     virtual void render(const Camera &camera,
-                const std::vector<Triangle> &triangles, 
-                QImage &img, int SPP, int img_width, int img_height, 
-                std::function<void(bool)> callback, std::atomic<int> &con_flag, 
-                std::function<void(float)> progress_report, 
-                QMutex& framebuffer_mutex,
-                const Envmap *env_map = nullptr) = 0;
+                        const std::vector<Triangle> &triangles,
+                        QImage &img, int SPP, int img_width, int img_height,
+                        std::function<void(bool)> callback, std::atomic<int> &con_flag,
+                        std::function<void(float)> progress_report,
+                        QMutex &framebuffer_mutex,
+                        const Envmap *env_map = nullptr) = 0;
+    virtual void setEnvmap(const Envmap &env_map);
 
 protected:
     BVH bvh_;
