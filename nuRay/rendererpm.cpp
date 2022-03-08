@@ -7,8 +7,9 @@
 #include <QTimer>
 #include <QEventLoop>
 #include "samplerstd.h"
+#include "kdtree.h"
 
-vec3 RendererPM::trace(const std::vector<Photon> &photon_map, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh, const Envmap *env_map)
+vec3 RendererPM::trace(const KDTree<Photon> &photon_map, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh, const Envmap *env_map)
 {
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
@@ -51,31 +52,30 @@ vec3 RendererPM::trace(const std::vector<Photon> &photon_map, Sampler &sampler, 
 
     if (hit_obj->mat->isSpecular(wo, normal, wo, texcoords) == false)
     {
-        const int photon_limit = 10;
+        const int photon_limit = 256;
 
         // Radiance Estimate: find nearest k photons and estimate the radiance
-        std::priority_queue<Photon, std::vector<Photon>, decltype(photon_cmp)> photon_queue(photon_cmp);
-        for (const auto &photon : photon_map)
-        {
-            photon_queue.push(photon);
-            if (photon_queue.size() > photon_limit)
-            {
-                photon_queue.pop();
-            }
-        }
+        // std::priority_queue<Photon, std::vector<Photon>, decltype(photon_cmp)> photon_queue(photon_cmp);
+        // for (const auto &photon : photon_map)
+        // {
+        //     photon_queue.push(photon);
+        //     if (photon_queue.size() > photon_limit)
+        //     {
+        //         photon_queue.pop();
+        //     }
+        // }
 
-        if (!photon_queue.empty())
+        auto photon_list = photon_map.kNN(hit_pos, photon_limit);
+
+        if (photon_list.size())
         {
-            float d2 = (photon_queue.top().pos - hit_pos).norm2();
+            float d2 = (photon_list[0]->pos - hit_pos).norm2();
             vec3 radiance;
-            while (!photon_queue.empty())
+            for (auto photon : photon_list)
             {
-                auto photon = photon_queue.top();
-                photon_queue.pop();
-
-                vec3 wi = photon.dir;
+                vec3 wi = photon->dir;
                 vec3 bxdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-                radiance += photon.power * bxdf;
+                radiance += photon->power * bxdf;
             }
             return radiance / 3.14159 / d2;
         }
@@ -144,57 +144,63 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
 
     std::vector<Photon> photon_list;
 
-    int n_photons = 1000;
+    int n_photons = 1000000;
+#pragma omp parallel for
     for (int i = 0; i < n_photons; i++)
     {
+        SamplerStd sampler;
         // emit photon
-        const Triangle *light_obj = light_sampler_.sampleLight(sampler);
-        if (light_obj != nullptr)
+        auto [light_pos, light_dir, light_int] = light_sampler_.sampleAllLight(sampler);
+        Photon photon;
+        photon.pos = light_pos;
+        photon.dir = light_dir;
+        photon.power = light_int / n_photons;
+
+        // trace photon
+        while (true)
         {
-            auto [light_pos, light_dir, light_int] = light_sampler_.sampleAllLight(sampler);
-            Photon photon;
-            photon.pos = light_pos;
-            photon.dir = light_dir;
-            photon.power = light_int / n_photons;
+            auto orig = photon.pos, dir = photon.dir;
+            auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh_);
+            if (hit_obj == nullptr)
+                break;
+            vec3 wo = -dir;
+            vec3 normal = hit_obj->getNormal(b1, b2);
 
-            // trace photon
-            while (true)
+            if (hit_obj->mat->isEmission())
             {
-                auto orig = photon.pos, dir = photon.dir;
-                auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh_);
-                if (hit_obj == nullptr)
-                    break;
-                vec3 wo = -dir;
-                vec3 normal = hit_obj->getNormal(b1, b2);
-
-                if (hit_obj->mat->isEmission())
-                {
-                    break;
-                }
-
-                vec3 texcoords = hit_obj->getTexCoords(b1, b2);
-                float u = texcoords[0], v = texcoords[1];
-
-                if (hit_obj->mat->isSpecular(wo, normal, wo, texcoords) == false)
-                    photon_list.push_back(photon);
-
-                if (normal.dot(dir) > 0 && hit_obj->mat->isTransmission() == false)
-                    break;
-
-                vec3 hit_pos = orig + dir * t;
-
-                float prr = 0.8;
-                if (sampler.random() > prr)
-                    break;
-
-                vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
-                vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-                photon.pos = hit_pos + wi * 1e-3;
-                photon.dir = wi;
-                photon.power *= brdf * abs(wi.dot(normal)) / prr; // is cos term needed?
+                break;
             }
+
+            vec3 texcoords = hit_obj->getTexCoords(b1, b2);
+            float u = texcoords[0], v = texcoords[1];
+#pragma omp critical
+            if (hit_obj->mat->isSpecular(wo, normal, wo, texcoords) == false)
+                photon_list.push_back(photon);
+
+            if (normal.dot(dir) > 0 && hit_obj->mat->isTransmission() == false)
+                break;
+
+            vec3 hit_pos = orig + dir * t;
+
+            float prr = 0.8;
+            if (sampler.random() > prr)
+                break;
+
+            vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
+            vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
+            photon.pos = hit_pos + wi * 1e-3;
+            photon.dir = wi;
+            photon.power *= brdf * abs(wi.dot(normal)) / prr; // is cos term needed?
         }
     }
+
+    KDTree<Photon> photon_map;
+    std::vector<std::pair<vec3, Photon *>> photon_list_cvt;
+    for (auto &i : photon_list)
+    {
+        photon_list_cvt.push_back({i.pos, &i});
+    }
+    photon_map.build(photon_list_cvt);
 
     int block_size = 8;
     std::vector<std::pair<int, int>> task_queue;
@@ -239,7 +245,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
                     for (int i = 0; i < SPP; i++)
                     {
                         vec3 ray_dir = camera.generateRay(x + sampler.random(), y + sampler.random(), img_width, img_height);
-                        result += max(0.0f, trace(photon_list, sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, env_map));
+                        result += max(0.0f, trace(photon_map, sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, env_map));
                     }
                     result /= SPP;
                     // Gamma correction

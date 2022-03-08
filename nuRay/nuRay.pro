@@ -32,6 +32,7 @@ SOURCES += \
     envmap.cpp \
     envmapsampler.cpp \
     glwidget.cpp \
+    kdtree.cpp \
     lightsampler.cpp \
     loader.cpp \
     main.cpp \
@@ -63,6 +64,7 @@ HEADERS += \
     envmap.h \
     envmapsampler.h \
     glwidget.h \
+    kdtree.h \
     lightsampler.h \
     loader.h \
     matblinnphong.h \
