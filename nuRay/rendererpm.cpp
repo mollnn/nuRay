@@ -76,7 +76,7 @@ vec3 RendererPM::trace(const KDTree<Photon> &photon_map, Sampler &sampler, const
                 vec3 wi = photon->dir;
                 vec3 bxdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
                 float pdf = hit_obj->mat->pdf(wo, normal, wi);
-                radiance += photon->power * bxdf * abs(wi.dot(normal)) / pdf;
+                radiance += photon->power * bxdf;
             }
             return radiance / 3.14159 / d2;
         }
@@ -155,7 +155,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
         Photon photon;
         photon.pos = light_pos;
         photon.dir = light_dir;
-        photon.power = light_int / n_photons;
+        photon.power = 2 * 3.14159 * light_int / n_photons;
 
         // trace photon
         while (true)
