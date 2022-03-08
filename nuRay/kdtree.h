@@ -31,12 +31,24 @@ void KDTree<T>::build(const std::vector<Record> &elements)
     {
         if (elements.size() == 0)
             return nullptr;
+        vec3 mx = elements[0].first, mn = elements[0].first;
+        for (auto &i : elements)
+        {
+            mx = max(mx, i.first);
+            mn = min(mn, i.first);
+        }
+        vec3 tmp = mx - mn;
+
         KDNode<T> *node = new KDNode<T>;
-        node-> axis = rand() % 3;
+        node->axis = tmp.argmax();
+
+        // Add some random
+        if (rand() % 3 == 0)
+            node->axis = rand() % 3;
 
         auto cmp = [&](const Record &a, const Record &b)
         {
-            return a.first[node-> axis] < b.first[node-> axis];
+            return a.first[node->axis] < b.first[node->axis];
         };
 
         sort(elements.begin(), elements.end(), cmp);

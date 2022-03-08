@@ -77,7 +77,7 @@ float vec3::avg() const
 }
 float vec3::lumin() const
 {
-    return  0.21 * v[0] + 0.71 * v[1] + 0.08 * v[2];
+    return 0.21 * v[0] + 0.71 * v[1] + 0.08 * v[2];
 }
 vec3 operator*(float lhs, const vec3 &rhs)
 {
@@ -113,4 +113,14 @@ vec3 max(const vec3 &a, const vec3 &b)
 vec3 vec3::pow(float q) const
 {
     return vec3(std::pow(v[0], q), std::pow(v[1], q), std::pow(v[2], q));
+}
+
+int vec3::argmax() const
+{
+    int id = 0;
+    if (v[1] > v[id])
+        id = 1;
+    if (v[2] > v[id])
+        id = 2;
+    return id;
 }

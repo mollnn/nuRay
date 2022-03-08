@@ -32,6 +32,7 @@ struct vec3
     float avg() const;
     float lumin() const;
     vec3 pow(float q) const;
+    int argmax() const;
 
     float &operator[](int i);
     float operator[](int i) const;

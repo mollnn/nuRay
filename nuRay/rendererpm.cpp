@@ -52,7 +52,7 @@ vec3 RendererPM::trace(const KDTree<Photon> &photon_map, Sampler &sampler, const
 
     if (hit_obj->mat->isSpecular(wo, normal, wo, texcoords) == false)
     {
-        const int photon_limit = 256;
+        const int photon_limit = 128;
 
         // Radiance Estimate: find nearest k photons and estimate the radiance
         // std::priority_queue<Photon, std::vector<Photon>, decltype(photon_cmp)> photon_queue(photon_cmp);
@@ -144,7 +144,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
 
     std::vector<Photon> photon_list;
 
-    int n_photons = 1000000;
+    int n_photons = 100000;
 #pragma omp parallel for
     for (int i = 0; i < n_photons; i++)
     {
