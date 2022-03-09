@@ -55,15 +55,18 @@ void RendererPSSMLT::render(const Camera &camera,
     int N = img_width * img_height * SPP;
     float bdM = 1.0 / SPP;
 
-    float large_jump_prob = 0.99f;
+    float large_jump_prob = 0.3f;
     original_sampler.newSample();
     SamplerStd std_sampler;
+
+    int accept_count = 0;
     for (int i = 0; i < N; i++)
     {
         SamplerPSSMLT tentative_sampler = original_sampler;
 
         bool large_jump = std_sampler.random() < large_jump_prob;
         tentative_sampler.nextIter(large_jump);
+        original_sampler.repeatCurrentIter();
 
         float original_r1 = original_sampler.random();
         float original_r2 = original_sampler.random();
@@ -77,12 +80,13 @@ void RendererPSSMLT::render(const Camera &camera,
         vec3 tentative_ray_dir = camera.generateRay(tentative_r1 * img_width, tentative_r2 * img_height, img_width, img_height);
         vec3 tentative_radiance = RendererPT::trace(tentative_sampler, camera.pos, tentative_ray_dir, triangles, light_sampler_, bvh_, env_map);
 
-        float original_importance = original_radiance.lumin() + 1e-8f;
-        float tentative_importance = tentative_radiance.lumin() + 1e-8f;
+        float original_importance = original_radiance.lumin() + 1e-18f;
+        float tentative_importance = tentative_radiance.lumin() + 1e-18f;
         vec3 original_contrib = original_radiance;
         vec3 tentative_contrib = tentative_radiance;
 
         float accept_prob = std::max(0.0f, std::min(1.0f, tentative_importance / original_importance));
+        // std::cout << tentative_importance / original_importance << " " << original_importance << std::endl;
 
         float original_weight = (1 - accept_prob) / (original_importance / b + large_jump_prob);
         float tentative_weight = (accept_prob + (large_jump ? 1.0 : 0.0)) / (tentative_importance / b + large_jump_prob);
@@ -91,12 +95,17 @@ void RendererPSSMLT::render(const Camera &camera,
         original_y = std::max(0, std::min(img_height - 1, original_y));
         tentative_x = std::max(0, std::min(img_width - 1, tentative_x));
         tentative_y = std::max(0, std::min(img_height - 1, tentative_y));
+
+        // render_buf[original_y * img_width + original_x] += bdM * original_contrib / original_importance * b * (1 - accept_prob);
+        // render_buf[tentative_y * img_width + tentative_x] += bdM * tentative_contrib / tentative_importance * b * accept_prob;
+
         render_buf[original_y * img_width + original_x] += bdM * original_weight * original_contrib;
         render_buf[tentative_y * img_width + tentative_x] += bdM * tentative_weight * tentative_contrib;
 
         if (std_sampler.random() < accept_prob)
         {
             original_sampler = tentative_sampler;
+            accept_count++;
         }
         else
         {
@@ -107,6 +116,8 @@ void RendererPSSMLT::render(const Camera &camera,
             std::cout << i << " / " << N << std::endl;
         }
     }
+
+    qDebug() << "accept rate: " << accept_count * 1.0f / N;
 
     auto f = [&](float x) -> int
     {

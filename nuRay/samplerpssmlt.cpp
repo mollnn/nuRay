@@ -39,9 +39,9 @@ void SamplerPSSMLT::nextIter(bool large_jump)
                 a[i] -= s2 * exp(-r * log(s2 / s1));
             }
             if (a[i] < 0.0f)
-                a[i] = 0.0f;
+                a[i] += 1.0f;
             if (a[i] > 1.0f)
-                a[i] = 1.0f;
+                a[i] -= 1.0f;
         }
     }
 }
@@ -53,4 +53,9 @@ void SamplerPSSMLT::newSample()
     {
         a[i] = SamplerStd::random();
     }
+}
+
+void SamplerPSSMLT::repeatCurrentIter()
+{
+    ptr = 0;
 }

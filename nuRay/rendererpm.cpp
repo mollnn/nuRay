@@ -52,7 +52,7 @@ vec3 RendererPM::trace(const KDTree<Photon> &photon_map, Sampler &sampler, const
 
     if (hit_obj->mat->isSpecular(wo, normal, wo, texcoords) == false)
     {
-        const int photon_limit = 128;
+        const int photon_limit = 64;
 
         // Radiance Estimate: find nearest k photons and estimate the radiance
         // std::priority_queue<Photon, std::vector<Photon>, decltype(photon_cmp)> photon_queue(photon_cmp);

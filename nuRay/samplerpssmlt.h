@@ -13,6 +13,7 @@ public:
     virtual float random() override;
     void nextIter(bool large_jump);
     void newSample();
+    void repeatCurrentIter();
 };
 
 #endif // SAMPLERPSSMLT_H
