@@ -12,7 +12,7 @@
 #include "renderer.h"
 #include <QMutex>
 
-vec3 buf[6][6][500][500];
+vec3 buf[8][8][500][500];
 
 struct Vinfo
 {
@@ -82,6 +82,7 @@ public:
             }
             std::cout << std::endl;
         };
+
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -134,7 +135,7 @@ public:
                             }
 
                             // get intersection
-                            auto [hit_t, hit_bc1, hit_bc2, hit_obj] = bvh_.intersection(pos, wo);
+                            auto [hit_t, hit_bc1, hit_bc2, hit_obj] = bvh_.intersection(pos + 1e-2f * wo, wo);
                             if (hit_obj == nullptr)
                             {
                                 break;
@@ -142,7 +143,7 @@ public:
                             vec3 hit_pos = pos + wo * hit_t, hit_uv = hit_obj->getTexCoords(hit_bc1, hit_bc2);
 
                             // push into stack
-                            path.push_back(vInfo(c * bxdf / pdf_proj / prr, 0, 0, hit_obj, hit_pos, hit_uv, hit_bc1, hit_bc2));
+                            path.push_back(vInfo(c * bxdf / pdf_proj / prr, 1, 1, hit_obj, hit_pos, hit_uv, hit_bc1, hit_bc2));
                             if (hit_obj->mat->isEmission())
                             {
                                 break;
@@ -156,12 +157,22 @@ public:
                     auto light_normal = light_obj->getNormal(light_bc1, light_bc2);
                     auto light_int = light_obj->mat->emission(light_normal, light_normal); // * need fix
                     auto light_pdf = light_sampler_.p();
-                    light_path.push_back(vInfo(light_int / light_pdf, 0, 0, light_obj, light_pos, 0, 0, 0));
+                    light_path.push_back(vInfo(light_int / light_pdf, 1, 1, light_obj, light_pos, 0, 0, 0));
                     trace(true, light_path);
 
+                    if (light_path.size() > 0)
+                        light_path[0].pf = light_pdf;
+                    if (light_path.size() > 1)
+                        light_path[1].pf = 1.0f / 3.14159f;
+
                     // STEP B: GENERATE CAMERA PATH AND TRACE
-                    camera_path.push_back(vInfo(1.0f / SPP, 0, 0, nullptr, camera.pos, 0, 0, 0));
+                    camera_path.push_back(vInfo(1.0f / SPP, 1, 1, nullptr, camera.pos, 0, 0, 0));
                     trace(false, camera_path);
+
+                    if (camera_path.size() > 0)
+                        camera_path[0].pr = 1.0f;
+                    if (camera_path.size() > 1)
+                        camera_path[1].pr = 1.0f;
 
                     // printPath(light_path);
                     // printPath(camera_path);
@@ -173,14 +184,46 @@ public:
                     {
                         for (int t = 2; t <= T; t++)
                         {
-                            // todo: concate path
+                            // *: concate path
                             std::vector<Vinfo> full_path;
                             for (int i = 0; i < s; i++)
                                 full_path.push_back(light_path[i]);
                             for (int i = 0; i < t; i++)
                                 full_path.push_back(camera_path[t - i - 1]);
 
-                            // todo: evaluate connecting weight
+                            // todo: evaluate probability
+                            for (int i = 2; i < s + t - 2; i++)
+                            {
+                                vec3 wi = (full_path[i - 2].pos - full_path[i - 1].pos).normalized();
+                                vec3 normal = full_path[i - 1].obj->getNormal(full_path[i - 1].bc1, full_path[i - 1].bc2);
+                                vec3 wo = (full_path[i].pos - full_path[i - 1].pos).normalized();
+                                vec3 new_normal = full_path[i].obj->getNormal(full_path[i].bc1, full_path[i].bc2);
+                                float g = abs(wo.dot(normal)) * abs(wo.dot(new_normal)) / (full_path[i].pos - full_path[i - 1].pos).norm();
+                                full_path[i].pf = full_path[i - 1].obj->mat->pdf(wi, normal, wo) / abs(wo.dot(normal)) * g;
+                            }
+                            for (int i = 0; i < s + t - 2; i++)
+                            {
+                                vec3 wi = (full_path[i + 2].pos - full_path[i + 1].pos).normalized();
+                                vec3 normal = full_path[i + 1].obj->getNormal(full_path[i + 1].bc1, full_path[i + 1].bc2);
+                                vec3 wo = (full_path[i].pos - full_path[i + 1].pos).normalized();
+                                vec3 new_normal = full_path[i].obj->getNormal(full_path[i].bc1, full_path[i].bc2);
+                                float g = abs(wo.dot(normal)) * abs(wo.dot(new_normal)) / (full_path[i].pos - full_path[i + 1].pos).norm();
+                                full_path[i].pr = full_path[i + 1].obj->mat->pdf(wi, normal, wo) / abs(wo.dot(normal)) * g;
+                            }
+
+                            // for (int i = 0; i < s + t - 2; i++)
+                            // {
+                            //     std::cout << full_path[i].pf << "\t";
+                            // }
+                            // std::cout << std::endl;
+
+                            // for (int i = 0; i < s + t - 2; i++)
+                            // {
+                            //     std::cout << full_path[i].pr << "\t";
+                            // }
+                            // std::cout << std::endl;
+
+                            // *: evaluate connecting weight
                             // fs = f(xs-2, xs-1, xs),  ft = f(xs-1, xs, xs+1)
                             vec3 fs, ft, c;
                             float g = 1;
@@ -222,11 +265,32 @@ public:
                                 c = fs * g * ft;
                             }
 
-                            // todo: add contribution
+                            // *: add contribution
                             vec3 contrib = (s == 0 ? 1.0f : full_path[s - 1].c) * c * full_path[s].c;
-                            if (s < 6 && t < 6)
+                            float mis_weight = 1;
+                            float ratio = 1;
+                            for (int i = s - 1; i >= 0; i--)
                             {
-                                buf[s][t][x][y] += contrib;
+                                ratio *= full_path[i].pr / full_path[i].pf;
+                                mis_weight += ratio;
+                            }
+                            ratio = 1;
+                            for (int i = s + 1; i <= s + t - 2; i++)
+                            {
+                                ratio *= full_path[i - 1].pf / full_path[i - 1].pr;
+                                mis_weight += ratio;
+                            }
+                            mis_weight = 1.0f / mis_weight;
+                            // if (mis_weight < 0.0f)
+                            //     std::cerr << mis_weight << "error";
+                            // if (mis_weight > 1.0f)
+                            //     std::cerr << mis_weight << "error";
+                            if (std::isinf(mis_weight) || std::isnan(mis_weight) || mis_weight > 1e9 || mis_weight < 0)
+                                mis_weight = 0;
+
+                            if (s < 8 && t < 8)
+                            {
+                                buf[s][t][x][y] += contrib * mis_weight;
                             }
                         }
                     }
@@ -234,19 +298,19 @@ public:
             }
         }
 
-        img = QImage(img_width * 6, img_height * 6, QImage::Format_RGB888);
-        for (int i = 0; i < 6; i++)
-            for (int j = 0; j < 6; j++)
+        img = QImage(img_width * 8, img_height * 8, QImage::Format_RGB888);
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
                 for (int x = 0; x < img_width; x++)
                 {
                     for (int y = 0; y < img_height; y++)
                     {
-                        buf[0][0][x][y] += buf[i][j][x][y];
+                        buf[0][0][x][y] += max(buf[i][j][x][y], 0.0f);
                     }
                 }
 
-        for (int i = 0; i < 6; i++)
-            for (int j = 0; j < 6; j++)
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
                 for (int x = 0; x < img_width; x++)
                 {
                     for (int y = 0; y < img_height; y++)

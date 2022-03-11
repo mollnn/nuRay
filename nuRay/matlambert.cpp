@@ -33,7 +33,7 @@ vec3 MatLambert::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const 
 
 float MatLambert::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
 {
-    return 1.0 / 3.14159 * (wi.dot(normal) + 1e-4f);
+    return 1.0 / 3.14159 * (abs(wi.dot(normal)) + 1e-4f);
 }
 
 bool MatLambert::isEmission() const

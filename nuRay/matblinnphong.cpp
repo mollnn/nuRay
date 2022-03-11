@@ -52,11 +52,11 @@ vec3 MatBlinnPhong::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, con
 float MatBlinnPhong::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
 {
     if (wi.dot(normal) <= 1e-4 || wo.dot(normal) <= 1e-4f)
-        return 1e18f;
+        return 1e-18f;
     float lambda = 0.5f;
-    float pdf_diffuse = 1.0 / 3.14159 * (wi.dot(normal) + 1e-6f);
+    float pdf_diffuse = 1.0 / 3.14159 * (abs(wi.dot(normal)) + 1e-6f);
     vec3 h = (wo + wi).normalized();
-    float pdf_specular = (Ns_ + 2) / 3.14159 / 8 * pow(normal.dot(h), Ns_ + 1);
+    float pdf_specular = (Ns_ + 2) / 3.14159 / 8 * pow(abs(normal.dot(h)), Ns_ + 1);
     return lambda * pdf_diffuse + (1.0f - lambda) * pdf_specular;
 }
 
