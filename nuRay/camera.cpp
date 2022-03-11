@@ -65,3 +65,10 @@ void Camera::fromEuler(float a, float b, float c)
 {
     fromEuler({a, b, c});
 }
+
+float Camera::filmSize() const
+{
+    float film_height = 2 * tan(fov_h * 3.14159 / 180 / 2);
+    float film_width = film_height * aspect;
+    return film_height * film_width;
+}

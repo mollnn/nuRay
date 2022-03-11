@@ -64,7 +64,7 @@ private:
     QLabel label_envmap_;
     QLabel label_scene_;
     int spp_ = 32, spp_preview_ = 8;
-    int img_width_ = 256, img_height_ = 256, preview_level_ = 8;
+    int img_width_ = 128, img_height_ = 128, preview_level_ = 8;
     QTime last_review_render_time_;
     QTextEdit text_edit_scene_;
     QPushButton btn_load_scene_;

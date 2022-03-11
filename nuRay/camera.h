@@ -22,6 +22,8 @@ struct Camera
     vec3 toEuler() const;
     void fromEuler(const vec3 &euler);
     void fromEuler(float yaw, float pitch, float roll);
+
+    float filmSize() const;
 };
 
 #endif

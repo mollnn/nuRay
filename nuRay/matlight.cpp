@@ -1,8 +1,8 @@
 #include "MatLight.h"
 
-MatLight::MatLight(const vec3& Ke) : Ke_(Ke) {}
+MatLight::MatLight(const vec3 &Ke) : Ke_(Ke) {}
 
-vec3 MatLight::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) const
+vec3 MatLight::sampleBxdf(Sampler &sampler, const vec3 &wo, const vec3 &normal) const
 {
     return vec3(0.0f, 0.0f, 0.0f);
 }
@@ -37,7 +37,7 @@ bool MatLight::requireLightSampling(const vec3 &wo, const vec3 &normal) const
     return false;
 }
 
-vec3 MatLight::emission(const vec3 &wo, const vec3& normal) const
+vec3 MatLight::emission(const vec3 &wo, const vec3 &normal) const
 {
     return Ke_;
 }
