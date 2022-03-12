@@ -60,3 +60,25 @@ vec3 MatLambert::emission(const vec3 &wo, const vec3 &normal) const
 {
     return vec3(0.0f, 0.0f, 0.0f);
 }
+
+float MatLambert::roughness(const vec3 &uv) const
+{
+    return 1.0f;
+}
+
+vec3 MatLambert::reflectanceDiffuse(const vec3 &uv) const
+{
+    if (usetex_Kd_)
+    {
+        return map_Kd_.pixelUV(uv[0], uv[1]) / 3.14159;
+    }
+    else
+    {
+        return Kd_ / 3.14159;
+    }
+}
+
+vec3 MatLambert::reflectanceSpecular(const vec3 &uv) const
+{
+    return 0.0f;
+}

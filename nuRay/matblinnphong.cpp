@@ -93,3 +93,20 @@ vec3 MatBlinnPhong::emission(const vec3 &wo, const vec3 &normal) const
 {
     return vec3(0.0f, 0.0f, 0.0f);
 }
+
+float MatBlinnPhong::roughness(const vec3 &uv) const
+{
+    return 1.0f / Ns_;
+}
+
+vec3 MatBlinnPhong::reflectanceDiffuse(const vec3 &uv) const
+{
+    vec3 Rd = usetex_Kd_ ? map_Kd_.pixelUV(uv[0], uv[1]) : Kd_;
+    return Rd;
+}
+
+vec3 MatBlinnPhong::reflectanceSpecular(const vec3 &uv) const
+{
+    vec3 Rs = usetex_Ks_ ? map_Ks_.pixelUV(uv[0], uv[1]) : Ks_;
+    return Rs;
+}

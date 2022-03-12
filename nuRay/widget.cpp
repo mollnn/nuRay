@@ -7,6 +7,7 @@
 #include "rendererpssmlt.h"
 #include "rendererbdpt.h"
 #include "rendererpm.h"
+#include "renderernrc.h"
 #include "envmap.h"
 
 Widget::Widget(QWidget *parent)
@@ -63,6 +64,7 @@ Widget::Widget(QWidget *parent)
     combo_renderer_.addItem("PSSMLT");
     combo_renderer_.addItem("BDPT");
     combo_renderer_.addItem("Photon Mapping (Global)");
+    combo_renderer_.addItem("Neural Radiance Cache (based on PT-NEE)");
     combo_renderer_.setCurrentIndex(4);
 
     connect(&combo_renderer_, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int id)
@@ -87,6 +89,10 @@ Widget::Widget(QWidget *parent)
         else if (id == 4)
         {
             renderer_ = new RendererPM;
+        }
+        else if (id == 5)
+        {
+            renderer_ = new RendererNRC;
         }
         renderer_->prepare(triangles); });
 
