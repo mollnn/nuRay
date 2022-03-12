@@ -34,11 +34,14 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 - GUI with Qt, Raster-based preview via OpenGL and interactive camera control
 
+- Primary Sample Space Metropolis Light Transport 
+- 
+- Bidirectional Path Tracing (need fix)
+- 
+- Photon Mapping with kd-tree
+
 ### WIP
 
-- Primary Sample Space Metropolis Light Transport (need fix)
-- Bidirectional Path Tracing (need fix)
-- Photon Mapping with kd-tree
 - Continuous mode
 - SVGF Denoiser
 - RAE Denoiser
