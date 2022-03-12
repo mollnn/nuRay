@@ -92,7 +92,7 @@ vec3 RendererNRC::trace(NRC &nrc, int depth, bool is_train, Sampler &sampler, co
         return {x};
     };
 
-    // todo: calculate encoding of hit_pos and wo and ...
+    // *: calculate encoding of hit_pos and wo and ...
     std::vector<float> encoding;
 
     auto pushEncoding = [&](const std::vector<float> &x)

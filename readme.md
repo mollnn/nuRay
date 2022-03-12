@@ -35,24 +35,35 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 - GUI with Qt, Raster-based preview via OpenGL and interactive camera control
 
 - Primary Sample Space Metropolis Light Transport 
-- 
+
 - Bidirectional Path Tracing (need fix)
-- 
+ 
 - Photon Mapping with kd-tree
 
+- Neural Radiance Caching
+ 
 ### WIP
 
-- Continuous mode
+- JSON Config of Renderer (life with GUI is too tough 555)
+
+- Adjustment of Directory Structure 
+
+- Continuous mode 
+
 - SVGF Denoiser
+
 - RAE Denoiser
-- Neural Radiance Caching
+
 - Bump mapping
+
 - Tessellation Displacement Mapping
 
 
 ### Future
 
 - SSS Materials
+
+- Assimp-based Scene Loader
 
 - Scene hierarchy
 
