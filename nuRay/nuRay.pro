@@ -36,12 +36,14 @@ SOURCES += \
     lightsampler.cpp \
     loader.cpp \
     main.cpp \
+    mat4.cpp \
     matblinnphong.cpp \
     matggx.cpp \
     matggxrefl.cpp \
     matglass.cpp \
     matlambert.cpp \
     matlight.cpp \
+    nnnode.cpp \
     renderer.cpp \
     rendererbdpt.cpp \
     renderernrc.cpp \
@@ -56,6 +58,7 @@ SOURCES += \
     triangle.cpp \
     utils.cpp \
     vec3.cpp \
+    vec4.cpp \
     widget.cpp
 
 HEADERS += \
@@ -68,6 +71,7 @@ HEADERS += \
     kdtree.h \
     lightsampler.h \
     loader.h \
+    mat4.h \
     matblinnphong.h \
     material.h \
     matggx.h \
@@ -75,6 +79,7 @@ HEADERS += \
     matglass.h \
     matlambert.h \
     matlight.h \
+    nnnode.h \
     renderer.h \
     rendererbdpt.h \
     renderernrc.h \
@@ -89,6 +94,7 @@ HEADERS += \
     triangle.h \
     utils.h \
     vec3.h \
+    vec4.h \
     widget.h
 
 FORMS +=

@@ -10,7 +10,7 @@
 
 float loss_acc = 0.0f, train_acc = 0.0f;
 
-vec3 RendererNRC::trace(NRC &nrc, int depth, bool is_train, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Envmap *env_map)
+vec3 RendererNRC::trace(NeuralRadianceCache &nrc, int depth, bool is_train, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Envmap *env_map)
 {
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
@@ -54,7 +54,7 @@ vec3 RendererNRC::trace(NRC &nrc, int depth, bool is_train, Sampler &sampler, co
         return 2 * abs(fmod(x / f, 2) - 1) - 1;
     };
 
-    auto encoderFreq = [&](float x) -> std::vector<float>
+    auto encoderTriFreq = [&](float x) -> std::vector<float>
     {
         std::vector<float> ans;
         for (int i = 0; i < 12; i++)
@@ -76,7 +76,7 @@ vec3 RendererNRC::trace(NRC &nrc, int depth, bool is_train, Sampler &sampler, co
         return quartic(2 * n * x - 2 * i - 1);
     };
 
-    auto encoderQuartic = [&](float x) -> std::vector<float>
+    auto encoderOneBlob = [&](float x) -> std::vector<float>
     {
         // input range [0,1]
         std::vector<float> ans;
@@ -105,14 +105,14 @@ vec3 RendererNRC::trace(NRC &nrc, int depth, bool is_train, Sampler &sampler, co
     vec3 reflectance_d = hit_obj->mat->reflectanceDiffuse(texcoords);
     vec3 reflectance_s = hit_obj->mat->reflectanceSpecular(texcoords);
 
-    pushEncoding(encoderFreq(hit_pos[0]));
-    pushEncoding(encoderFreq(hit_pos[1]));
-    pushEncoding(encoderFreq(hit_pos[2]));
-    pushEncoding(encoderQuartic(wo[0] * 0.5f + 0.5f));
-    pushEncoding(encoderQuartic(wo[1] * 0.5f + 0.5f));
-    pushEncoding(encoderQuartic(normal[0] * 0.5f + 0.5f));
-    pushEncoding(encoderQuartic(normal[1] * 0.5f + 0.5f));
-    pushEncoding(encoderQuartic(exp(-rough)));
+    pushEncoding(encoderTriFreq(hit_pos[0]));
+    pushEncoding(encoderTriFreq(hit_pos[1]));
+    pushEncoding(encoderTriFreq(hit_pos[2]));
+    pushEncoding(encoderOneBlob(wo[0] * 0.5f + 0.5f));
+    pushEncoding(encoderOneBlob(wo[1] * 0.5f + 0.5f));
+    pushEncoding(encoderOneBlob(normal[0] * 0.5f + 0.5f));
+    pushEncoding(encoderOneBlob(normal[1] * 0.5f + 0.5f));
+    pushEncoding(encoderOneBlob(exp(-rough)));
     pushEncoding(encoderId(reflectance_d[0]));
     pushEncoding(encoderId(reflectance_d[1]));
     pushEncoding(encoderId(reflectance_d[2]));
@@ -171,9 +171,11 @@ vec3 RendererNRC::trace(NRC &nrc, int depth, bool is_train, Sampler &sampler, co
 
     // *: update cache if is training
 
+    const float rate = 0.003f;
+
     if (is_train)
     {
-        float loss = nrc.train(encoding, result);
+        float loss = nrc.train(encoding, result, rate);
         loss_acc += loss;
         train_acc += 1.0f;
     }
@@ -185,7 +187,7 @@ void RendererNRC::render(const Camera &camera, const std::vector<Triangle> &tria
 {
     SamplerStd sampler;
 
-    NRC nrc;
+    NeuralRadianceCache nrc;
 
     requestDisplayUpdate(false);
     framebuffer_mutex.lock();
