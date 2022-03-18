@@ -52,8 +52,6 @@ These features is coming.
 
 - JSON Config of Renderer (life with GUI is too tough 555)
 
-- Adjustment of Directory Structure 
-
 - Continuous mode 
 
 - SVGF Denoiser

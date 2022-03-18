@@ -84,7 +84,7 @@ void RendererBDPT::render(const Camera &camera,
                             {
                                 wo = hemisphereSampler(normal);
                                 pdf_proj = 1.0f / 3.14159f;
-                                bxdf = 1.0;
+                                bxdf = 1.0 / 3.14159f;
                             }
                             else
                             {
@@ -214,7 +214,7 @@ void RendererBDPT::render(const Camera &camera,
                             {
                                 // camera ray hit light source
                                 vec3 normal = full_path[0].obj->getNormal(full_path[0].bc1, full_path[0].bc2);
-                                c = 3.14159f * full_path[0].obj->mat->emission(normal, normal);
+                                c =  full_path[0].obj->mat->emission(normal, normal);
                             }
                         }
                         else if (s == 1)
