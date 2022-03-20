@@ -10,6 +10,28 @@ vec3 Camera::generateRay(float img_x, float img_y, float img_width, float img_he
     return (gaze + hand * film_width * canonical_x * 0.5 - up * film_height * canonical_y * 0.5).normalized();
 }
 
+std::pair<int, int> Camera::getCoord(vec3 dir, float img_width, float img_height) const
+{
+    vec3 hand = gaze.cross(up).normalized();
+    float z = dir.dot(gaze);
+    float x = dir.dot(hand);
+    float y = dir.dot(-up);
+    x /= z;
+    y /= z;
+    float film_height = 2 * tan(fov_h * 3.14159 / 180 / 2);
+    float film_width = film_height * aspect;
+    float rx = x / film_width + 0.5;
+    float ry = y / film_height + 0.5;
+    if (rx > 0 && ry > 0 && rx < 1 && ry < 1)
+    {
+        return {rx * img_width, ry * img_height};
+    }
+    else
+    {
+        return {-1, -1};
+    }
+}
+
 void Camera::turnH(float k)
 {
     vec3 hand = gaze.cross(up).normalized();

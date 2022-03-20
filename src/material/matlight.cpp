@@ -14,7 +14,7 @@ vec3 MatLight::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const ve
 
 float MatLight::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
 {
-    return 1.0;
+    return 1.0 / 3.14159;
 }
 
 bool MatLight::isEmission() const

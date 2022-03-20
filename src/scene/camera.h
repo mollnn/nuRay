@@ -14,6 +14,7 @@ struct Camera
     float aspect; // width / height
 
     vec3 generateRay(float img_x, float img_y, float img_width, float img_height) const;
+    std::pair<int,int> getCoord(vec3 dir, float img_width, float img_height) const;
 
     void turnH(float k);
     void turnV(float k);
