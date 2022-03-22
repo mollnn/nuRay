@@ -67,7 +67,6 @@ void RendererBDPT::render(const Camera &camera,
             {
                 std::vector<Vinfo> light_path, camera_path;
                 const float prr = 0.8f;
-
                 auto trace = [&](bool is_light_path, std::vector<Vinfo> &path)
                 {
                     while (true)

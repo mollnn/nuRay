@@ -42,7 +42,7 @@ Widget::Widget(QWidget *parent)
     camera_.gaze = vec3(-0.2f, -0.5f, -1.0f).normalized();
     vec3 camera_hand = vec3(1.0f, 0.0f, 0.1f).normalized();
     camera_.up = camera_hand.cross(camera_.gaze).normalized();
-    camera_.fov_h = 20.0f;
+    camera_.fov_h = 30.0f;
     camera_.aspect = 1.0;
 
     text_edit_scene_.setText("cbox/CornellBox-Mirror.obj -p 0 0 0 -s 100");
@@ -54,7 +54,7 @@ Widget::Widget(QWidget *parent)
 
     auto &triangles = scene_loader_.getTriangles();
 
-    renderer_ = new RendererPM();
+    renderer_ = new RendererBDPT();
     // renderer_ = new RendererPSSMLT();
     renderer_->prepare(triangles);
 
@@ -64,8 +64,8 @@ Widget::Widget(QWidget *parent)
     combo_renderer_.addItem("PSSMLT");
     combo_renderer_.addItem("BDPT");
     combo_renderer_.addItem("Photon Mapping (Global)");
-    combo_renderer_.addItem("Neural Radiance Cache (based on PT-NEE)");
-    combo_renderer_.setCurrentIndex(4);
+    combo_renderer_.addItem("Neural Radiance Cache (on PT-NEE)");
+    combo_renderer_.setCurrentIndex(3);
 
     connect(&combo_renderer_, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int id)
             {
@@ -304,22 +304,22 @@ void Widget::bindLineEdit(QLineEdit &line_edit, float &var)
 {
     line_edit.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit.setText(QString::number(var, 'f', 4));
-    connect(&line_edit, &QLineEdit::editingFinished, [&]()
-            { var = line_edit.text().toDouble(); renderRT_preview(); });
+    connect(&line_edit, &QLineEdit::textEdited, [&]()
+            { bool t; int v; v = line_edit.text().toDouble(&t); if(t) var=v; renderRT_preview(); });
 }
 
 void Widget::bindLineEdit(QLineEdit &line_edit, int &var)
 {
     line_edit.setValidator(new QIntValidator(-1e9, 1e9, this));
     line_edit.setText(QString::number(var));
-    connect(&line_edit, &QLineEdit::editingFinished, [&]()
-            { var = line_edit.text().toDouble(); renderRT_preview(); });
+    connect(&line_edit, &QLineEdit::textEdited, [&]()
+            { bool t; int v; v = line_edit.text().toInt(&t); if(t) var=v; renderRT_preview(); });
 }
 
 void Widget::bindLineEdit(QLineEdit &line_edit, QString &var)
 {
     line_edit.setText(var);
-    connect(&line_edit, &QLineEdit::editingFinished, [&]()
+    connect(&line_edit, &QLineEdit::textEdited, [&]()
             { var = line_edit.text(); renderRT_preview(); });
 }
 
