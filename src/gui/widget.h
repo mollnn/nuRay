@@ -76,6 +76,7 @@ private:
     QProgressBar progress_bar_;
     QString str_envmap_;
     QComboBox combo_renderer_;
+    QImage img_ref_;
 
     void bindLineEdit(QLineEdit &line_edit, float &var);
     void bindLineEdit(QLineEdit &line_edit, int &var);

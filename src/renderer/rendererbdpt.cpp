@@ -69,7 +69,7 @@ void RendererBDPT::render(const Camera &camera,
                 {
                     while (true)
                     {
-                        if (path.size() > 3 && sampler.random() > prr)
+                        if (sampler.random() > prr)
                             return;
 
                         auto [c, pf, pr, obj, pos, uv, bc1, bc2] = path.back();

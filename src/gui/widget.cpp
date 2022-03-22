@@ -9,6 +9,7 @@
 #include "../renderer/rendererpm.h"
 #include "../renderer/renderernrc.h"
 #include "../scene/envmap.h"
+#include "../utils/utils.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
@@ -264,6 +265,20 @@ void Widget::renderRT()
         &envmap);
     lock_render_.unlock();
     framebufferUpdated();
+    // compare and evaluate mse
+    if (img_ref_.sizeInBytes() == 0)
+    {
+        img_ref_ = framebuffer_;
+        img_ref_.bits();
+        std::cout << "stored" << std::endl;
+    }
+    else
+    {
+        Utils utils;
+        float mse = utils.mse(img_ref_, framebuffer_);
+        std::cout << "MSE = " << std::fixed << std::setprecision(6) << mse << std::endl;
+    }
+    framebuffer_.save("./" + QTime::currentTime().toString().replace(":", "-") + ".bmp", "bmp");
 }
 
 void Widget::renderRT_preview()
