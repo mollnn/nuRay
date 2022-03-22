@@ -5,9 +5,6 @@ Vinfo vInfo(vec3 c, float pf, float pr, const Triangle *obj, vec3 pos, vec3 uv, 
     return {c, pf, pr, obj, pos, uv, bc1, bc2};
 }
 
-// todo: replace with real buffer
-vec3 buf[6][6][500][500];
-
 void RendererBDPT::render(const Camera &camera,
                           const std::vector<Triangle> &triangles,
                           QImage &img,
@@ -58,7 +55,8 @@ void RendererBDPT::render(const Camera &camera,
         std::cout << std::endl;
     };
 
-    memset(buf, 0, sizeof buf);
+    std::vector<std::vector<vec3>> buf(img_height, std::vector<vec3>(img_width));
+
     for (int x = 0; x < img_width; x++)
     {
         for (int y = 0; y < img_height; y++)
@@ -299,24 +297,21 @@ void RendererBDPT::render(const Camera &camera,
 
                         // std::cout << "s=" << s << " t=" << t << " w=" << mis_weight << std::endl;
 
-                        if (s < 6 && t < 6)
+                        if (t == 1)
                         {
-                            if (t == 1)
+                            // splat
+                            vec3 d = (full_path[s].pos - full_path[s - 1].pos).normalized();
+                            vec3 cam_ray_dir = -d;
+                            auto [xx, yy] = camera.getCoord(cam_ray_dir, img_width, img_height);
+                            if (xx != -1)
                             {
-                                // splat
-                                vec3 d = (full_path[s].pos - full_path[s - 1].pos).normalized();
-                                vec3 cam_ray_dir = -d;
-                                auto [xx, yy] = camera.getCoord(cam_ray_dir, img_width, img_height);
-                                if (xx != -1)
-                                {
-                                    buf[s][t][xx][yy] += contrib * mis_weight;
-                                }
+                                buf[xx][yy] += contrib * mis_weight;
                             }
-                            else
-                            {
-                                // contribute to current pixel
-                                buf[s][t][x][y] += contrib * mis_weight;
-                            }
+                        }
+                        else
+                        {
+                            // contribute to current pixel
+                            buf[x][y] += contrib * mis_weight;
                         }
                     }
                 }
@@ -324,41 +319,14 @@ void RendererBDPT::render(const Camera &camera,
         }
     }
 
-    img = QImage(img_width * 6, img_height * 6, QImage::Format_RGB888);
-    for (int i = 0; i < 6; i++)
-        for (int j = 0; j < 6; j++)
-            for (int x = 0; x < img_width; x++)
-            {
-                for (int y = 0; y < img_height; y++)
-                {
-                    buf[0][0][x][y] += max(buf[i][j][x][y], 0.0f);
-                }
-            }
+    img = QImage(img_width, img_height, QImage::Format_RGB888);
 
-    for (int i = 0; i < 6; i++)
-        for (int j = 0; j < 6; j++)
-            for (int x = 0; x < img_width; x++)
-            {
-                for (int y = 0; y < img_height; y++)
-                {
-                    auto result = buf[i][j][x][y].pow(1.0f / 2.2f) * 255.0f;
-                    if (x == 0 || y == 0)
-                    {
-                        result = 255.0f;
-                    }
-                    img.setPixel(x + j * img_width, y + i * img_height, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
-                }
-            }
-
-    // img = QImage(img_width, img_height, QImage::Format_RGB888);
-    // for (int i = 0; i < 1; i++)
-    //     for (int j = 0; j < 1; j++)
-    //         for (int x = 0; x < img_width; x++)
-    //         {
-    //             for (int y = 0; y < img_height; y++)
-    //             {
-    //                 auto result = buf[i][j][x][y].pow(1.0f / 2.2f) * 255.0f;
-    //                 img.setPixel(x + j * img_width, y + i * img_height, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
-    //             }
-    //         }
+    for (int x = 0; x < img_width; x++)
+    {
+        for (int y = 0; y < img_height; y++)
+        {
+            auto result = buf[x][y].pow(1.0f / 2.2f) * 255.0f;
+            img.setPixel(x, y, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
+        }
+    }
 }
