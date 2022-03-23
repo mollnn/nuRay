@@ -12,7 +12,6 @@
 
 vec3 RendererPTLS::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Envmap *env_map)
 {
-
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
     {
@@ -85,13 +84,6 @@ vec3 RendererPTLS::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, co
     vec3 Li = trace(sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled, env_map);
     vec3 contri = Li * abs(wi.dot(normal)) * brdf / pdf / prr;
     result += contri;
-
-    // if (contri.norm() > 1000.0f)
-    // {
-    //     std::stringstream t_stream;
-    //     t_stream << std::fixed << std::setprecision(4) << "Large Value Detected: " << contri << "   " << brdf << "   " << pdf << std::endl;
-    //     std::cerr << t_stream.str();
-    // }
 
     return result;
 }
@@ -206,6 +198,7 @@ void RendererPTLS::render(const Camera &camera, const std::vector<Triangle> &tri
             request_disp_update = 0;
             requestDisplayUpdate(false);
         }
+        
         // Just delay
         QEventLoop loop;
         QTimer timer;

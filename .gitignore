@@ -52,7 +52,6 @@ dlldata.c
 *_i.h
 *.ilk
 *.meta
-*.obj
 *.pch
 *.pdb
 *.pgc
@@ -209,7 +208,6 @@ FakesAssemblies/
 *.exe
 *.o
 *.a
-*.obj
 include/SDL*
 lib/*
 *.dll

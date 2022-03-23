@@ -17,6 +17,8 @@ public:
     float getValueFloat(const std::string &key, float default_value);
     vec3 getValueVec3(const std::string &key, const vec3 &default_value);
     void setValueStr(const std::string &key, const std::string &value);
+    void addItem(const std::string& kv);
+    void print();
 };
 
 #endif

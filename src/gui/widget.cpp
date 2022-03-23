@@ -47,8 +47,8 @@ Widget::Widget(QWidget *parent)
     camera_.fov_h = 30.0f;
     camera_.aspect = 1.0;
 
-    text_edit_scene_.setText("cbox/CornellBox-Mirror.obj -p 0 0 0 -s 100");
-    scene_loader_.fromSceneDescription("cbox/CornellBox-Mirror.obj -p 0 0 0 -s 100");
+    text_edit_scene_.setText("../scenes/cornell/CornellBox-Mirror.obj -p 0 0 0 -s 100");
+    scene_loader_.fromSceneDescription("../scenes/cornell/CornellBox-Mirror.obj -p 0 0 0 -s 100");
 
     updateVertices();
 
@@ -56,8 +56,7 @@ Widget::Widget(QWidget *parent)
 
     auto &triangles = scene_loader_.getTriangles();
 
-    renderer_ = new RendererBDPT();
-    // renderer_ = new RendererPSSMLT();
+    renderer_ = new RendererPTLS();
     renderer_->prepare(triangles);
 
     grid_layout_.addWidget(&combo_renderer_, 2, 50, 1, 5);
@@ -67,7 +66,7 @@ Widget::Widget(QWidget *parent)
     combo_renderer_.addItem("BDPT");
     combo_renderer_.addItem("Photon Mapping (Global)");
     combo_renderer_.addItem("Neural Radiance Cache (on PT-NEE)");
-    combo_renderer_.setCurrentIndex(3);
+    combo_renderer_.setCurrentIndex(1);
 
     connect(&combo_renderer_, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int id)
             {
@@ -264,7 +263,7 @@ void Widget::renderRT()
     std::cout << "Loading scene..." << std::endl;
     auto &triangles = scene_loader_.getTriangles();
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
-    
+
     Config config(str_setting_);
     config.setValueStr("imgw", std::to_string(img_width_));
     config.setValueStr("imgh", std::to_string(img_height_));

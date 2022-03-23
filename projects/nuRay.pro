@@ -27,7 +27,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     ../src/gui/glwidget.cpp \
-    ../src/gui/main.cpp \
+    ../src/main.cpp \
     ../src/gui/widget.cpp \
     ../src/hierarchy/bvh.cpp \
     ../src/hierarchy/bvhnode.cpp \

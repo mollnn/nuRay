@@ -1,9 +1,5 @@
 # Night-Up Ray: Physically-based Offline Renderer
 
-## Dependency
-
-C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional)
-
 ## Feature Set
 
 ### Basic
@@ -12,15 +8,15 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 - Monte Carlo samplers
 
-- Bounding volume hierarchy: Surface Area Heuristic
+- Bounding Volume Hierarchy with Surface Area Heuristic
 
 - Area (mesh) lights
 
 - Path tracing integrator with Russian Roulette (RR) and Next Event Estimator (NEE, Direct lighting integrator)
 
-- Importance sampling of BSDF
+- Importance sampling of BSDF/NDF
 
-- Microfacet-based material (GGX with Smith-G), importance sampling based on NDF function
+- Microfacet-based material (GGX with Smith-G)
 
 - Texturing with Bilinear interpolation
 
@@ -71,6 +67,34 @@ Pies in the sky.
 - Scene hierarchy
 
 - Particle system support
+
+
+## Dependency
+
+C++17 (gcc recommended), Qt (with OpenGL), OpenMP (optional)
+
+
+## Usage
+
+Now we only provide GUI interaction mode. CLI support is coming soon.
+
+### GUI
+
+1. Configure and build project `projects/nuRay.pro`. Run program `nuRay` with no command parameters. 
+2. Enter scene description in the text box. Each line for one Wavefront OBJ file path followed by optional parameters describing transform (`-p` for translating, `-s` for scaling). For example:
+
+``` plain
+../scenes/cornell/CornellBox-Mirror.obj -p 0 0 0 -s 100
+```
+
+3. Click `Load` button. Models and materials will be loaded and accelerating structures will be built. When it's done, preview with low-resolution can be seen.
+
+4. 
+
+
+### CLI
+
+WIP...
 
 
 ## Gallary

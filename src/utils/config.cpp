@@ -15,11 +15,7 @@ void Config::fromString(const std::string &str)
     std::string kv;
     while (ss >> kv)
     {
-        std::string key, value;
-        auto id = kv.find('=');
-        key = kv.substr(0, id);
-        value = kv.substr(id + 1);
-        mp[key] = value;
+        addItem(kv);
     }
 }
 
@@ -89,4 +85,21 @@ vec3 Config::getValueVec3(const std::string &key, const vec3 &default_value)
         return default_value;
     }
     return vec3(x, y, z);
+}
+
+void Config::addItem(const std::string &kv)
+{
+    std::string key, value;
+    auto id = kv.find('=');
+    key = kv.substr(0, id);
+    value = kv.substr(id + 1);
+    mp[key] = value;
+}
+
+void Config::print()
+{
+    for (auto &[x, y] : mp)
+    {
+        std::cout << x << ": " << y << std::endl;
+    }
 }
