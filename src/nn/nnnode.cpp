@@ -176,8 +176,8 @@ float NNNodeMultiLayerPerceptron::train(const std::vector<float> &in, const std:
     {
         float o = out[i];
         float a = ans[i];
-        loss += pow(o - a, 2);
-        layers.back().neurals[i].delta = o - a;
+        loss += pow(o - a, 2) / (o * o + 0.01);
+        layers.back().neurals[i].delta = (o - a) / (o * o + 0.01);
     }
     backward(rate);
 

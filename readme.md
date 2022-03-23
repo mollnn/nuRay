@@ -40,19 +40,15 @@ C++17, Qt (with OpenGL for GUI and raster-based quick preview), OpenMP (optional
 
 The features below may not work well with environment lighting or some advanced materials like translucent GGX. 
 
-- Bidirectional Path Tracing (BDPT) (need fix)
+- Bidirectional Path Tracing (BDPT)
  
 - Photon Mapping with kd-tree
 
-- Neural Radiance Caching (need to be replaced with Matrix-based NN implementation, replace terminate strategy, replace loss function)
+- Neural Radiance Caching (need fix)
  
 ### WIP
 
 These features is coming.
-
-- JSON Config of Renderer (life with GUI is too tough 555)
-
-- Continuous mode 
 
 - SVGF Denoiser
 

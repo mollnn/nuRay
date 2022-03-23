@@ -9,6 +9,7 @@
 #include "../hierarchy/bvh.h"
 #include "../scene/texture.h"
 #include "../scene/envmap.h"
+#include "../utils/config.h"
 #include <QMutex>
 
 class Renderer
@@ -20,7 +21,8 @@ public:
     virtual void prepare(const std::vector<Triangle> &triangles);
     virtual void render(const Camera &camera,
                         const std::vector<Triangle> &triangles,
-                        QImage &img, int SPP, int img_width, int img_height,
+                        QImage &img,
+                        Config &config,
                         std::function<void(bool)> callback, std::atomic<int> &con_flag,
                         std::function<void(float)> progress_report,
                         QMutex &framebuffer_mutex,

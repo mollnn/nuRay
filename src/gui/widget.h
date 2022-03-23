@@ -48,6 +48,7 @@ private:
     Camera camera_;
     QImage framebuffer_;
     Loader scene_loader_;
+    QPushButton btn_apply_;
     QPushButton btn_render_;
     QPushButton btn_cancel_;
     GlWidget glwidget_preview_;
@@ -62,10 +63,12 @@ private:
     QLabel label_yaw_, label_pitch_, label_roll_;
     QLabel label_fov_h_, label_aspect_, label_img_w_, label_img_h_, label_preview_level_;
     QLabel label_envmap_;
+    QLabel label_setting_;
     QLabel label_scene_;
     int spp_ = 32, spp_preview_ = 8;
     int img_width_ = 128, img_height_ = 128, preview_level_ = 8;
     QTime last_review_render_time_;
+    QTextEdit text_edit_setting_;
     QTextEdit text_edit_scene_;
     QPushButton btn_load_scene_;
     Texture env_map_;
@@ -75,6 +78,7 @@ private:
     QMutex lock_render_;
     QProgressBar progress_bar_;
     QString str_envmap_;
+    std::string str_setting_;
     QComboBox combo_renderer_;
     QImage img_ref_;
 

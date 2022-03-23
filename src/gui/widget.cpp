@@ -14,6 +14,7 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
       framebuffer_(QSize(1, 1), QImage::Format_RGB888),
+      btn_apply_("Apply"),
       btn_render_("Render"),
       btn_cancel_("Cancel")
 {
@@ -153,7 +154,8 @@ Widget::Widget(QWidget *parent)
     grid_layout_.addWidget(&label_yaw_, 30, 50, 1, 1);
     line_edit_yaw_.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit_yaw_.setText(QString::number(camera_.toEuler()[0], 'f', 4));
-    connect(&line_edit_yaw_, &QLineEdit::editingFinished, [&]()
+
+    connect(&line_edit_yaw_, &QLineEdit::textEdited, [&]()
             {
         if (line_edit_yaw_.text().toFloat() == camera_.toEuler()[0])
             return;
@@ -165,7 +167,8 @@ Widget::Widget(QWidget *parent)
     grid_layout_.addWidget(&label_pitch_, 31, 50, 1, 1);
     line_edit_pitch_.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit_pitch_.setText(QString::number(camera_.toEuler()[1], 'f', 4));
-    connect(&line_edit_pitch_, &QLineEdit::editingFinished, [&]()
+
+    connect(&line_edit_pitch_, &QLineEdit::textEdited, [&]()
             {
         if (line_edit_pitch_.text().toFloat() == camera_.toEuler()[1])
             return;
@@ -177,7 +180,8 @@ Widget::Widget(QWidget *parent)
     grid_layout_.addWidget(&label_roll_, 32, 50, 1, 1);
     line_edit_roll_.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit_roll_.setText(QString::number(camera_.toEuler()[2], 'f', 4));
-    connect(&line_edit_roll_, &QLineEdit::editingFinished, [&]()
+
+    connect(&line_edit_roll_, &QLineEdit::textEdited, [&]()
             {
         if (line_edit_roll_.text().toFloat() == camera_.toEuler()[2])
             return;
@@ -202,6 +206,11 @@ Widget::Widget(QWidget *parent)
         updateVertices();
         renderRT_preview(); });
 
+    connect(&btn_apply_, &QPushButton::clicked, [&]()
+            {
+        str_setting_ = text_edit_setting_.toPlainText().toStdString();
+        renderRT_preview(); });
+
     label_cam_pos_x_.setText(("Cam Pos X"));
     label_cam_pos_y_.setText(("Cam Pos Y"));
     label_cam_pos_z_.setText(("Cam Pos Z"));
@@ -215,14 +224,14 @@ Widget::Widget(QWidget *parent)
     label_img_w_.setText(("Img W"));
     label_img_h_.setText(("Img H"));
     label_preview_level_.setText(("Preview Level"));
-    label_scene_.setText("Scene Description");
+    label_scene_.setText("Scene Desc");
 
     progress_bar_.setMinimum(0);
     progress_bar_.setMaximum(100 * 100);
     progress_bar_.setOrientation(Qt::Horizontal);
     progress_bar_.setValue(50);
 
-    line_edit_envmap_.setText("envmap.jfif");
+    line_edit_envmap_.setText("");
     str_envmap_ = line_edit_envmap_.text();
 
     this->setLayout(&grid_layout_);
@@ -255,8 +264,14 @@ void Widget::renderRT()
     std::cout << "Loading scene..." << std::endl;
     auto &triangles = scene_loader_.getTriangles();
     std::cout << "Loading scene ok, " << timer.elapsed() * 0.001 << " secs used" << std::endl;
+    
+    Config config(str_setting_);
+    config.setValueStr("imgw", std::to_string(img_width_));
+    config.setValueStr("imgh", std::to_string(img_height_));
+    config.setValueStr("spp", std::to_string(spp_));
+
     this->renderer_->render(
-        camera_, triangles, framebuffer_, spp_, img_width_, img_height_, [&](bool f)
+        camera_, triangles, framebuffer_, config, [&](bool f)
         { framebufferUpdated(f); },
         render_control_flag_,
         [&](float p)
@@ -294,12 +309,17 @@ void Widget::renderRT_preview()
     Envmap envmap(&env_map_);
     env_map_.load(str_envmap_.toStdString());
     renderer_->setEnvmap(envmap);
-    std::cerr << "ok";
     render_control_flag_ = 1;
     last_review_render_time_ = QTime::currentTime();
     auto &triangles = scene_loader_.getTriangles();
+
+    Config config(str_setting_);
+    config.setValueStr("imgw", std::to_string(img_width_ / preview_level_));
+    config.setValueStr("imgh", std::to_string(img_height_ / preview_level_));
+    config.setValueStr("spp", std::to_string(spp_preview_));
+
     this->renderer_->render(
-        camera_, triangles, framebuffer_, spp_preview_, img_width_ / preview_level_, img_height_ / preview_level_, [&](bool f)
+        camera_, triangles, framebuffer_, config, [&](bool f)
         { framebufferUpdated(f); },
         render_control_flag_,
         [&](float p)

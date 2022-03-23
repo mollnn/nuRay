@@ -60,8 +60,12 @@ vec3 RendererPT::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, cons
     return result;
 }
 
-void RendererPT::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Envmap *env_map)
+void RendererPT::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, Config &config, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Envmap *env_map)
 {
+    int img_width = config.getValueInt("imgw", 0);
+    int img_height = config.getValueInt("imgh", 0);
+    int SPP = config.getValueInt("spp", 1);
+
     SamplerStd sampler;
 
     requestDisplayUpdate(false);

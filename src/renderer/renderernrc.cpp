@@ -126,6 +126,7 @@ vec3 RendererNRC::trace(NeuralRadianceCache &nrc, int depth, bool is_train, Samp
     }
 
     // *: decide whether to return with cache
+    // todo: judge with area condition
     if (depth >= 2 && (!is_train || depth >= 4))
     {
         return nrc.eval(encoding);
@@ -171,7 +172,7 @@ vec3 RendererNRC::trace(NeuralRadianceCache &nrc, int depth, bool is_train, Samp
 
     // *: update cache if is training
 
-    const float rate = 0.003f;
+    const float rate = 0.0001f;
 
     if (is_train)
     {
@@ -183,8 +184,12 @@ vec3 RendererNRC::trace(NeuralRadianceCache &nrc, int depth, bool is_train, Samp
     return result;
 }
 
-void RendererNRC::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, int SPP, int img_width, int img_height, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Envmap *env_map)
+void RendererNRC::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, Config &config, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Envmap *env_map)
 {
+    int img_width = config.getValueInt("imgw", 0);
+    int img_height = config.getValueInt("imgh", 0);
+    int SPP = config.getValueInt("spp", 1);
+
     SamplerStd sampler;
 
     NeuralRadianceCache nrc;
@@ -248,6 +253,7 @@ void RendererNRC::render(const Camera &camera, const std::vector<Triangle> &tria
         loss_acc = 0;
         train_acc = 0;
     }
+
     for (int y = 0; y < img_height; y++)
     {
         for (int x = 0; x < img_width; x++)

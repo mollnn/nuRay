@@ -8,15 +8,17 @@ Vinfo vInfo(vec3 c, float pf, float pr, const Triangle *obj, vec3 pos, vec3 uv, 
 void RendererBDPT::render(const Camera &camera,
                           const std::vector<Triangle> &triangles,
                           QImage &img,
-                          int SPP,
-                          int img_width,
-                          int img_height,
+                          Config &config,
                           std::function<void(bool)> callback,
                           std::atomic<int> &con_flag,
                           std::function<void(float)> progress_report,
                           QMutex &framebuffer_mutex,
                           const Envmap *env_map)
 {
+    int img_width = config.getValueInt("imgw", 0);
+    int img_height = config.getValueInt("imgh", 0);
+    int SPP = config.getValueInt("spp", 1);
+
     SamplerStd sampler;
 
     float film_size = camera.filmSize();
@@ -64,7 +66,7 @@ void RendererBDPT::render(const Camera &camera,
             for (int sppi = 0; sppi < SPP; sppi++)
             {
                 std::vector<Vinfo> light_path, camera_path;
-                const float prr = 0.8f;
+                float prr = 0.8f;
                 auto trace = [&](bool is_light_path, std::vector<Vinfo> &path)
                 {
                     while (true)

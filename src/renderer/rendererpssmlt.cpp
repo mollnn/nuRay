@@ -13,15 +13,17 @@
 void RendererPSSMLT::render(const Camera &camera,
                             const std::vector<Triangle> &triangles,
                             QImage &img,
-                            int SPP,
-                            int img_width,
-                            int img_height,
+                            Config &config,
                             std::function<void(bool)> requestDisplayUpdate,
                             std::atomic<int> &con_flag,
                             std::function<void(float)> progress_report,
                             QMutex &framebuffer_mutex,
                             const Envmap *env_map)
 {
+    int img_width = config.getValueInt("imgw", 0);
+    int img_height = config.getValueInt("imgh", 0);
+    int SPP = config.getValueInt("spp", 1);
+
     SamplerPSSMLT original_sampler;
 
     requestDisplayUpdate(false);

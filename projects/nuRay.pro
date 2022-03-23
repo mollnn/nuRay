@@ -59,6 +59,7 @@ SOURCES += \
     ../src/scene/loader.cpp \
     ../src/scene/texture.cpp \
     ../src/scene/triangle.cpp \
+    ../src/utils/config.cpp \
     ../src/utils/utils.cpp
 
 
@@ -96,6 +97,7 @@ HEADERS += \
     ../src/scene/loader.h \
     ../src/scene/texture.h \
     ../src/scene/triangle.h \
+    ../src/utils/config.h \
     ../src/utils/utils.h
 
 
