@@ -1,5 +1,26 @@
 #include "../scene/camera.h"
 
+Camera::Camera()
+{
+}
+
+Camera::Camera(float fov, float asp, vec3 p, vec3 g, vec3 u)
+{
+    fov_h = fov;
+    aspect = asp;
+    pos = p;
+    gaze = g;
+    up = u;
+}
+
+Camera::Camera(float fov, float asp, vec3 p, float yaw, float pitch, float roll)
+{
+    fov_h = fov;
+    aspect = asp;
+    pos = p;
+    fromEuler(yaw, pitch, roll);
+}
+
 vec3 Camera::generateRay(float img_x, float img_y, float img_width, float img_height) const
 {
     float canonical_x = img_x / img_width * 2 - 1;

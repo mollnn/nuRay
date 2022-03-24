@@ -6,9 +6,9 @@
 
 int main(int argc, char *argv[])
 {
+    QApplication a(argc, argv);
     if (argc == 1)
     {
-        QApplication a(argc, argv);
         Widget w;
         w.show();
         return a.exec();
@@ -22,5 +22,6 @@ int main(int argc, char *argv[])
         }
         Cmd cmd;
         cmd.main(args);
+        return 0;
     }
 }
