@@ -47,8 +47,8 @@ Widget::Widget(QWidget *parent)
     camera_.fov_h = 30.0f;
     camera_.aspect = 1.0;
 
-    text_edit_scene_.setText("../scenes/cornell/CornellBox-Mirror.obj -p 0 0 0 -s 100");
-    scene_loader_.fromSceneDescription("../scenes/cornell/CornellBox-Mirror.obj -p 0 0 0 -s 100");
+    text_edit_scene_.setText("../scenes/cornell/CornellBox-Original.obj -p 0 0 0 -s 100");
+    scene_loader_.fromSceneDescription("../scenes/cornell/CornellBox-Original.obj -p 0 0 0 -s 100");
 
     updateVertices();
 
@@ -60,12 +60,12 @@ Widget::Widget(QWidget *parent)
     renderer_->prepare(triangles);
 
     grid_layout_.addWidget(&combo_renderer_, 2, 50, 1, 5);
-    combo_renderer_.addItem("Path Trace (no NEE)");
-    combo_renderer_.addItem("Path Trace (NEE)");
+    combo_renderer_.addItem("PathTracing");
+    combo_renderer_.addItem("PathTracingNEE");
     combo_renderer_.addItem("PSSMLT");
     combo_renderer_.addItem("BDPT");
-    combo_renderer_.addItem("Photon Mapping (Global)");
-    combo_renderer_.addItem("Neural Radiance Cache (on PT-NEE)");
+    combo_renderer_.addItem("PhotonMapping");
+    combo_renderer_.addItem("NeuralRadianceCache");
     combo_renderer_.setCurrentIndex(1);
 
     connect(&combo_renderer_, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int id)
@@ -300,7 +300,7 @@ void Widget::renderRT()
         float mse = utils.mse(img_ref_, framebuffer_);
         std::cout << "MSE = " << std::fixed << std::setprecision(6) << mse << std::endl;
     }
-    framebuffer_.save("./" + QTime::currentTime().toString().replace(":", "-") + ".bmp", "bmp");
+    framebuffer_.save("./" + QTime::currentTime().toString().replace(":", "") + combo_renderer_.currentText() + QString::fromStdString(std::to_string(spp_)) +  "spp.bmp", "bmp");
 }
 
 void Widget::renderRT_preview()

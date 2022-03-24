@@ -12,7 +12,7 @@ void Cmd::main(const std::vector<std::string> &args)
 
     // Cmds are seped by spaces
     // Format: <scene desc> --output <output filename> --params <render setting>
-    // Example: ./nuRay.exe  ../scenes/cornell/CornellBox-Mirror.obj -s 100  --output result.bmp  --params renderer=ptnee imgw=320 imgh=240 spp=16 campos=0,120,200 cameuler=0,0,0 camfov=64 camasp=1.333
+    // Example: ./nuRay.exe  ../scenes/cornell/CornellBox-Original.obj -s 100  --output result.bmp  --params renderer=ptnee imgw=320 imgh=240 spp=16 campos=0,120,200 cameuler=0,0,0 camfov=64 camasp=1.333
     // DO NOT add any space in one kvpair
 
     std::string scene_desc;

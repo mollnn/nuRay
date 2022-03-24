@@ -57,7 +57,9 @@ void RendererBDPT::render(const Camera &camera,
         std::cout << std::endl;
     };
 
-    std::vector<std::vector<vec3>> buf(img_height, std::vector<vec3>(img_width));
+    int nbuf = config.getValueInt("exbuf", 1);
+    typedef std::vector<std::vector<vec3>> Buffer;
+    std::vector<std::vector<Buffer>> buf(nbuf, std::vector<Buffer>(nbuf, Buffer(img_height, std::vector<vec3>(img_width))));
 
     for (int x = 0; x < img_width; x++)
     {
@@ -272,7 +274,7 @@ void RendererBDPT::render(const Camera &camera,
                         // *: add contribution
                         vec3 contrib = (s == 0 ? 1.0f : full_path[s - 1].c) * c * full_path[s].c;
                         float mis_weight = 1;
-                        bool USE_MIS = true;
+                        bool USE_MIS = config.getValueInt("mis", 1);
                         if (USE_MIS)
                         {
                             float ratio = 1;
@@ -299,6 +301,9 @@ void RendererBDPT::render(const Camera &camera,
 
                         // std::cout << "s=" << s << " t=" << t << " w=" << mis_weight << std::endl;
 
+                        auto contribution = contrib * mis_weight;
+                        contribution = max(contribution, 0.0f);
+
                         if (t == 1)
                         {
                             // splat
@@ -307,13 +312,21 @@ void RendererBDPT::render(const Camera &camera,
                             auto [xx, yy] = camera.getCoord(cam_ray_dir, img_width, img_height);
                             if (xx != -1)
                             {
-                                buf[xx][yy] += contrib * mis_weight;
+                                buf[0][0][xx][yy] += contribution;
+                                if (s < nbuf && t < nbuf)
+                                {
+                                    buf[s][t][xx][yy] += contribution;
+                                }
                             }
                         }
                         else
                         {
                             // contribute to current pixel
-                            buf[x][y] += contrib * mis_weight;
+                            buf[0][0][x][y] += contribution;
+                            if (s < nbuf && t < nbuf)
+                            {
+                                buf[s][t][x][y] += contribution;
+                            }
                         }
                     }
                 }
@@ -321,14 +334,20 @@ void RendererBDPT::render(const Camera &camera,
         }
     }
 
-    img = QImage(img_width, img_height, QImage::Format_RGB888);
+    img = QImage(img_width * nbuf, img_height * nbuf, QImage::Format_RGB888);
 
-    for (int x = 0; x < img_width; x++)
+    for (int i = 0; i < nbuf; i++)
     {
-        for (int y = 0; y < img_height; y++)
+        for (int j = 0; j < nbuf; j++)
         {
-            auto result = buf[x][y].pow(1.0f / 2.2f) * 255.0f;
-            img.setPixel(x, y, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
+            for (int x = 0; x < img_width; x++)
+            {
+                for (int y = 0; y < img_height; y++)
+                {
+                    auto result = (buf[i][j][x][y] * pow(2.0, std::max(0.0, i + j - 2.0))).pow(1.0f / 2.2f) * 255.0f;
+                    img.setPixel(x + j * img_width, y + i * img_height, qRgb(std::min(255.0f, std::max(0.0f, result[0])), std::min(255.0f, std::max(0.0f, result[1])), std::min(255.0f, std::max(0.0f, result[2]))));
+                }
+            }
         }
     }
 }
