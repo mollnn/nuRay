@@ -1,8 +1,8 @@
-QT       += core gui opengl
+QT       += core gui opengl 
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++17 
+CONFIG += c++17 console
 LIBS += -fopenmp
 
 
@@ -26,6 +26,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../src/cmd/cmd.cpp \
     ../src/gui/glwidget.cpp \
     ../src/main.cpp \
     ../src/gui/widget.cpp \
@@ -64,6 +65,7 @@ SOURCES += \
 
 
 HEADERS += \
+    ../src/cmd/cmd.h \
     ../src/gui/glwidget.h \
     ../src/gui/widget.h \
     ../src/hierarchy/bvh.h \

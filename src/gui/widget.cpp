@@ -239,6 +239,7 @@ Widget::Widget(QWidget *parent)
 
 Widget::~Widget()
 {
+    exit(0);
 }
 
 void Widget::resizeEvent(QResizeEvent *event)
