@@ -10,7 +10,7 @@
 
 float loss_acc = 0.0f, train_acc = 0.0f;
 
-vec3 RendererNRC::trace(NeuralRadianceCache &nrc, int depth, bool is_train, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Envmap *env_map)
+vec3 RendererNRC::trace(Config &config, NeuralRadianceCache &nrc, int depth, bool is_train, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Envmap *env_map)
 {
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
@@ -158,21 +158,21 @@ vec3 RendererNRC::trace(NeuralRadianceCache &nrc, int depth, bool is_train, Samp
     }
 
     // Round Robin
-    float prr = 0.8;
+    float prr = config.getValueFloat("prr", 0.8f);
     if (sampler.random() < prr)
     {
         // sample bxdf
         vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
         float pdf = hit_obj->mat->pdf(wo, normal, wi);
         vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-        vec3 Li = trace(nrc, depth + 1, is_train, sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled, env_map);
+        vec3 Li = trace(config, nrc, depth + 1, is_train, sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled, env_map);
         vec3 contri = Li * abs(wi.dot(normal)) * brdf / pdf / prr;
         result += contri;
     }
 
     // *: update cache if is training
 
-    const float rate = 0.0001f;
+    const float rate = config.getValueFloat("lr", 0.001f);
 
     if (is_train)
     {
@@ -231,7 +231,7 @@ void RendererNRC::render(const Camera &camera, const std::vector<Triangle> &tria
             for (int x = 0; x < img_width; x++)
             {
                 vec3 ray_dir = camera.generateRay(x + sampler.random(), y + sampler.random(), img_width, img_height);
-                buf[y * img_width + x] += max(0.0f, trace(nrc, 0, true, sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, true, env_map));
+                buf[y * img_width + x] += max(0.0f, trace(config, nrc, 0, true, sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, true, env_map));
             }
         }
         std::cout << "pre i=" << i << " loss=" << loss_acc / train_acc << std::endl;
@@ -246,7 +246,7 @@ void RendererNRC::render(const Camera &camera, const std::vector<Triangle> &tria
             for (int x = 0; x < img_width; x++)
             {
                 vec3 ray_dir = camera.generateRay(x + sampler.random(), y + sampler.random(), img_width, img_height);
-                buf[y * img_width + x] += max(0.0f, trace(nrc, 0, sampler.random() < 0.2, sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, true, env_map));
+                buf[y * img_width + x] += max(0.0f, trace(config, nrc, 0, sampler.random() < 0.2, sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, true, env_map));
             }
         }
         std::cout << "i=" << i << " loss=" << loss_acc / train_acc << std::endl;

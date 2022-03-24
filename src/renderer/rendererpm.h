@@ -22,7 +22,7 @@ class RendererPM : public Renderer
     };
 
 protected:
-    virtual vec3 trace(const KDTree<Photon>& photon_map, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Envmap *env_map = nullptr);
+    virtual vec3 trace(Config &config, const KDTree<Photon> &photon_map, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh_, const Envmap *env_map = nullptr);
 
 public:
     virtual void render(const Camera &camera,

@@ -9,7 +9,7 @@
 #include "../sampler/samplerstd.h"
 #include "../hierarchy/kdtree.h"
 
-vec3 RendererPM::trace(const KDTree<Photon> &photon_map, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh, const Envmap *env_map)
+vec3 RendererPM::trace(Config &config, const KDTree<Photon> &photon_map, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh, const Envmap *env_map)
 {
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
@@ -52,7 +52,7 @@ vec3 RendererPM::trace(const KDTree<Photon> &photon_map, Sampler &sampler, const
 
     if (hit_obj->mat->isSpecular(wo, normal, wo, texcoords) == false)
     {
-        const int photon_limit = 64;
+        int photon_limit = config.getValueInt("photon_k", 32);
 
         // Radiance Estimate: find nearest k photons and estimate the radiance
         // std::priority_queue<Photon, std::vector<Photon>, decltype(photon_cmp)> photon_queue(photon_cmp);
@@ -91,7 +91,7 @@ vec3 RendererPM::trace(const KDTree<Photon> &photon_map, Sampler &sampler, const
     vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-    vec3 Li = trace(photon_map, sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler_, bvh, env_map);
+    vec3 Li = trace(config, photon_map, sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler_, bvh, env_map);
     vec3 contri = Li * abs(wi.dot(normal)) * brdf / pdf / prr;
     result += contri;
 
@@ -149,7 +149,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
 
     std::vector<Photon> photon_list;
 
-    int n_photons = 100000;
+    int n_photons = config.getValueInt("n_photons", 100000);
 #pragma omp parallel for
     for (int i = 0; i < n_photons; i++)
     {
@@ -208,7 +208,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
     }
     photon_map.build(photon_list_cvt);
 
-    int block_size = 8;
+    int block_size = config.getValueInt("blocksize", 4);
     std::vector<std::pair<int, int>> task_queue;
     std::mutex task_mutex;
 
@@ -251,7 +251,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
                     for (int i = 0; i < SPP; i++)
                     {
                         vec3 ray_dir = camera.generateRay(x + sampler.random(), y + sampler.random(), img_width, img_height);
-                        result += max(0.0f, trace(photon_map, sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, env_map));
+                        result += max(0.0f, trace(config, photon_map, sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, env_map));
                     }
                     result /= SPP;
                     // Gamma correction
@@ -270,7 +270,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
         }
     };
 
-    int num_threads = 4;
+    int num_threads = config.getValueInt("parallel", 4);
     std::vector<std::thread> ths;
     for (int i = 0; i < num_threads; i++)
     {

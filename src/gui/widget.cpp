@@ -28,7 +28,7 @@ Widget::Widget(QWidget *parent)
 
     grid_layout_.addWidget(&label_render_result_, 0, 0, 49, 50);
     grid_layout_.addWidget(&btn_render_, 49, 52, 1, 1);
-    grid_layout_.addWidget(&btn_cancel_, 49, 54, 1, 1);
+    grid_layout_.addWidget(&btn_cancel_, 49, 53, 1, 1);
 
     connect(&btn_render_, &QPushButton::clicked, [&]()
             { renderRT(); });
@@ -193,9 +193,13 @@ Widget::Widget(QWidget *parent)
     grid_layout_.addWidget(&label_envmap_, 36, 50, 1, 1);
 
     btn_load_scene_.setText("Load");
-    grid_layout_.addWidget(&label_scene_, 40, 50, 1, 1);
-    grid_layout_.addWidget(&text_edit_scene_, 41, 50, 8, 5);
+    label_setting_.setText("Custom Setting");
+    grid_layout_.addWidget(&label_setting_, 40, 50, 1, 1);
+    grid_layout_.addWidget(&text_edit_setting_, 41, 50, 3, 5);
+    grid_layout_.addWidget(&label_scene_, 44, 50, 1, 1);
+    grid_layout_.addWidget(&text_edit_scene_, 45, 50, 3, 5);
     grid_layout_.addWidget(&btn_load_scene_, 49, 50, 1, 1);
+    grid_layout_.addWidget(&btn_apply_, 49, 51, 1, 1);
     grid_layout_.addWidget(&progress_bar_, 49, 0, 1, 50);
 
     connect(&btn_load_scene_, &QPushButton::clicked, [&]()
@@ -228,8 +232,9 @@ Widget::Widget(QWidget *parent)
     progress_bar_.setMinimum(0);
     progress_bar_.setMaximum(100 * 100);
     progress_bar_.setOrientation(Qt::Horizontal);
-    progress_bar_.setValue(50);
+    progress_bar_.setValue(0);
 
+    label_envmap_.setText("Envmap");
     line_edit_envmap_.setText("");
     str_envmap_ = line_edit_envmap_.text();
 
@@ -269,6 +274,8 @@ void Widget::renderRT()
     config.setValueStr("imgw", std::to_string(img_width_));
     config.setValueStr("imgh", std::to_string(img_height_));
     config.setValueStr("spp", std::to_string(spp_));
+    config.setValueStr("camfov", std::to_string(camera_.fov_h));
+    config.setValueStr("camasp", std::to_string(camera_.aspect));
 
     this->renderer_->render(
         camera_, triangles, framebuffer_, config, [&](bool f)
@@ -306,6 +313,7 @@ void Widget::renderRT_preview()
         qDebug() << "Already rendering, action ignored.";
         return;
     }
+
     Envmap envmap(&env_map_);
     env_map_.load(str_envmap_.toStdString());
     renderer_->setEnvmap(envmap);
@@ -317,6 +325,8 @@ void Widget::renderRT_preview()
     config.setValueStr("imgw", std::to_string(img_width_ / preview_level_));
     config.setValueStr("imgh", std::to_string(img_height_ / preview_level_));
     config.setValueStr("spp", std::to_string(spp_preview_));
+    config.setValueStr("camfov", std::to_string(camera_.fov_h));
+    config.setValueStr("camasp", std::to_string(camera_.aspect));
 
     this->renderer_->render(
         camera_, triangles, framebuffer_, config, [&](bool f)
@@ -340,7 +350,7 @@ void Widget::bindLineEdit(QLineEdit &line_edit, float &var)
     line_edit.setValidator(new QDoubleValidator(-1e9, 1e9, 4, this));
     line_edit.setText(QString::number(var, 'f', 4));
     connect(&line_edit, &QLineEdit::textEdited, [&]()
-            { bool t; int v; v = line_edit.text().toDouble(&t); if(t) var=v; renderRT_preview(); });
+            { bool t; float v; v = line_edit.text().toDouble(&t); if(t) var=v; renderRT_preview(); });
 }
 
 void Widget::bindLineEdit(QLineEdit &line_edit, int &var)

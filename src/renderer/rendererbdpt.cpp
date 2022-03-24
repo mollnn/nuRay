@@ -66,7 +66,7 @@ void RendererBDPT::render(const Camera &camera,
             for (int sppi = 0; sppi < SPP; sppi++)
             {
                 std::vector<Vinfo> light_path, camera_path;
-                float prr = 0.8f;
+                float prr = config.getValueFloat("prr", 0.8f);
                 auto trace = [&](bool is_light_path, std::vector<Vinfo> &path)
                 {
                     while (true)
@@ -291,7 +291,7 @@ void RendererBDPT::render(const Camera &camera,
                         }
                         else
                         {
-                            mis_weight = 1.0f / (s + t + 1);
+                            mis_weight = 1.0f / (s + t); // case t=0 does not exist
                         }
 
                         if (std::isinf(mis_weight) || std::isnan(mis_weight) || mis_weight > 1e9 || mis_weight < 0)

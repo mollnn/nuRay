@@ -41,23 +41,24 @@ void RendererPSSMLT::render(const Camera &camera,
     vec3 *render_buf = new vec3[img_width * img_height];
 
     float b = 0;
-    for (int i = 0; i < 10000; i++)
+    int N_SAMPLE_B = config.getValueInt("bsample", 10000);
+    for (int i = 0; i < N_SAMPLE_B; i++)
     {
         original_sampler.newSample();
         float original_r1 = original_sampler.random();
         float original_r2 = original_sampler.random();
         int original_x = original_r1 * img_width, original_y = original_r2 * img_height;
         vec3 original_ray_dir = camera.generateRay(original_r1 * img_width, original_r2 * img_height, img_width, img_height);
-        vec3 original_radiance = RendererPT::trace(original_sampler, camera.pos, original_ray_dir, triangles, light_sampler_, bvh_, env_map);
+        vec3 original_radiance = RendererPT::trace(config, original_sampler, camera.pos, original_ray_dir, triangles, light_sampler_, bvh_, env_map);
         float original_importance = original_radiance.lumin();
         if (!std::isnan(original_importance))
             b += original_importance;
     }
-    b /= 10000;
+    b /= N_SAMPLE_B;
     int N = img_width * img_height * SPP;
     float bdM = 1.0 / SPP;
 
-    float large_jump_prob = 0.3f;
+    float large_jump_prob = config.getValueFloat("plargejump", 0.3f);
     original_sampler.newSample();
     SamplerStd std_sampler;
 
@@ -74,13 +75,13 @@ void RendererPSSMLT::render(const Camera &camera,
         float original_r2 = original_sampler.random();
         int original_x = original_r1 * img_width, original_y = original_r2 * img_height;
         vec3 original_ray_dir = camera.generateRay(original_r1 * img_width, original_r2 * img_height, img_width, img_height);
-        vec3 original_radiance = RendererPT::trace(original_sampler, camera.pos, original_ray_dir, triangles, light_sampler_, bvh_, env_map);
+        vec3 original_radiance = RendererPT::trace(config, original_sampler, camera.pos, original_ray_dir, triangles, light_sampler_, bvh_, env_map);
 
         float tentative_r1 = tentative_sampler.random();
         float tentative_r2 = tentative_sampler.random();
         int tentative_x = tentative_r1 * img_width, tentative_y = tentative_r2 * img_height;
         vec3 tentative_ray_dir = camera.generateRay(tentative_r1 * img_width, tentative_r2 * img_height, img_width, img_height);
-        vec3 tentative_radiance = RendererPT::trace(tentative_sampler, camera.pos, tentative_ray_dir, triangles, light_sampler_, bvh_, env_map);
+        vec3 tentative_radiance = RendererPT::trace(config, tentative_sampler, camera.pos, tentative_ray_dir, triangles, light_sampler_, bvh_, env_map);
 
         float original_importance = original_radiance.lumin() + 1e-18f;
         float tentative_importance = tentative_radiance.lumin() + 1e-18f;

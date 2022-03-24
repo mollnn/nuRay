@@ -10,7 +10,7 @@
 
 // Path Tracing without Light Sampler
 
-vec3 RendererPT::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, const Envmap *env_map)
+vec3 RendererPT::trace(Config& config, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, const Envmap *env_map)
 {
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
@@ -45,7 +45,7 @@ vec3 RendererPT::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, cons
     vec3 result;
 
     // Round Robin
-    float prr = 0.8;
+    float prr = config.getValueFloat("prr", 0.8f);
     if (sampler.random() > prr)
         return result;
 
@@ -53,7 +53,7 @@ vec3 RendererPT::trace(Sampler &sampler, const vec3 &orig, const vec3 &dir, cons
     vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-    vec3 Li = trace(sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, env_map);
+    vec3 Li = trace(config, sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, env_map);
     vec3 contri = Li * abs(wi.dot(normal)) * brdf / pdf / prr;
     result += contri;
 
@@ -94,7 +94,7 @@ void RendererPT::render(const Camera &camera, const std::vector<Triangle> &trian
         }
     };
 
-    int block_size = 8;
+    int block_size = config.getValueInt("blocksize",4);
     std::vector<std::pair<int, int>> task_queue;
     std::mutex task_mutex;
 
@@ -137,7 +137,7 @@ void RendererPT::render(const Camera &camera, const std::vector<Triangle> &trian
                     for (int i = 0; i < SPP; i++)
                     {
                         vec3 ray_dir = camera.generateRay(x + sampler.random(), y + sampler.random(), img_width, img_height);
-                        result += max(0.0f, trace(sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, env_map));
+                        result += max(0.0f, trace(config, sampler, camera.pos, ray_dir, triangles, light_sampler_, bvh_, env_map));
                     }
                     result /= SPP;
                     // Gamma correction
@@ -156,7 +156,7 @@ void RendererPT::render(const Camera &camera, const std::vector<Triangle> &trian
         }
     };
 
-    int num_threads = 4;
+    int num_threads = config.getValueInt("parallel",4);
     std::vector<std::thread> ths;
     for (int i = 0; i < num_threads; i++)
     {

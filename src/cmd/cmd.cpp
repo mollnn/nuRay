@@ -1,4 +1,10 @@
 #include "cmd.h"
+#include "../renderer/rendererbdpt.h"
+#include "../renderer/renderernrc.h"
+#include "../renderer/rendererpm.h"
+#include "../renderer/rendererpssmlt.h"
+#include "../renderer/rendererpt.h"
+#include "../renderer/rendererptls.h"
 
 void Cmd::main(const std::vector<std::string> &args)
 {
@@ -61,9 +67,35 @@ void Cmd::main(const std::vector<std::string> &args)
     std::atomic<int> con_flag = 1;
 
     std::string renderer_name = config.getValueStr("renderer", "ptnee");
-    RendererPTLS r;
-    r.prepare(loader.getTriangles());
-    r.render(
+    std::shared_ptr<Renderer> r;
+
+    if (renderer_name == "pt")
+    {
+        r = std::make_shared<RendererPT>();
+    }
+    else if (renderer_name == "ptnee")
+    {
+        r = std::make_shared<RendererPTLS>();
+    }
+    else if (renderer_name == "pssmlt")
+    {
+        r = std::make_shared<RendererPSSMLT>();
+    }
+    else if (renderer_name == "bdpt")
+    {
+        r = std::make_shared<RendererBDPT>();
+    }
+    else if (renderer_name == "pm")
+    {
+        r = std::make_shared<RendererPM>();
+    }
+    else if (renderer_name == "nrc")
+    {
+        r = std::make_shared<RendererNRC>();
+    }
+
+    r->prepare(loader.getTriangles());
+    r->render(
         Camera(config.getValueFloat("camfov", 90.0f), config.getValueFloat("camasp", 1.0f),
                config.getValueVec3("campos", {0, 0, 0}), config.getValueVec3("cameuler", {0, 0, 0})[0],
                config.getValueVec3("cameuler", {0, 0, 0})[1], config.getValueVec3("cameuler", {0, 0, 0})[2]),
