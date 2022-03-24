@@ -9,6 +9,8 @@ class SamplerPSSMLT: public SamplerStd
 {
     std::vector<float> a;
     int ptr;
+    float cs1,cs2,cs20,cs10,cs11;
+    bool configed = false;
 public:
     SamplerPSSMLT();
     virtual float random() override;

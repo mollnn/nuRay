@@ -26,14 +26,24 @@ void SamplerPSSMLT::nextIter(bool large_jump, Config &config)
     {
         for (int i = 0; i < a.size(); i++)
         {
-            // todo: move into construct func
-            float s1 = config.getValueFloat("s1", 1.0 / 1024), s2 = config.getValueFloat("s2", 1.0 / 16);
+            if (!configed)
+            {
+                cs1 = config.getValueFloat("s1", 1.0 / 1024);
+                cs2 = config.getValueFloat("s2", 1.0 / 16);
+                cs20 = config.getValueFloat("s20", 1.0 / 10);
+                cs10 = 1.0 / config.getValueInt("imgw", 1.0);
+                cs11 = 1.0 / config.getValueInt("imgh", 1.0);
+                configed = true;
+            }
+
+            float s1 = cs1, s2 = cs2;
             if (i < 2)
-                s2 = config.getValueFloat("s20", 1.0 / 10);
+                s2 = cs20;
             if (i == 0)
-                s1 = 1.0 / config.getValueInt("imgw", 1.0);
+                s1 = cs10;
             if (i == 1)
-                s1 = 1.0 / config.getValueInt("imgh", 1.0);
+                s1 = cs11;
+                
             float r = SamplerStd::random();
             if (r < 0.5f)
             {

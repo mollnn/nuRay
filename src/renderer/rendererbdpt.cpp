@@ -61,14 +61,21 @@ void RendererBDPT::render(const Camera &camera,
     typedef std::vector<std::vector<vec3>> Buffer;
     std::vector<std::vector<Buffer>> buf(nbuf, std::vector<Buffer>(nbuf, Buffer(img_height, std::vector<vec3>(img_width))));
 
-    for (int x = 0; x < img_width; x++)
+    img = QImage(img_width * nbuf, img_height * nbuf, QImage::Format_RGB888);
+
+    QMutex buf_mutex;
+
+    // todo: parallel without openmp, solve events, feedback etc
+
+    for (int y = 0; y < img_height; y++)
     {
-        for (int y = 0; y < img_height; y++)
+#pragma omp parallel for
+        for (int x = 0; x < img_width; x++)
         {
             for (int sppi = 0; sppi < SPP; sppi++)
             {
                 std::vector<Vinfo> light_path, camera_path;
-                float prr = config.getValueFloat("prr", 0.8f);
+                float prr = config.getValueFloat("prr", 0.8f); // todo: use albedo
                 auto trace = [&](bool is_light_path, std::vector<Vinfo> &path)
                 {
                     while (true)
@@ -304,6 +311,7 @@ void RendererBDPT::render(const Camera &camera,
                         auto contribution = contrib * mis_weight;
                         contribution = max(contribution, 0.0f);
 
+                        buf_mutex.lock();
                         if (t == 1)
                         {
                             // splat
@@ -328,13 +336,14 @@ void RendererBDPT::render(const Camera &camera,
                                 buf[s][t][x][y] += contribution;
                             }
                         }
+                        buf_mutex.unlock();
                     }
                 }
             }
         }
+        std::cout << y << "/" << img_height << "\t";
     }
-
-    img = QImage(img_width * nbuf, img_height * nbuf, QImage::Format_RGB888);
+    std::cout << std::endl;
 
     for (int i = 0; i < nbuf; i++)
     {

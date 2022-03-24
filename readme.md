@@ -1,5 +1,7 @@
 # Night-Up Ray: Physically-Based Offline Renderer
 
+![sponza_ptnee_640x360x512](https://github.com/mollnn/nuRay/blob/main/docs/imgs/sponza_ptnee_640x360x512.jpg?raw=true)
+
 ## Feature Set
 
 ### Basic
@@ -30,7 +32,7 @@
 
 - GUI with Qt, Raster-based preview via OpenGL and interactive camera control
 
-- Primary Sample Space Metropolis Light Transport (PSSMLT)
+- Primary Sample Space Metropolis Light Transport (PSSMLT) based on naive PT
 
 ### Extension
 
@@ -156,10 +158,15 @@ No extra parameters.
 
 ### Primary Sample Space Metropolis Light Transport
 
-| Parameter | Type  | Description                                               | Default Value |
-| --------- | ----- | --------------------------------------------------------- | ------------- |
-| plarge    | float | Probability of large jump.                                | 0.3           |
-| bsample   | int   | Number of samples to evaluate the overall scaling factor. | 10000         |
+Note that our PSSMLT is based on pure path tracer without next event estimation.
+
+| Parameter | Type  | Description                                                                  | Default Value |
+| --------- | ----- | ---------------------------------------------------------------------------- | ------------- |
+| plarge    | float | Probability of large jump.                                                   | 0.3           |
+| bsample   | int   | Number of samples to evaluate the overall scaling factor.                    | 10000         |
+| s1        | float | Mutation coefficient.                                                        | 1/1024        |
+| s2        | float | Mutation coefficient.                                                        | 1/16          |
+| s20       | float | Mutation coefficient for first two dims, which are used for coords of pixel. | 1/10          |
 
 ### Photon Mapping
 
@@ -178,17 +185,26 @@ No extra parameters.
 
 (WIP)
 
+## Hacking scenes
+
+In `scenes\cornell\CornellBox-Mirror-B.obj`, we modify the light source such that most of the scene can only be lighten by reflection of light source in a small corner. Our idea is to wrap the light source so that it can only works as a spot light, and in this way the next event estimator of path tracing will fail, while bidirectional methods working well. 
+
+![hack_cboxb_32spp.jpg](https://github.com/mollnn/nuRay/blob/main/docs/imgs/hack_cboxb_32spp.jpg?raw=true)
+
 ## Gallary
 
 Microfacet (Reflect) 
 
 ![mitsuba-envmap-512x512x512](https://github.com/mollnn/nuRay/blob/main/docs/imgs/mitsuba-envmap-512x512x512.jpg?raw=true)
 
+Microfacet (Reflect) Gold
+
+![mitsuba_gold_512x512x512](https://github.com/mollnn/nuRay/blob/main/docs/imgs/mitsuba_gold_512x512x512.jpg?raw=true)
+
 Sponza (Area light)
 
 ![sponza_512x512x256](https://github.com/mollnn/nuRay/blob/main/docs/imgs/sponza_512x512x256.jpg?raw=true)
 
+Sponza (Pseudo Sun Light)
 
-Microfacet (Reflect) Gold
-
-![mitsuba_gold_512x512x512](https://github.com/mollnn/nuRay/blob/main/docs/imgs/mitsuba_gold_512x512x512.jpg?raw=true)
+![sponza_ptnee_640x360x512](https://github.com/mollnn/nuRay/blob/main/docs/imgs/sponza_ptnee_640x360x512.jpg?raw=true)
