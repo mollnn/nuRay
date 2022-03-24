@@ -24,7 +24,7 @@ public:
                         QImage &img,
                         Config &config,
                         std::function<void(bool)> callback, std::atomic<int> &con_flag,
-                        std::function<void(float)> progress_report,
+                        std::function<void(float)> progress_report_callback,
                         QMutex &framebuffer_mutex,
                         const Envmap *env_map = nullptr) = 0;
     virtual void setEnvmap(const Envmap &env_map);

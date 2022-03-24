@@ -98,14 +98,14 @@ vec3 RendererPM::trace(Config &config, const KDTree<Photon> &photon_map, Sampler
     return result;
 }
 
-void RendererPM::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, Config &config, std::function<void(bool)> requestDisplayUpdate, std::atomic<int> &con_flag, std::function<void(float)> progress_report, QMutex &framebuffer_mutex, const Envmap *env_map)
+void RendererPM::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, Config &config, std::function<void(bool)> display_update_callback, std::atomic<int> &con_flag, std::function<void(float)> progress_report_callback, QMutex &framebuffer_mutex, const Envmap *env_map)
 {
-    int img_width = config.getValueInt("imgw", 0);
-    int img_height = config.getValueInt("imgh", 0);
+    int img_width = config.getValueInt("imgw", 1);
+    int img_height = config.getValueInt("imgh", 1);
     int SPP = config.getValueInt("spp", 1);
 
     SamplerStd sampler;
-    requestDisplayUpdate(false);
+    display_update_callback(false);
     framebuffer_mutex.lock();
     img = QImage(QSize(img_width, img_height), QImage::Format_RGB888);
     img.fill(Qt::black);
@@ -117,12 +117,12 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
 
     std::cout << "Rendering... " << std::endl;
 
-    std::atomic<int> pxc = 0;
+    std::atomic<int> progress_unit_counter = 0;
 
     auto requestProgressUpdate = [&]()
     {
-        float progress = pxc * 1.0f / img_height / img_width;
-        progress_report(progress * 100);
+        float progress = progress_unit_counter * 1.0f / img_height / img_width;
+        progress_report_callback(progress * 100);
         if (time.elapsed() - time_last > 1000)
         {
             std::cout << std::fixed << std::setprecision(2) << "Rendering... " << progress * 100 << "%"
@@ -264,7 +264,7 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
                     vec3 ray_dir = camera.generateRay(x + 0.5f, y + 0.5f, img_width, img_height);
                 }
             }
-            pxc += block_size * block_size;
+            progress_unit_counter += block_size * block_size;
             requestProgressUpdate();
             request_disp_update = 1;
         }
@@ -277,12 +277,12 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
         ths.push_back(std::thread(workerFunc));
     }
 
-    while (pxc < img_width * img_height)
+    while (progress_unit_counter < img_width * img_height)
     {
         if (request_disp_update == 1)
         {
             request_disp_update = 0;
-            requestDisplayUpdate(false);
+            display_update_callback(false);
         }
         // Just delay
         QEventLoop loop;
@@ -312,5 +312,5 @@ void RendererPM::render(const Camera &camera, const std::vector<Triangle> &trian
     std::cout << std::fixed << std::setprecision(2) << "Rendering... " << 100.0 << "%"
               << "   " << time.elapsed() * 0.001 << " secs used" << std::endl;
     con_flag = 0;
-    requestDisplayUpdate(true);
+    display_update_callback(true);
 }

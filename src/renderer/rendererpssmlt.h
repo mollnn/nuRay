@@ -10,6 +10,7 @@
 #include "../scene/texture.h"
 #include "../renderer/renderer.h"
 #include "../renderer/rendererpt.h"
+#include "../renderer/rendererptls.h"
 #include <QMutex>
 
 
@@ -22,7 +23,7 @@ public:
                         Config &config,
                         std::function<void(bool)> callback,
                         std::atomic<int> &con_flag,
-                        std::function<void(float)> progress_report,
+                        std::function<void(float)> progress_report_callback,
                         QMutex &framebuffer_mutex,
                         const Envmap *env_map = nullptr) override;
 };

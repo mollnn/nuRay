@@ -11,12 +11,12 @@ void RendererBDPT::render(const Camera &camera,
                           Config &config,
                           std::function<void(bool)> callback,
                           std::atomic<int> &con_flag,
-                          std::function<void(float)> progress_report,
+                          std::function<void(float)> progress_report_callback,
                           QMutex &framebuffer_mutex,
                           const Envmap *env_map)
 {
-    int img_width = config.getValueInt("imgw", 0);
-    int img_height = config.getValueInt("imgh", 0);
+    int img_width = config.getValueInt("imgw", 1);
+    int img_height = config.getValueInt("imgh", 1);
     int SPP = config.getValueInt("spp", 1);
 
     SamplerStd sampler;

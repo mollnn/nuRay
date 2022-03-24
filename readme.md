@@ -128,8 +128,8 @@ This section provides informations on selecting and customizing renderers. We di
 | renderer  | str   | Renderer you want to use. Candidates including `ptnee`, `pt`, `bdpt`, `pssmlt`, `nrc`.                                                                                                                          | `ptnee`       |
 | parallel  | int   | Number of threads if renderer support multithreading.                                                                                                                                                           | 4             |
 | blocksize | int   | Size (length of square) of block (tile) if renderer divides task into tile.                                                                                                                                     | 8             |
-| imgw      | int   | Image width.                                                                                                                                                                                                    | 0             |
-| imgh      | int   | Image height.                                                                                                                                                                                                   | 0             |
+| imgw      | int   | Image width.                                                                                                                                                                                                    | 1             |
+| imgh      | int   | Image height.                                                                                                                                                                                                   | 1             |
 | spp       | int   | Number of samples per pixel. For BDPT it is number of light paths or camera paths generated from each pixel. For PSSMLT it is the average number of samples for each pixel. For NRC it is the number of epochs. | 1             |
 | campos    | vec3  | Camera position.                                                                                                                                                                                                | (0,0,0)       |
 | cameuler  | vec3  | Camera direction (both gaze and up) by Euler angle in degree.                                                                                                                                                   | (0,0,0)       |
@@ -163,23 +163,22 @@ No extra parameters.
 
 ### Photon Mapping
 
+![pm_cboxo_1e6_1e3_32.jpg](https://github.com/mollnn/nuRay/blob/main/docs/imgs/pm_cboxo_1e6_1e3_32.jpg?raw=true)
+
 | Parameter | Type | Description        | Default Value |
 | --------- | ---- | ------------------ | ------------- |
 | n_photons | int  | Number of photons. | 100000        |
 | photon_k  | int  | K of KNN query.    | 32            |
-
 
 ### Neural Radiance Caching (experimental)
 
 | Parameter | Type  | Description                                | Default Value |
 | --------- | ----- | ------------------------------------------ | ------------- |
 | lr        | float | Learning Rate of standard Gradient Descent | 0.001         |
-WIP...
+
+(WIP)
 
 ## Gallary
-
-
-
 
 Microfacet (Reflect) 
 

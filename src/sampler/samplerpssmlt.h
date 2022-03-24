@@ -2,6 +2,7 @@
 #define SAMPLERPSSMLT_H
 
 #include "../sampler/samplerstd.h"
+#include "../utils/config.h"
 #include <bits/stdc++.h>
 
 class SamplerPSSMLT: public SamplerStd
@@ -11,7 +12,7 @@ class SamplerPSSMLT: public SamplerStd
 public:
     SamplerPSSMLT();
     virtual float random() override;
-    void nextIter(bool large_jump);
+    void nextIter(bool large_jump, Config& config);
     void newSample();
     void repeatCurrentIter();
 };
