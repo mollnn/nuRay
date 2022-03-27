@@ -16,7 +16,7 @@
 
 - Path tracing integrator with Russian Roulette (RR) and Next Event Estimator (NEE, Direct lighting integrator)
 
-- Importance sampling of BSDF/NDF
+- Multiple importance sampling of BSDF/NDF
 
 - Microfacet-based material (GGX with Smith-G)
 
@@ -141,11 +141,16 @@ This section provides informations on selecting and customizing renderers. We di
 
 ### Path Tracing with Next Event Estimation (default)
 
-No extra parameters.
+| Parameter | Type | Description                                                                                                                                                                                                                                                                                                  | Default Value |
+| --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| mis       | bool | Whether to use Multiple Importance Sampling between next event estimator and bxdf sampler f.                                                                                                                                                                                                                              | 1             |
+
 
 ### Path Tracing (pure)
 
-No extra parameters.
+| Parameter | Type | Description                                                                                                                                                                                                                                                                                                  | Default Value |
+| --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| mis       | bool | Whether to use Multiple Importance Sampling between next event estimator and bxdf sampler f.                                                                                                                                                                                                                              | 1             |
 
 ### Bidirectional Path Tracing
 

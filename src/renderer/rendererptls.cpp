@@ -10,7 +10,7 @@
 
 // Path Tracing with Light Sampler
 
-vec3 RendererPTLS::trace(Config &config, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, bool light_source_visible, const Envmap *env_map)
+vec3 RendererPTLS::trace(Config &config, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler, BVH &bvh, float light_fac, const Envmap *env_map)
 {
     auto [t, b1, b2, hit_obj] = intersect(orig, dir, triangles, bvh);
     if (hit_obj == nullptr)
@@ -32,10 +32,7 @@ vec3 RendererPTLS::trace(Config &config, Sampler &sampler, const vec3 &orig, con
 
     if (hit_obj->mat->isEmission())
     {
-        if (light_source_visible)
-            return hit_obj->mat->emission(wo, normal);
-        else
-            return vec3(0.0f, 0.0f, 0.0f);
+        return hit_obj->mat->emission(wo, normal) * light_fac;
     }
 
     vec3 texcoords = hit_obj->getTexCoords(b1, b2);
@@ -47,11 +44,11 @@ vec3 RendererPTLS::trace(Config &config, Sampler &sampler, const vec3 &orig, con
     vec3 hit_pos = orig + dir * t;
     vec3 result;
 
+    float fac = 1.0f;
+
     // sample the light
-    bool is_light_sampled = false;
     if (hit_obj->mat->requireLightSampling(wo, normal))
     {
-        is_light_sampled = true;
         const Triangle *light_obj = light_sampler.sampleLight(sampler);
         if (light_obj != nullptr)
         {
@@ -62,12 +59,20 @@ vec3 RendererPTLS::trace(Config &config, Sampler &sampler, const vec3 &orig, con
             vec3 wl = light_vec.normalized();
             vec3 light_int = light_obj->mat->emission(wl, light_normal);
             float light_pdf = light_sampler.p();
+            float light_omega_pdf = light_pdf * light_vec.dot(light_vec) / std::max(1e-6f, light_normal.dot(-wl));
+            float brdf_omega_pdf = hit_obj->mat->pdf(wo, normal, wl);
+            float mis = light_omega_pdf / (light_omega_pdf + brdf_omega_pdf);
+            if (config.getValueInt("mis", 1) == 0)
+            {
+                mis = 0.5f;
+            }
+            fac = 1 - mis;
             auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 1e-3, wl, triangles, bvh);
             if (light_ray_t + 2e-3 > light_vec.norm())
             {
                 vec3 brdf_ = hit_obj->mat->bxdf(wo, normal, wl, texcoords);
                 vec3 Ll = light_int / light_vec.norm2() * std::max(0.0f, light_normal.dot(-wl)) / light_pdf;
-                result += Ll * brdf_ * std::max(0.0f, normal.dot((light_pos - hit_pos).normalized()));
+                result += Ll * brdf_ * std::max(0.0f, normal.dot((light_pos - hit_pos).normalized())) * mis;
             }
         }
     }
@@ -81,7 +86,7 @@ vec3 RendererPTLS::trace(Config &config, Sampler &sampler, const vec3 &orig, con
     vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
     float pdf = hit_obj->mat->pdf(wo, normal, wi);
     vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-    vec3 Li = trace(config, sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, !is_light_sampled, env_map);
+    vec3 Li = trace(config, sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, fac, env_map);
     vec3 contri = Li * abs(wi.dot(normal)) * brdf / pdf / prr;
     result += contri;
 
