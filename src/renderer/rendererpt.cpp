@@ -150,7 +150,7 @@ void RendererPT::render(const Camera &camera, const std::vector<Triangle> &trian
                     vec3 ray_dir = camera.generateRay(x + 0.5f, y + 0.5f, img_width, img_height);
                 }
             }
-            progress_unit_counter += block_size * block_size;
+            progress_unit_counter += std::min(img_height - y0, block_size) * std::min(img_width - x0, block_size);;
             requestProgressUpdate();
             request_disp_update = 1;
         }
