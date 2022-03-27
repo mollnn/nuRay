@@ -119,7 +119,23 @@ void NNNodeLayer::print()
     cout << endl;
 }
 
+NNNodeMultiLayerPerceptron::NNNodeMultiLayerPerceptron()
+{
+}
+
 NNNodeMultiLayerPerceptron::NNNodeMultiLayerPerceptron(std::vector<int> shape)
+{
+    for (int i = 0; i < shape.size(); i++)
+    {
+        layers.push_back(NNNodeLayer(shape[i]));
+        if (i > 0)
+        {
+            layers[i].connect(layers[i - 1]);
+        }
+    }
+}
+
+void NNNodeMultiLayerPerceptron::init(std::vector<int> shape)
 {
     for (int i = 0; i < shape.size(); i++)
     {

@@ -127,7 +127,7 @@ vec3 RendererNRC::trace(Config &config, NeuralRadianceCache &nrc, int depth, boo
 
     // *: decide whether to return with cache
     // todo: judge with area condition
-    if (depth >= 2 && (!is_train || depth >= 4))
+    if (depth >= config.getValueInt("path_lim", 2) && (!is_train || depth >= config.getValueInt("path_lim_train", 4)))
     {
         return nrc.eval(encoding);
     }
@@ -192,7 +192,13 @@ void RendererNRC::render(const Camera &camera, const std::vector<Triangle> &tria
 
     SamplerStd sampler;
 
-    NeuralRadianceCache nrc;
+    int n_layer = config.getValueInt("n_layer", 4);
+    int n_width = config.getValueInt("n_width", 64);
+
+    std::vector<int> shape(n_layer, n_width);
+    shape.push_back(3);
+
+    NeuralRadianceCache nrc(shape);
 
     display_update_callback(false);
     framebuffer_mutex.lock();

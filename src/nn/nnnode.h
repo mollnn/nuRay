@@ -65,7 +65,11 @@ struct NNNodeMultiLayerPerceptron
 {
     vector<NNNodeLayer> layers;
 
+    NNNodeMultiLayerPerceptron();
+    
     NNNodeMultiLayerPerceptron(std::vector<int> shape);
+
+    void init(std::vector<int> shape);
 
     void feed(const std::vector<float> &values);
 

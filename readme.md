@@ -42,7 +42,7 @@ The features below may not work well with environment lighting or some advanced 
  
 - Photon Mapping with kd-tree
 
-- Neural Radiance Caching (need fix)
+- Neural Radiance Caching (need heuristic terminate strategy)
  
 
 ### Future Roadmap
@@ -141,16 +141,16 @@ This section provides informations on selecting and customizing renderers. We di
 
 ### Path Tracing with Next Event Estimation (default)
 
-| Parameter | Type | Description                                                                                                                                                                                                                                                                                                  | Default Value |
-| --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
-| mis       | bool | Whether to use Multiple Importance Sampling between next event estimator and bxdf sampler f.                                                                                                                                                                                                                              | 1             |
+| Parameter | Type | Description                                                                                  | Default Value |
+| --------- | ---- | -------------------------------------------------------------------------------------------- | ------------- |
+| mis       | bool | Whether to use Multiple Importance Sampling between next event estimator and bxdf sampler f. | 1             |
 
 
 ### Path Tracing (pure)
 
-| Parameter | Type | Description                                                                                                                                                                                                                                                                                                  | Default Value |
-| --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
-| mis       | bool | Whether to use Multiple Importance Sampling between next event estimator and bxdf sampler f.                                                                                                                                                                                                                              | 1             |
+| Parameter | Type | Description                                                                                  | Default Value |
+| --------- | ---- | -------------------------------------------------------------------------------------------- | ------------- |
+| mis       | bool | Whether to use Multiple Importance Sampling between next event estimator and bxdf sampler f. | 1             |
 
 ### Bidirectional Path Tracing
 
@@ -184,11 +184,17 @@ Note that our PSSMLT is based on pure path tracer without next event estimation.
 
 ### Neural Radiance Caching (experimental)
 
-| Parameter | Type  | Description                                | Default Value |
-| --------- | ----- | ------------------------------------------ | ------------- |
-| lr        | float | Learning Rate of standard Gradient Descent | 0.001         |
 
-(WIP)
+Note that we use fixed path length limitation instead of heuristic terminate strategy in the original paper. This will be fixed soon.
+
+| Parameter      | Type  | Description                                 | Default Value |
+| -------------- | ----- | ------------------------------------------- | ------------- |
+| lr             | float | Learning Rate of standard Gradient Descent. | 0.001         |
+| path_lim       | int   | Path length limitation of render paths.     | 2             |
+| path_lim_train | int   | Path length limitation of training paths.   | 4             |
+| n_layer        | int   | Number of layers of MLP.                    | 4             |
+| n_width        | int   | Number of nodes in one layer of MLP.        | 64            |
+
 
 ## Hacking scenes
 

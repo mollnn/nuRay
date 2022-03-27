@@ -18,7 +18,7 @@ struct NeuralRadianceCache
 {
     NNNodeMultiLayerPerceptron mlp;
 
-    NeuralRadianceCache() : mlp({64, 64, 64, 64, 64, 64, 3})
+    NeuralRadianceCache(std::vector<int> shape) : mlp(shape)
     {
     }
 
