@@ -7,14 +7,14 @@ vec3 MatGlass::sampleBxdf(Sampler& sampler, const vec3 &wo, const vec3 &normal) 
     if (sampler.random() < 0.5)
     {
         float I = wo.dot(normal) > 0 ? 1.0f / Ior_ : Ior_;
-        vec3 n = wo.dot(normal) < 0 ? normal : -normal;
+        vec3 n = wo.dot(normal) > 0 ? normal : -normal;
         vec3 t = n.cross(wo).cross(n).normalized();
         float sin_o = wo.dot(t);
         float sin_i = sin_o * I;
         sin_i = std::min(sin_i, 1.0f);
         float cos_i = sqrt(1.0f - sin_i * sin_i);
         vec3 i = cos_i * n + sin_i * t;
-        return i;
+        return -i;
     }
     else
     {
@@ -44,7 +44,7 @@ vec3 MatGlass::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const ve
 
 float MatGlass::pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const
 {
-    return 0.5;
+    return 0.5; // eliminated
 }
 
 bool MatGlass::isEmission() const

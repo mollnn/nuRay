@@ -219,3 +219,7 @@ Sponza (Area light)
 Sponza (Pseudo Sun Light)
 
 ![sponza_ptnee_640x360x512](https://github.com/mollnn/nuRay/blob/main/docs/imgs/sponza_ptnee_640x360x512.jpg?raw=true)
+
+Glass
+
+![refr](https://github.com/mollnn/nuRay/blob/main/docs/imgs/refr.jpg?raw=true)
