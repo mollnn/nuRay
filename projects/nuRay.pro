@@ -45,6 +45,7 @@ SOURCES += \
     ../src/nn/nnnode.cpp \
     ../src/renderer/renderer.cpp \
     ../src/renderer/rendererbdpt.cpp \
+    ../src/renderer/rendererdirect.cpp \
     ../src/renderer/renderernrc.cpp \
     ../src/renderer/rendererpm.cpp \
     ../src/renderer/rendererpssmlt.cpp \
@@ -84,6 +85,7 @@ HEADERS += \
     ../src/nn/nnnode.h \
     ../src/renderer/renderer.h \
     ../src/renderer/rendererbdpt.h \
+    ../src/renderer/rendererdirect.h \
     ../src/renderer/renderernrc.h \
     ../src/renderer/rendererpm.h \
     ../src/renderer/rendererpssmlt.h \

@@ -2,6 +2,7 @@
 #include <QDoubleValidator>
 #include <QSizePolicy>
 #include <QApplication>
+#include "../renderer/rendererdirect.h"
 #include "../renderer/rendererpt.h"
 #include "../renderer/rendererptls.h"
 #include "../renderer/rendererpssmlt.h"
@@ -56,7 +57,7 @@ Widget::Widget(QWidget *parent)
 
     auto &triangles = scene_loader_.getTriangles();
 
-    renderer_ = new RendererPTLS();
+    renderer_ = new RendererDirect();
     renderer_->prepare(triangles);
 
     grid_layout_.addWidget(&combo_renderer_, 2, 50, 1, 5);
@@ -66,7 +67,8 @@ Widget::Widget(QWidget *parent)
     combo_renderer_.addItem("BDPT");
     combo_renderer_.addItem("PhotonMapping");
     combo_renderer_.addItem("NeuralRadianceCache");
-    combo_renderer_.setCurrentIndex(1);
+    combo_renderer_.addItem("DirectLighting");
+    combo_renderer_.setCurrentIndex(6);
 
     connect(&combo_renderer_, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int id)
             {
@@ -94,6 +96,10 @@ Widget::Widget(QWidget *parent)
         else if (id == 5)
         {
             renderer_ = new RendererNRC;
+        }
+        else if (id == 6)
+        {
+            renderer_ = new RendererDirect;
         }
         renderer_->prepare(triangles); });
 

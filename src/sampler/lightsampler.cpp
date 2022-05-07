@@ -48,6 +48,7 @@ void LightSampler::setEnvmap(const Envmap &envmap)
 
 const Triangle *LightSampler::sampleLight(Sampler &sampler)
 {
+    // todo: support delta light source 
     if (lighting_triangles_.size() == 0)
     {
         return nullptr;
