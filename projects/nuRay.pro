@@ -30,9 +30,9 @@ SOURCES += \
     ../src/gui/glwidget.cpp \
     ../src/main.cpp \
     ../src/gui/widget.cpp \
-    ../src/hierarchy/bvh.cpp \
-    ../src/hierarchy/bvhnode.cpp \
-    ../src/hierarchy/kdtree.cpp \
+    ../src/accel/bvh.cpp \
+    ../src/accel/bvhnode.cpp \
+    ../src/accel/kdtree.cpp \
     ../src/material/matblinnphong.cpp \
     ../src/material/matggx.cpp \
     ../src/material/matggxrefl.cpp \
@@ -68,9 +68,9 @@ HEADERS += \
     ../src/cmd/cmd.h \
     ../src/gui/glwidget.h \
     ../src/gui/widget.h \
-    ../src/hierarchy/bvh.h \
-    ../src/hierarchy/bvhnode.h \
-    ../src/hierarchy/kdtree.h \
+    ../src/accel/bvh.h \
+    ../src/accel/bvhnode.h \
+    ../src/accel/kdtree.h \
     ../src/material/matblinnphong.h \
     ../src/material/material.h \
     ../src/material/matggx.h \

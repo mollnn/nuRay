@@ -1,7 +1,7 @@
 #include "../renderer/renderernrc.h"
 #include "../scene/texture.h"
 #include "../sampler/lightsampler.h"
-#include "../hierarchy/bvh.h"
+#include "../accel/bvh.h"
 #include <QTime>
 #include <QDebug>
 #include <QTimer>

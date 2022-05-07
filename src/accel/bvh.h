@@ -1,7 +1,7 @@
 #ifndef _BVH_H_
 #define _BVH_H_
 
-#include "../hierarchy/bvhnode.h"
+#include "../accel/bvhnode.h"
 
 class BVH
 {

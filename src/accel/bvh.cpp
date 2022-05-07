@@ -1,4 +1,4 @@
-#include "../hierarchy/bvh.h"
+#include "../accel/bvh.h"
 #include <QDebug>
 #include <bits/stdc++.h>
 

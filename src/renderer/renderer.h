@@ -6,7 +6,7 @@
 #include "../scene/triangle.h"
 #include <QImage>
 #include "../sampler/lightsampler.h"
-#include "../hierarchy/bvh.h"
+#include "../accel/bvh.h"
 #include "../scene/texture.h"
 #include "../scene/envmap.h"
 #include "../utils/config.h"

@@ -1,13 +1,13 @@
 #include "../renderer/rendererpm.h"
 #include "../scene/texture.h"
 #include "../sampler/lightsampler.h"
-#include "../hierarchy/bvh.h"
+#include "../accel/bvh.h"
 #include <QTime>
 #include <QDebug>
 #include <QTimer>
 #include <QEventLoop>
 #include "../sampler/samplerstd.h"
-#include "../hierarchy/kdtree.h"
+#include "../accel/kdtree.h"
 
 vec3 RendererPM::trace(Config &config, const KDTree<Photon> &photon_map, Sampler &sampler, const vec3 &orig, const vec3 &dir, const std::vector<Triangle> &triangles, LightSampler &light_sampler_, BVH &bvh, const Envmap *env_map)
 {

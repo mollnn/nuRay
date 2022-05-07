@@ -1,4 +1,4 @@
-#include "../hierarchy/bvhnode.h"
+#include "../accel/bvhnode.h"
 #include <QDebug>
 
 BVHNode::BVHNode(const std::vector<const Triangle *> &triangles) : left_child(nullptr),
