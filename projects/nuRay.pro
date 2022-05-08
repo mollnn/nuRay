@@ -39,6 +39,7 @@ SOURCES += \
     ../src/material/matglass.cpp \
     ../src/material/matlambert.cpp \
     ../src/material/matlight.cpp \
+    ../src/material/matmirror.cpp \
     ../src/math/mat4.cpp \
     ../src/math/vec3.cpp \
     ../src/math/vec4.cpp \
@@ -79,6 +80,7 @@ HEADERS += \
     ../src/material/matglass.h \
     ../src/material/matlambert.h \
     ../src/material/matlight.h \
+    ../src/material/matmirror.h \
     ../src/math/mat4.h \
     ../src/math/vec3.h \
     ../src/math/vec4.h \

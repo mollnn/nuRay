@@ -5,6 +5,7 @@
 #include "../material/matggx.h"
 #include "../material/matggxrefl.h"
 #include "../material/matglass.h"
+#include "../material/matmirror.h"
 #include <QDebug>
 
 Loader::~Loader()
@@ -44,6 +45,7 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
         bool ggx = false;
         bool ggxr = false;
         bool glass = false;
+        bool mirror = false;
         vec3 t_vec;
         float t_ps;
         float t_ps2;
@@ -80,6 +82,11 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
                     desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2] >> t_ps;
                     glass = true;
                 }
+                else if (op == "-m=mirror")
+                {
+                    desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2] >> t_ps;
+                    mirror = true;
+                }
             }
             if (light)
             {
@@ -100,6 +107,11 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
             {
                 forcing_mat = new MatGlass(t_vec, t_ps);
                 material_dict["__glass_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
+            }
+            if (mirror)
+            {
+                forcing_mat = new MatMirror(t_vec, t_ps);
+                material_dict["__mirror_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
             }
             loadObj(filename, position, scale, forcing_mat);
         }
