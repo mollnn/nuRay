@@ -29,10 +29,11 @@ vec3 RendererPT::trace(Config& config, Sampler &sampler, const vec3 &orig, const
 
     vec3 wo = -dir;
     vec3 normal = hit_obj->getNormal(b1, b2);
+    vec3 result;
 
     if (hit_obj->mat->isEmission())
     {
-        return hit_obj->mat->emission(wo, normal);
+        result += hit_obj->mat->emission(wo, normal);
     }
 
     vec3 texcoords = hit_obj->getTexCoords(b1, b2);
@@ -42,7 +43,6 @@ vec3 RendererPT::trace(Config& config, Sampler &sampler, const vec3 &orig, const
         return vec3(0.0f, 0.0f, 0.0f);
 
     vec3 hit_pos = orig + dir * t;
-    vec3 result;
 
     // Round Robin
     float prr = config.getValueFloat("prr", 0.8f);

@@ -29,10 +29,11 @@ vec3 RendererDirect::trace(Config &config, Sampler &sampler, const vec3 &orig, c
 
     vec3 wo = -dir;
     vec3 normal = hit_obj->getNormal(b1, b2);
+    vec3 result;
 
     if (hit_obj->mat->isEmission())
     {
-        return hit_obj->mat->emission(wo, normal) * light_fac;
+        result += hit_obj->mat->emission(wo, normal);
     }
 
     vec3 texcoords = hit_obj->getTexCoords(b1, b2);
@@ -42,14 +43,11 @@ vec3 RendererDirect::trace(Config &config, Sampler &sampler, const vec3 &orig, c
         return vec3(0.0f, 0.0f, 0.0f);
 
     vec3 hit_pos = orig + dir * t;
-    vec3 result;
-
-    float fac = 1.0f;
 
     // sample the light
-    if (hit_obj->mat->requireLightSampling(wo, normal))
+    const Triangle *light_obj = light_sampler.sampleLight(sampler);
+    if (config.getValueInt("sample_light", 1))
     {
-        const Triangle *light_obj = light_sampler.sampleLight(sampler);
         if (light_obj != nullptr)
         {
             auto [light_pos, light_bc1, light_bc2] = light_obj->sample(sampler);
@@ -66,30 +64,64 @@ vec3 RendererDirect::trace(Config &config, Sampler &sampler, const vec3 &orig, c
             {
                 mis = 0.5f;
             }
-            mis = 1.0f; // todo
-            fac = 1 - mis;
+            if (config.getValueInt("sample_bxdf", 1) == 0)
+            {
+                mis = 1.0f;
+            }
             auto [light_ray_t, light_ray_b1, light_ray_b2, light_ray_hit_obj] = intersect(hit_pos + wl * 1e-3, wl, triangles, bvh);
             if (light_ray_t + 2e-3 > light_vec.norm())
             {
                 vec3 brdf_ = hit_obj->mat->bxdf(wo, normal, wl, texcoords);
-                vec3 Ll = light_int / light_vec.norm2() * std::max(0.0f, light_normal.dot(-wl)) / light_pdf;
-                result += Ll * brdf_ * std::max(0.0f, normal.dot((light_pos - hit_pos).normalized())) * mis;
+                vec3 Ll = light_int;
+                result += Ll * brdf_ * std::max(0.0f, normal.dot(wl)) * mis / light_omega_pdf;
             }
         }
     }
 
-    // Round Robin
-    float prr = config.getValueFloat("prr", 0.8f);
-    if (sampler.random() > prr)
-        return result;
+    if (config.getValueInt("sample_bxdf", 1))
+    {
+        vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
+        float pdf = hit_obj->mat->pdf(wo, normal, wi);
+        vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
+        // vec3 Li = trace(config, sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, fac, env_map);
+        vec3 Li = 0.0f;
 
-    // todo: sample bxdf 
-    vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
-    float pdf = hit_obj->mat->pdf(wo, normal, wi);
-    vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-    vec3 Li = trace(config, sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, fac, env_map);
-    vec3 contri = Li * abs(wi.dot(normal)) * brdf / pdf / prr;
-    // result += contri;
+        vec3 shadow_ray_orig = hit_pos;
+        vec3 shadow_ray_dir = wi;
+        shadow_ray_orig += shadow_ray_dir * 1e-3f;
+        auto [sr_t, sr_b1, sr_b2, sr_hit_obj] = intersect(shadow_ray_orig, shadow_ray_dir, triangles, bvh);
+
+        float mis = 1.0f;
+
+        if (sr_hit_obj)
+        {
+            vec3 sr_wo = -shadow_ray_dir;
+            vec3 light_normal = sr_hit_obj->getNormal(sr_b1, sr_b2);
+            vec3 light_pos = shadow_ray_orig + shadow_ray_dir * sr_t;
+
+            if (sr_hit_obj->mat->isEmission())
+            {
+                Li = sr_hit_obj->mat->emission(sr_wo, light_normal);
+                float light_pdf = light_sampler.p();
+                vec3 wl = -sr_wo;
+                vec3 light_vec = light_pos - hit_pos;
+                float light_omega_pdf = light_pdf * light_vec.dot(light_vec) / std::max(1e-6f, light_normal.dot(-wl));
+                mis = pdf / (light_omega_pdf + pdf);
+            }
+        }
+
+        vec3 contri = Li * max(0.0f, abs(wi.dot(normal))) * brdf / pdf;
+
+        if (config.getValueInt("mis", 1) == 0)
+        {
+            mis = 0.5f;
+        }
+        if (config.getValueInt("sample_light", 1) == 0)
+        {
+            mis = 1.0f;
+        }
+        result += contri * mis;
+    }
 
     return result;
 }

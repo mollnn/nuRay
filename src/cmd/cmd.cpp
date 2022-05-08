@@ -5,6 +5,7 @@
 #include "../renderer/rendererpssmlt.h"
 #include "../renderer/rendererpt.h"
 #include "../renderer/rendererptls.h"
+#include "../renderer/rendererdirect.h"
 
 void Cmd::main(const std::vector<std::string> &args)
 {
@@ -92,6 +93,10 @@ void Cmd::main(const std::vector<std::string> &args)
     else if (renderer_name == "nrc")
     {
         r = std::make_shared<RendererNRC>();
+    }
+    else if (renderer_name == "direct")
+    {
+        r = std::make_shared<RendererDirect>();
     }
 
     r->prepare(loader.getTriangles());

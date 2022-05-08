@@ -56,7 +56,7 @@ std::tuple<vec3, float, float> Triangle::sample(Sampler& sampler) const
 
 float Triangle::area() const
 {
-    return (p[1] - p[0]).cross(p[2] - p[0]).norm();
+    return (p[1] - p[0]).cross(p[2] - p[0]).norm() / 2.0f;
 }
 
 std::ostream &operator<<(std::ostream &lhs, const Triangle &rhs)

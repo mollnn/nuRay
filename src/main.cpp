@@ -7,6 +7,7 @@
 
 int main(int argc, char *argv[])
 {
+    std::cout << "nuRay" << std::endl;
     if (argc == 1)
     {
         QApplication a(argc, argv);
@@ -16,9 +17,10 @@ int main(int argc, char *argv[])
     }
     else
     {
+        std::cout << "cmdmode of nuRay" << std::endl;
         QCoreApplication a(argc, argv);
         std::vector<std::string> args;
-        for(int i=1;i<argc;i++)
+        for (int i = 1; i < argc; i++)
         {
             args.push_back(std::string(argv[i]));
         }
