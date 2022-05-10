@@ -17,6 +17,12 @@ vec3 MatLambert::sampleBxdf(Sampler &sampler, const vec3 &wo, const vec3 &normal
     return wi;
 }
 
+std::tuple<vec3, vec3, float> MatLambert::sampleBxdfNew(Sampler &sampler, const vec3 &wo, const vec3 &normal, const vec3 &uv) const
+{
+    auto wi = sampleBxdf(sampler, wo, normal);
+    return {wi, bxdf(wo,normal,wi,uv),pdf(wo,normal,wi)};
+}
+
 vec3 MatLambert::bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const
 {
     if (wi.dot(normal) * wo.dot(normal) < 0)

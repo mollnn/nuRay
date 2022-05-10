@@ -34,6 +34,7 @@ SOURCES += \
     ../src/accel/bvhnode.cpp \
     ../src/accel/kdtree.cpp \
     ../src/material/matblinnphong.cpp \
+    ../src/material/material.cpp \
     ../src/material/matggx.cpp \
     ../src/material/matggxrefl.cpp \
     ../src/material/matglass.cpp \

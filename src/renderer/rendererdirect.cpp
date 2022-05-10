@@ -80,10 +80,7 @@ vec3 RendererDirect::trace(Config &config, Sampler &sampler, const vec3 &orig, c
 
     if (config.getValueInt("sample_bxdf", 1))
     {
-        vec3 wi = hit_obj->mat->sampleBxdf(sampler, wo, normal);
-        float pdf = hit_obj->mat->pdf(wo, normal, wi);
-        vec3 brdf = hit_obj->mat->bxdf(wo, normal, wi, texcoords);
-        // vec3 Li = trace(config, sampler, hit_pos + wi * 1e-3, wi, triangles, light_sampler, bvh, fac, env_map);
+        auto [wi, brdf, pdf] = hit_obj->mat->sampleBxdfNew(sampler, wo, normal, texcoords);
         vec3 Li = 0.0f;
 
         vec3 shadow_ray_orig = hit_pos;

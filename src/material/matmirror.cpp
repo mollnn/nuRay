@@ -8,7 +8,7 @@ vec3 MatMirror::sampleBxdf(Sampler &sampler, const vec3 &wo, const vec3 &normal)
     return 2 * wo.dot(n) * n - wo;
 }
 
-std::tuple<vec3, vec3, float> MatMirror::sampleBxdfNew(Sampler &sampler, const vec3 &wo, const vec3 &normal) const
+std::tuple<vec3, vec3, float> MatMirror::sampleBxdfNew(Sampler &sampler, const vec3 &wo, const vec3 &normal, const vec3 &uv) const
 {
     return {sampleBxdf(sampler, wo, normal), F0_, 1.0f};
 }

@@ -7,6 +7,7 @@
 class Material
 {
 public:
+    virtual std::tuple<vec3, vec3, float> sampleBxdfNew(Sampler &sampler, const vec3 &wo, const vec3 &normal, const vec3 &uv) const; // todo: make pure virtual
     virtual vec3 sampleBxdf(Sampler &sampler, const vec3 &wo, const vec3 &normal) const = 0;
     virtual vec3 bxdf(const vec3 &wo, const vec3 &normal, const vec3 &wi, const vec3 &uv) const = 0;
     virtual float pdf(const vec3 &wo, const vec3 &normal, const vec3 &wi) const = 0;
