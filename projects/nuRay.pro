@@ -42,19 +42,11 @@ SOURCES += \
     ../src/math/mat4.cpp \
     ../src/math/vec3.cpp \
     ../src/math/vec4.cpp \
-    ../src/nn/nnnode.cpp \
     ../src/renderer/renderer.cpp \
-    ../src/renderer/rendererbdpt.cpp \
-    ../src/renderer/rendererdirect.cpp \
-    ../src/renderer/renderernrc.cpp \
-    ../src/renderer/rendererpm.cpp \
-    ../src/renderer/rendererpssmlt.cpp \
     ../src/renderer/rendererpt.cpp \
-    ../src/renderer/rendererptls.cpp \
     ../src/sampler/envmapsampler.cpp \
     ../src/sampler/lightsampler.cpp \
     ../src/sampler/sampler.cpp \
-    ../src/sampler/samplerpssmlt.cpp \
     ../src/sampler/samplerstd.cpp \
     ../src/scene/camera.cpp \
     ../src/scene/envmap.cpp \
@@ -67,8 +59,6 @@ SOURCES += \
 
 HEADERS += \
     ../src/cmd/cmd.h \
-    ../src/gui/glwidget.h \
-    ../src/gui/widget.h \
     ../src/accel/bvh.h \
     ../src/accel/bvhnode.h \
     ../src/accel/kdtree.h \
@@ -83,19 +73,11 @@ HEADERS += \
     ../src/math/mat4.h \
     ../src/math/vec3.h \
     ../src/math/vec4.h \
-    ../src/nn/nnnode.h \
     ../src/renderer/renderer.h \
-    ../src/renderer/rendererbdpt.h \
-    ../src/renderer/rendererdirect.h \
-    ../src/renderer/renderernrc.h \
-    ../src/renderer/rendererpm.h \
-    ../src/renderer/rendererpssmlt.h \
     ../src/renderer/rendererpt.h \
-    ../src/renderer/rendererptls.h \
     ../src/sampler/envmapsampler.h \
     ../src/sampler/lightsampler.h \
     ../src/sampler/sampler.h \
-    ../src/sampler/samplerpssmlt.h \
     ../src/sampler/samplerstd.h \
     ../src/scene/camera.h \
     ../src/scene/envmap.h \

@@ -1,6 +1,5 @@
 #include "../renderer/rendererpt.h"
 #include "../scene/texture.h"
-#include "../sampler/lightsampler.h"
 #include "../accel/bvh.h"
 #include <QTime>
 #include <QDebug>

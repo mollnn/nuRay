@@ -1,11 +1,5 @@
 #include "cmd.h"
-#include "../renderer/rendererbdpt.h"
-#include "../renderer/renderernrc.h"
-#include "../renderer/rendererpm.h"
-#include "../renderer/rendererpssmlt.h"
 #include "../renderer/rendererpt.h"
-#include "../renderer/rendererptls.h"
-#include "../renderer/rendererdirect.h"
 
 void Cmd::main(const std::vector<std::string> &args)
 {
@@ -73,30 +67,6 @@ void Cmd::main(const std::vector<std::string> &args)
     if (renderer_name == "pt")
     {
         r = std::make_shared<RendererPT>();
-    }
-    else if (renderer_name == "ptnee")
-    {
-        r = std::make_shared<RendererPTLS>();
-    }
-    else if (renderer_name == "pssmlt")
-    {
-        r = std::make_shared<RendererPSSMLT>();
-    }
-    else if (renderer_name == "bdpt")
-    {
-        r = std::make_shared<RendererBDPT>();
-    }
-    else if (renderer_name == "pm")
-    {
-        r = std::make_shared<RendererPM>();
-    }
-    else if (renderer_name == "nrc")
-    {
-        r = std::make_shared<RendererNRC>();
-    }
-    else if (renderer_name == "direct")
-    {
-        r = std::make_shared<RendererDirect>();
     }
 
     r->prepare(loader.getTriangles());

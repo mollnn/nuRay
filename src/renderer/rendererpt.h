@@ -7,7 +7,6 @@
 #include "../scene/camera.h"
 #include "../scene/triangle.h"
 #include <QImage>
-#include "../sampler/lightsampler.h"
 #include "../accel/bvh.h"
 #include "../scene/texture.h"
 #include "../renderer/renderer.h"

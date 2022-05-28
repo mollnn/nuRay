@@ -3,7 +3,6 @@
 
 #include "../utils/config.h"
 #include <bits/stdc++.h>
-#include "../renderer/rendererptls.h"
 #include "../scene/loader.h"
 
 class Cmd
