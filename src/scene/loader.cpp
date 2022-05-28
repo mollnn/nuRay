@@ -1,11 +1,6 @@
 #include "../scene/loader.h"
 #include "../material/matlight.h"
 #include "../material/matlambert.h"
-#include "../material/matblinnphong.h"
-#include "../material/matggx.h"
-#include "../material/matggxrefl.h"
-#include "../material/matglass.h"
-#include "../material/matmirror.h"
 #include <QDebug>
 
 Loader::~Loader()
@@ -20,9 +15,9 @@ std::string path2dir(const std::string &path)
 {
     std::size_t pos = path.find_last_of("/\\");
     if (pos == path.npos)
-        return ".";
+        return "."; 
     return path.substr(0, pos);
-}
+} 
 
 void Loader::fromSceneDescription(const std::string &scene_desc)
 {
@@ -67,51 +62,11 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
                     desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2];
                     light = true;
                 }
-                else if (op == "-m=ggx")
-                {
-                    desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2] >> t_ps >> t_ps2;
-                    ggx = true;
-                }
-                else if (op == "-m=ggxr")
-                {
-                    desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2] >> t_ps;
-                    ggxr = true;
-                }
-                else if (op == "-m=glass")
-                {
-                    desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2] >> t_ps;
-                    glass = true;
-                }
-                else if (op == "-m=mirror")
-                {
-                    desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2] >> t_ps;
-                    mirror = true;
-                }
             }
             if (light)
             {
                 forcing_mat = new MatLight(t_vec);
                 material_dict["__light_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
-            }
-            if (ggx)
-            {
-                forcing_mat = new MatGGX(t_vec, t_ps, t_ps2);
-                material_dict["__ggx_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
-            }
-            if (ggxr)
-            {
-                forcing_mat = new MatGGXRefl(t_vec, t_ps);
-                material_dict["__ggxr_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
-            }
-            if (glass)
-            {
-                forcing_mat = new MatGlass(t_vec, t_ps);
-                material_dict["__glass_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
-            }
-            if (mirror)
-            {
-                forcing_mat = new MatMirror(t_vec, t_ps);
-                material_dict["__mirror_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
             }
             loadObj(filename, position, scale, forcing_mat);
         }
@@ -137,18 +92,7 @@ void Loader::loadMtl(const std::string &filename)
         {
             if (Ks.norm2() > 1e-6 || map_Ks != "")
             {
-                MatBlinnPhong *bf = new MatBlinnPhong(Kd, Ks, Ns);
-                if (map_Kd != "")
-                {
-                    bf->usetex_Kd_ = true;
-                    bf->map_Kd_.load(map_Kd);
-                }
-                if (map_Ks != "")
-                {
-                    bf->usetex_Ks_ = true;
-                    bf->map_Ks_.load(map_Ks);
-                }
-                mat = bf;
+                std::cout << "Unsupported material" << std::endl;
             }
             else
             {

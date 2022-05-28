@@ -31,14 +31,9 @@ SOURCES += \
     ../src/accel/bvh.cpp \
     ../src/accel/bvhnode.cpp \
     ../src/accel/kdtree.cpp \
-    ../src/material/matblinnphong.cpp \
     ../src/material/material.cpp \
-    ../src/material/matggx.cpp \
-    ../src/material/matggxrefl.cpp \
-    ../src/material/matglass.cpp \
     ../src/material/matlambert.cpp \
     ../src/material/matlight.cpp \
-    ../src/material/matmirror.cpp \
     ../src/math/mat4.cpp \
     ../src/math/vec3.cpp \
     ../src/math/vec4.cpp \
@@ -62,14 +57,9 @@ HEADERS += \
     ../src/accel/bvh.h \
     ../src/accel/bvhnode.h \
     ../src/accel/kdtree.h \
-    ../src/material/matblinnphong.h \
     ../src/material/material.h \
-    ../src/material/matggx.h \
-    ../src/material/matggxrefl.h \
-    ../src/material/matglass.h \
     ../src/material/matlambert.h \
     ../src/material/matlight.h \
-    ../src/material/matmirror.h \
     ../src/math/mat4.h \
     ../src/math/vec3.h \
     ../src/math/vec4.h \
