@@ -27,9 +27,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     ../src/cmd/cmd.cpp \
-    ../src/gui/glwidget.cpp \
     ../src/main.cpp \
-    ../src/gui/widget.cpp \
     ../src/accel/bvh.cpp \
     ../src/accel/bvhnode.cpp \
     ../src/accel/kdtree.cpp \
