@@ -76,113 +76,7 @@ void Loader::fromSceneDescription(const std::string &scene_desc)
 
 void Loader::loadMtl(const std::string &filename)
 {
-    float Ns, Ni;
-    vec3 Ka, Kd, Ks, Ke, Tf;
-    std::string map_Kd, map_Ks;
-    std::string name;
-
-    auto commit = [&]()
-    {
-        Material *mat;
-        if (Ke.norm2() > 1e-6)
-        {
-            mat = new MatLight(Ke);
-        }
-        else
-        {
-            if (Ks.norm2() > 1e-6 || map_Ks != "")
-            {
-                std::cout << "Unsupported material" << std::endl;
-            }
-            else
-            {
-                MatLambert *lambert = new MatLambert(Kd);
-                if (map_Kd != "")
-                {
-                    lambert->usetex_Kd_ = true;
-                    lambert->map_Kd_.load(map_Kd);
-                }
-                mat = lambert;
-            }
-        }
-        material_dict[filename + ":" + name] = mat;
-
-        Ns = 10.0f;
-        Ni = 1.0f;
-        Ka = 0.0f;
-        Kd = 0.0f;
-        Ks = 0.0f;
-        Ke = 0.0f;
-        Tf = 0.0f;
-        map_Kd = "";
-        map_Ks = "";
-
-        return;
-    };
-
-    std::ifstream ifs(filename);
-    std::string buf_line;
-
-    while (std::getline(ifs, buf_line))
-    {
-        if (buf_line.size() > 0 && buf_line[0] == '#')
-            continue;
-        std::stringstream ss(buf_line);
-        std::vector<std::string> buf;
-        std::string tmp;
-        while (ss >> tmp)
-        {
-            buf.push_back(tmp);
-        }
-        if (buf.size() == 0)
-            continue;
-        // ...
-        if (buf[0] == "newmtl")
-        {
-            // Commit material
-            if (name != "")
-                commit();
-            name = buf[1];
-        }
-        else if (buf[0] == "Ns")
-        {
-            Ns = atof(buf[1].c_str());
-        }
-        else if (buf[0] == "Ni")
-        {
-            Ni = atof(buf[1].c_str());
-        }
-        else if (buf[0] == "Ka")
-        {
-            Ka = vec3(atof(buf[1].c_str()), atof(buf[2].c_str()), atof(buf[3].c_str()));
-        }
-        else if (buf[0] == "Kd")
-        {
-            Kd = vec3(atof(buf[1].c_str()), atof(buf[2].c_str()), atof(buf[3].c_str()));
-        }
-        else if (buf[0] == "map_Kd")
-        {
-            map_Kd = path2dir(filename) + "/" + buf[1];
-        }
-        else if (buf[0] == "map_Ks")
-        {
-            map_Ks = path2dir(filename) + "/" + buf[1];
-        }
-        else if (buf[0] == "Ks")
-        {
-            Ks = vec3(atof(buf[1].c_str()), atof(buf[2].c_str()), atof(buf[3].c_str()));
-        }
-        else if (buf[0] == "Ke")
-        {
-            Ke = vec3(atof(buf[1].c_str()), atof(buf[2].c_str()), atof(buf[3].c_str()));
-        }
-        else if (buf[0] == "Tf")
-        {
-            Tf = vec3(atof(buf[1].c_str()), atof(buf[2].c_str()), atof(buf[3].c_str()));
-        }
-    }
-    if (name != "")
-        commit();
+    
 }
 
 void Loader::loadObj(const std::string &filename, const vec3 &position, float scale, const Material *forcing_mat)
@@ -213,16 +107,7 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
         }
         else if (buf[0] == "usemtl")
         {
-            if (forcing_mat == nullptr)
-            {
-                std::string mtl_name = buf[1];
-                std::string mtl_fullname = mtllib_filename + ":" + mtl_name;
-                if (material_dict.find(mtl_fullname) == material_dict.end())
-                {
-                    std::cerr << "Cannot find material " << mtl_fullname << std::endl;
-                }
-                mtl = material_dict[mtl_fullname];
-            }
+
         }
         else if (buf[0] == "v")
         {

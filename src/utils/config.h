@@ -16,8 +16,11 @@ public:
     int getValueInt(const std::string &key, int default_value);
     float getValueFloat(const std::string &key, float default_value);
     vec3 getValueVec3(const std::string &key, const vec3 &default_value);
+    vec3 getValueVec3RGB(const std::string& key, const vec3& default_value);
+    vec3 getValueVec3XYZ(const std::string& key, const vec3& default_value);
     void setValueStr(const std::string &key, const std::string &value);
     void addItem(const std::string& kv);
+    void fromFile(const std::string& filename);
     void print();
 };
 

@@ -87,6 +87,22 @@ vec3 Config::getValueVec3(const std::string &key, const vec3 &default_value)
     return vec3(x, y, z);
 }
 
+vec3 Config::getValueVec3RGB(const std::string &key, const vec3 &default_value)
+{
+    float x = getValueFloat(key + ".r", default_value[0]);
+    float y = getValueFloat(key + ".g", default_value[1]);
+    float z = getValueFloat(key + ".b", default_value[2]);
+    return vec3(x, y, z);
+}
+
+vec3 Config::getValueVec3XYZ(const std::string &key, const vec3 &default_value)
+{
+    float x = getValueFloat(key + ".x", default_value[0]);
+    float y = getValueFloat(key + ".y", default_value[1]);
+    float z = getValueFloat(key + ".z", default_value[2]);
+    return vec3(x, y, z);
+}
+
 void Config::addItem(const std::string &kv)
 {
     std::string key, value;
@@ -101,5 +117,26 @@ void Config::print()
     for (auto &[x, y] : mp)
     {
         std::cout << x << ": " << y << std::endl;
+    }
+}
+
+void Config::fromFile(const std::string &filename)
+{
+    mp.clear();
+    std::ifstream ifs(filename);
+    std::string str_line;
+    while (getline(ifs, str_line))
+    {
+        std::stringstream ss(str_line);
+        std::string key, op, value;
+        ss >> key >> op >> value;
+        if (op == "=")
+        {
+            mp[key] = value;
+        }
+        else if (op == "+=")
+        {
+            mp[key] += value;
+        }
     }
 }
