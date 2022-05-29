@@ -24,7 +24,7 @@ std::string Config::getValueStr(const std::string &key, const std::string &defau
     if (mp.find(key) == mp.end())
     {
         std::cerr << "Fail to get config item " << key << std::endl;
-        return "";
+        return default_value;
     }
     return mp[key];
 }
@@ -33,6 +33,20 @@ void Config::setValueStr(const std::string &key, const std::string &value)
 {
     mp[key] = value;
 }
+
+    std::vector<std::string> Config::getValueList(const std::string &key)
+    {
+        std::vector<std::string> ans;
+        std::string str0=mp[key];
+        std::stringstream ss(str0);
+        std::string str;
+        while(ss>>str)
+        {
+            ans.push_back(str);
+        }
+        return ans;
+    }
+
 
 int Config::getValueInt(const std::string &key, int default_value)
 {
@@ -136,7 +150,7 @@ void Config::fromFile(const std::string &filename)
         }
         else if (op == "+=")
         {
-            mp[key] += value;
+            mp[key] += value + " ";
         }
     }
 }

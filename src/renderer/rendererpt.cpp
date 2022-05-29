@@ -61,9 +61,9 @@ vec3 RendererPT::trace(Config& config, Sampler &sampler, const vec3 &orig, const
 
 void RendererPT::render(const Camera &camera, const std::vector<Triangle> &triangles, QImage &img, Config &config, std::function<void(bool)> display_update_callback, std::atomic<int> &con_flag, std::function<void(float)> progress_report_callback, QMutex &framebuffer_mutex, const Envmap *env_map)
 {
-    int img_width = config.getValueInt("imgw", 1);
-    int img_height = config.getValueInt("imgh", 1);
-    int SPP = config.getValueInt("spp", 1);
+    int img_width = config.getValueInt("imgw", 64);
+    int img_height = config.getValueInt("imgh", 64);
+    int SPP = config.getValueInt("spp", 16);
 
     SamplerStd sampler;
 

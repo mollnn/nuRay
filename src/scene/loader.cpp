@@ -15,68 +15,84 @@ std::string path2dir(const std::string &path)
 {
     std::size_t pos = path.find_last_of("/\\");
     if (pos == path.npos)
-        return "."; 
+        return ".";
     return path.substr(0, pos);
-} 
+}
+
+void Loader::fromConfig(Config &config)
+{
+    Material *material = new MatLight(1.0f);
+    auto obj_list = config.getValueList("objects");
+    for (auto obj_name : obj_list)
+    {
+        auto obj_type = config.getValueStr(obj_name + ".type", "");
+        vec3 position = config.getValueVec3XYZ(obj_name + ".position", vec3());
+        float scale = config.getValueFloat(obj_name + ".scale", 1.0f);
+        if (obj_type == "from_obj_file")
+        {
+            auto obj_filename = config.getValueStr(obj_name + ".filename", "");
+            loadObj(obj_filename, position, scale, material);
+        }
+    }
+}
 
 void Loader::fromSceneDescription(const std::string &scene_desc)
 {
-    std::stringstream scene_desc_ss(scene_desc);
-    std::string desc_line;
-    primitives_.clear();
-    for (auto &[i, j] : material_dict)
-    {
-        delete j;
-    }
-    material_dict.clear();
-    Material *forcing_mat = nullptr;
-    while (getline(scene_desc_ss, desc_line))
-    {
-        std::stringstream desc_line_ss(desc_line);
-        std::string filename;
-        vec3 position = 0.0f;
-        float scale = 1.0f;
-        bool light = false;
-        bool ggx = false;
-        bool ggxr = false;
-        bool glass = false;
-        bool mirror = false;
-        vec3 t_vec;
-        float t_ps;
-        float t_ps2;
-        if (desc_line_ss >> filename)
-        {
-            std::string op;
-            while (desc_line_ss >> op)
-            {
-                if (op == "-p")
-                {
-                    desc_line_ss >> position[0] >> position[1] >> position[2];
-                }
-                else if (op == "-s")
-                {
-                    desc_line_ss >> scale;
-                }
-                else if (op == "-m=light")
-                {
-                    desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2];
-                    light = true;
-                }
-            }
-            if (light)
-            {
-                forcing_mat = new MatLight(t_vec);
-                material_dict["__light_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
-            }
-            loadObj(filename, position, scale, forcing_mat);
-        }
-        forcing_mat = nullptr;
-    }
+    // std::stringstream scene_desc_ss(scene_desc);
+    // std::string desc_line;
+    // primitives_.clear();
+    // for (auto &[i, j] : material_dict)
+    // {
+    //     delete j;
+    // }
+    // material_dict.clear();
+    // Material *forcing_mat = nullptr;
+    // while (getline(scene_desc_ss, desc_line))
+    // {
+    //     std::stringstream desc_line_ss(desc_line);
+    //     std::string filename;
+    //     vec3 position = 0.0f;
+    //     float scale = 1.0f;
+    //     bool light = false;
+    //     bool ggx = false;
+    //     bool ggxr = false;
+    //     bool glass = false;
+    //     bool mirror = false;
+    //     vec3 t_vec;
+    //     float t_ps;
+    //     float t_ps2;
+    //     if (desc_line_ss >> filename)
+    //     {
+    //         std::string op;
+    //         while (desc_line_ss >> op)
+    //         {
+    //             if (op == "-p")
+    //             {
+    //                 desc_line_ss >> position[0] >> position[1] >> position[2];
+    //             }
+    //             else if (op == "-s")
+    //             {
+    //                 desc_line_ss >> scale;
+    //             }
+    //             else if (op == "-m=light")
+    //             {
+    //                 desc_line_ss >> t_vec[0] >> t_vec[1] >> t_vec[2];
+    //                 light = true;
+    //             }
+    //         }
+    //         if (light)
+    //         {
+    //             forcing_mat = new MatLight(t_vec);
+    //             material_dict["__light_" + std::to_string(rand() * rand()) + std::to_string(rand() * rand())] = forcing_mat;
+    //         }
+    //         loadObj(filename, position, scale, forcing_mat);
+    //     }
+    //     forcing_mat = nullptr;
+    // }
 }
 
 void Loader::loadMtl(const std::string &filename)
 {
-    
 }
 
 void Loader::loadObj(const std::string &filename, const vec3 &position, float scale, const Material *forcing_mat)
@@ -107,7 +123,6 @@ void Loader::loadObj(const std::string &filename, const vec3 &position, float sc
         }
         else if (buf[0] == "usemtl")
         {
-
         }
         else if (buf[0] == "v")
         {

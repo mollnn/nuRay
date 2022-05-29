@@ -13,6 +13,7 @@ public:
     Config(const std::string &str);
     void fromString(const std::string &str);
     std::string getValueStr(const std::string &key, const std::string &default_value);
+    std::vector<std::string> getValueList(const std::string &key);
     int getValueInt(const std::string &key, int default_value);
     float getValueFloat(const std::string &key, float default_value);
     vec3 getValueVec3(const std::string &key, const vec3 &default_value);
@@ -21,7 +22,7 @@ public:
     void setValueStr(const std::string &key, const std::string &value);
     void addItem(const std::string& kv);
     void fromFile(const std::string& filename);
-    void print();
+    void print() ;
 };
 
 #endif
